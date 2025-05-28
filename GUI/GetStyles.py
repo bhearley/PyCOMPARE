@@ -33,3 +33,70 @@ def GetStyles(self):
                         "Modern1.TButton",
                         background=[("active", "#428bca")]
                 )
+    
+    # -- Red Small Text
+    self.style.configure(
+                        "Modern2.TButton",
+                        background='#DD361C',
+                        foreground="white",
+                        font=("Segoe UI", 16),
+                        borderwidth=2,
+                        padding=5,
+                        focuscolor='',
+                        highlightthickness=0
+                        )
+
+    self.style.map(
+                        "Modern2.TButton",
+                        background=[("active", "#FC3D21")]
+                )
+    
+    # -- Red Large Text
+    self.style.configure(
+                        "Modern3.TButton",
+                        background='#DD361C',
+                        foreground="white",
+                        font=("Segoe UI", 18),
+                        borderwidth=2,
+                        padding=10,
+                        focuscolor='',
+                        highlightthickness=0
+                        )
+
+    self.style.map(
+                        "Modern3.TButton",
+                        background=[("active", "#FC3D21")]
+                )
+    
+    # Combo Box Style
+    self.style.configure(
+                        "Modern.TCombobox",
+                        fieldbackground="white",   
+                        background="white",        
+                        foreground="black",        
+                        bordercolor="#cccccc",
+                        lightcolor="#dddddd",
+                        darkcolor="#aaaaaa",
+                        borderwidth=1,
+                        relief="flat",
+                        padding=5
+                        )
+    
+    self.style.map(
+                        "Modern.TCombobox",
+                        fieldbackground=[("readonly", "white"), ("active", "white")], 
+                        foreground=[("readonly", "black"), ("active", "black")],  
+                        background=[("readonly", "white"), ("active", "white")],  
+                        selectbackground=[("active", "white"), ("readonly", "white")],  
+                        selectforeground=[("active", "black"), ("readonly", "black")]  
+                 )
+    
+    # Label
+    # -- Label 1
+    self.style.configure(
+                        "Modern1.TLabel",
+                        foreground="black",
+                        background="white",
+                        font=("Segoe UI", 14),
+                        padding=0
+                        )

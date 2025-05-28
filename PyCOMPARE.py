@@ -375,12 +375,12 @@ class PY_COMPARE:
             del self.canvas
 
         # Create the plot
-        self.fig = Figure(figsize=(5,3.6), dpi = 125, constrained_layout = True)
+        self.fig = Figure(figsize=(self.Placement['Data']['Figure1'][2],self.Placement['Data']['Figure1'][3]), dpi = self.Placement['Data']['Figure1'][4], constrained_layout = True)
         self.plot1 = self.fig.add_subplot(111)
 
         # Get the arrays
-        x_val = self.opt1_plt.get()
-        y_val = self.opt2_plt.get()
+        x_val = self.optmenu1_plt.get()
+        y_val = self.optmenu2_plt.get()
 
         # X Value
         if 'Time' in x_val:
@@ -500,14 +500,21 @@ class PY_COMPARE:
         self.toolbar.update()
 
         # Format Toolbar
-        self.toolbar.config(bg=bg_color)
-        self.toolbar._message_label.config(background=bg_color)
-        self.toolbar.place(anchor = 'e', relx = 0.975, rely = 0.9)
+        self.toolbar.config(bg='white')
+        self.toolbar._message_label.config(background='white')
+        self.toolbar.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Data']['Toolbar1'][0], 
+                        rely = self.Placement['Data']['Toolbar1'][1]
+                        )
 
         # Add the figure to the GUI
-        self.canvas.get_tk_widget().place(anchor = 'n', relx = 0.78, rely = 0.32)
-        if 'self.canvas' not in self.tab_att_list:
-            self.tab_att_list.append('self.canvas')
+        self.canvas.get_tk_widget().place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Data']['Figure1'][0], 
+                                        rely = self.Placement['Data']['Figure1'][1]
+                                        )
+        self.tab_att_list.append('self.canvas')
 
         # Enable Data Reduction on the Characterization Table
         if hasattr(self,'sheet_char'):
@@ -554,18 +561,28 @@ class PY_COMPARE:
 
                         # Create a sheet with number of stages
                         Cols = ['Stage', 'Points']
-                        self.stage_pts_sheet = tksheet.Sheet(root, total_rows = len(rows), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 220, height = 400, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-                        self.stage_pts_sheet.place(anchor = 'c', relx = 0.5, rely = 0.4)
+                        self.stage_pts_sheet = tksheet.Sheet(
+                                                            root, 
+                                                            total_rows = len(rows), 
+                                                            total_columns = len(Cols), 
+                                                            headers = Cols,
+                                                            width = self.Placement['Data']['Sheet3'][2], 
+                                                            height = self.Placement['Data']['Sheet3'][3], 
+                                                            show_x_scrollbar = False, 
+                                                            show_y_scrollbar = True,
+                                                            font = ("Segoe UI",self.Placement['Data']['Sheet3'][4],"normal"),
+                                                            header_font = ("Segoe UI",self.Placement['Data']['Sheet3'][4],"bold"))
+                        self.stage_pts_sheet.place(
+                                                anchor = 'c', 
+                                                relx = self.Placement['Data']['Sheet3'][0], 
+                                                rely = self.Placement['Data']['Sheet3'][1]
+                                                )
 
                         # Format the sheet
                         self.stage_pts_sheet.change_theme("blue")
                         self.stage_pts_sheet.set_index_width(0)
-                        self.stage_pts_sheet.column_width(column = 0, width = 100, redraw = True)
-                        self.stage_pts_sheet.column_width(column = 1, width = 100, redraw = True)
+                        self.stage_pts_sheet.column_width(column = 0, width = self.Placement['Data']['Sheet3'][5], redraw = True)
+                        self.stage_pts_sheet.column_width(column = 1, width = self.Placement['Data']['Sheet3'][6], redraw = True)
                         self.stage_pts_sheet.table_align(align = 'c',redraw=True)
 
                         # Enable Bindings
@@ -613,10 +630,18 @@ class PY_COMPARE:
                             self.plotter()
                                 
                         # Create button to get the reduced data points
-                        self.btn_get_red = tk.Button(root, text = "Get Data Points", command = GetReducedPts, 
-                                        font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                        width = 12)
-                        self.btn_get_red.place(anchor = 'c', relx = 0.5, rely = 0.9)
+                        self.btn_get_red = tk.Button(
+                                                    root, 
+                                                    text = "Get Data Points", 
+                                                    command = GetReducedPts,
+                                                    style = 'Modern2.TButton', 
+                                                    width = self.Placement['Data']['Button5'][2]
+                                                    )
+                        self.btn_get_red.place(
+                                            anchor = 'c', 
+                                            relx = self.Placement['Data']['Button5'][0], 
+                                            rely = self.Placement['Data']['Button5'][1]
+                                            )
 
                         def on_closing_root(self):
                             #------------------------------------------------------
@@ -636,10 +661,18 @@ class PY_COMPARE:
                 # Create button to reduce data
                 if hasattr(self, 'btn_loc3'):
                     self.btn_loc3.destroy()
-                self.btn_loc3 = tk.Button(window, text = "Reduce Data", command = ReduceData, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 12)
-                self.btn_loc3.place(anchor = 'e', relx = 0.725, rely = 0.9)
+                self.btn_loc3 = ttk.Button(
+                                        window, 
+                                        text = "Reduce Data", 
+                                        command = ReduceData,
+                                        style = 'Modern2.TButton', 
+                                        width = self.Placement['Data']['Button4'][2]
+                                        )
+                self.btn_loc3.place(
+                                    anchor = 'n', 
+                                    relx = self.Placement['Data']['Button4'][0], 
+                                    rely = self.Placement['Data']['Button4'][1]
+                                    )
                 self.tab_att_list.append('self.btn_loc3')
 
     def reduce_data(self, test, load_dir):
@@ -1059,12 +1092,15 @@ class PY_COMPARE:
         # Replot data
         self.plotter()
 
-    def plotter_all(self, value, tag):
+    def plotter_all(self, val, tag):
         #--------------------------------------------------------------------------
         #
         #   PURPOSE: Plot all curves on the same plot.
         #
         #--------------------------------------------------------------------------
+
+        # Get the value
+        value = self.optmenu1_plt.get()
 
         #  Delete the canvas and drop down if it exists
         if hasattr(self, 'canvas'):
@@ -1086,7 +1122,7 @@ class PY_COMPARE:
             eval(table_name).highlight_rows(i,'white','black')
 
         # Create the plot
-        self.fig = Figure(figsize=(5,3.6), dpi = 125, constrained_layout = True)
+        self.fig = Figure(figsize=(self.Placement['Data']['Figure1'][2],self.Placement['Data']['Figure1'][3]), dpi = self.Placement['Data']['Figure1'][4], constrained_layout = True)
         self.plot1 = self.fig.add_subplot(111)
 
         # Initialize the display curves
@@ -1169,10 +1205,18 @@ class PY_COMPARE:
             # Format Toolbar
             self.toolbar.config(bg=bg_color)
             self.toolbar._message_label.config(background=bg_color)
-            self.toolbar.place(anchor = 'e', relx = 0.975, rely = 0.9)
+            self.toolbar.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Data']['Toolbar1'][0], 
+                            rely = self.Placement['Data']['Toolbar1'][1]
+                            )
 
             # Add the figure to the GUI
-            self.canvas.get_tk_widget().place(anchor = 'n', relx = 0.78, rely = 0.32)
+            self.canvas.get_tk_widget().place(
+                                            anchor = 'n', 
+                                            relx = self.Placement['Data']['Figure1'][0], 
+                                            rely = self.Placement['Data']['Figure1'][1]
+                                            )
             if 'self.canvas' not in self.tab_att_list:
                 self.tab_att_list.append('self.canvas')
 

@@ -12,6 +12,7 @@ def CreateDataTab(self,window,frmt):
     import tkinter as tk
     from tkinter import messagebox
     from tkinter.filedialog import askopenfilenames
+    from tkinter import ttk
     import tksheet
     
     # Import Functions
@@ -170,61 +171,105 @@ def CreateDataTab(self,window,frmt):
                     break
 
             # Create the X drop down menu
-            self.opt1_plt = tk.StringVar(window)
-            self.opt1_plt.set(self.plot_opts[idx1]) 
-            self.optmenu1_plt = tk.OptionMenu(window, self.opt1_plt, *self.plot_opts) 
-            self.optmenu1_plt.place(anchor = 'e', relx = 0.73, rely = 0.275)
-            self.optmenu1_plt.configure(font = fsize_s)
+            self.optmenu1_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu1_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Data']['Combo1'][0], 
+                                    rely = self.Placement['Data']['Combo1'][1]
+                                    )
+            self.optmenu1_plt.set(self.plot_opts[idx1]) 
             self.tab_att_list.append('self.optmenu1_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu1_plt')
 
             # Create the vs Label
-            self.plot_label = tk.Label(window, text="vs", 
-                                        font=(fontname, fsize_s), background='white')
-            self.plot_label.place(anchor = 'e', relx = 0.765, rely = 0.275)
+            self.plot_label = ttk.Label(
+                                    window, 
+                                    text="vs",
+                                    style = 'Modern1.TLabel' 
+                                    )
+            self.plot_label.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Data']['Label1'][0], 
+                                rely = self.Placement['Data']['Label1'][1]
+                                )
             self.tab_att_list.append('self.plot_label')
 
             # Create the Y drop down menu
-            self.opt2_plt = tk.StringVar(window)
-            self.opt2_plt.set(self.plot_opts[idx2]) 
-            self.optmenu2_plt = tk.OptionMenu(window, self.opt2_plt, *self.plot_opts) 
-            self.optmenu2_plt.place(anchor = 'e', relx = 0.87, rely = 0.275)
-            self.optmenu2_plt.configure(font = fsize_s)
+            self.optmenu2_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu2_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Data']['Combo2'][0], 
+                                    rely = self.Placement['Data']['Combo2'][1]
+                                    )
+            self.optmenu2_plt.set(self.plot_opts[idx2])
             self.tab_att_list.append('self.optmenu2_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu2_plt')
 
             # Create the plot button
-            self.btn_plot = tk.Button(window, text = "Plot", command = self.plotter, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 6, height = 1)
-            self.btn_plot.place(anchor = 'e', relx = 0.95, rely = 0.275)
+            self.btn_plot = ttk.Button(
+                                window, 
+                                text = "Plot", 
+                                command = self.plotter, 
+                                style = "Modern2.TButton",
+                                width = self.Placement['Data']['Button1'][2], 
+                                )
+            self.btn_plot.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Data']['Button1'][0], 
+                                rely = self.Placement['Data']['Button1'][1]
+                                )
             self.tab_att_list.append('self.btn_plot')
 
             # Create the stage table
-            self.stage_label = tk.Label(window, text="Stage Table:", 
-                                        font=(fontname, fsize_s), background='white')
-            self.stage_label.place(anchor = 'w', relx = self.startx, rely = 0.61)
+            self.stage_label = ttk.Label(
+                                        window, 
+                                        text="Stage Table:", 
+                                        style = "Modern1.TLabel"
+                                        )
+            self.stage_label.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Data']['Label2'][0], 
+                                rely = self.Placement['Data']['Label2'][1]
+                                )
             self.tab_att_list.append('self.stage_label')
             Cols = ['Type', 'Direction','Control','Load Rate','Target','End Time (s)']
-            self.stage_table = tksheet.Sheet(window, total_rows = len(self.Compare['Data'][self.test_name]['Stage Type']), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 700, height = 240, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-            self.stage_table.place(anchor = 'n', relx = 0.24, rely = 0.63)
+            self.stage_table = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(self.Compare['Data'][self.test_name]['Stage Type']), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Data']['Sheet1'][2], 
+                                            height = self.Placement['Data']['Sheet1'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"bold"),
+                                            #table_bg = 'red' # For checking formatting only
+                                            )
+            self.stage_table.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Data']['Sheet1'][0], 
+                                rely = self.Placement['Data']['Sheet1'][1]
+                                )
             self.tab_att_list.append('self.stage_table')
 
             # Format the sheet
             self.stage_table.change_theme("blue")
             self.stage_table.set_index_width(0)
-            self.stage_table.column_width(column = 0, width = 110, redraw = True)
-            self.stage_table.column_width(column = 1, width = 90, redraw = True)
-            self.stage_table.column_width(column = 2, width = 90, redraw = True)
-            self.stage_table.column_width(column = 3, width = 130, redraw = True)
-            self.stage_table.column_width(column = 4, width = 130, redraw = True)
-            self.stage_table.column_width(column = 5, width = 105, redraw = True)
+            self.stage_table.column_width(column = 0, width = self.Placement['Data']['Sheet1'][5], redraw = True)
+            self.stage_table.column_width(column = 1, width = self.Placement['Data']['Sheet1'][6], redraw = True)
+            self.stage_table.column_width(column = 2, width = self.Placement['Data']['Sheet1'][7], redraw = True)
+            self.stage_table.column_width(column = 3, width = self.Placement['Data']['Sheet1'][8], redraw = True)
+            self.stage_table.column_width(column = 4, width = self.Placement['Data']['Sheet1'][9], redraw = True)
+            self.stage_table.column_width(column = 5, width = self.Placement['Data']['Sheet1'][10], redraw = True)
             self.stage_table.table_align(align = 'c',redraw=True)
 
             # Enable Bindings
@@ -274,14 +319,19 @@ def CreateDataTab(self,window,frmt):
             self.plot_opts = ['Tensile', 'Creep', 'Relaxation','Generic','All']
 
             # Create the plot option menu
-            self.opt1_plt = tk.StringVar(window)
-            self.opt1_plt.set(self.plot_opts[0]) 
-            self.optmenu1_plt = tk.OptionMenu(window, self.opt1_plt, *self.plot_opts, command = lambda event:self.plotter_all(event, 'sheet_db')) 
-            self.optmenu1_plt.place(anchor = 'e', relx = 0.82, rely = 0.275)
-            self.optmenu1_plt.configure(font = fsize_s)
-            self.tab_att_list.append('self.optmenu1_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu1_plt')
+            self.optmenu1_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu1_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Data']['Combo3'][0], 
+                                    rely = self.Placement['Data']['Combo3'][1]
+                                    )
+            self.optmenu1_plt.set(self.plot_opts[0])
+            self.optmenu1_plt.bind("<<ComboboxSelected>>",  lambda event:self.plotter_all(event, 'sheet_db'))
 
             # Call the plotting function
             self.plotter_all(self.plot_opts[0], 'sheet_db')
@@ -351,25 +401,37 @@ def CreateDataTab(self,window,frmt):
         # Create the test table
         tests = list(self.Compare['Data'].keys())
         Cols = [' ','Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)']
-        self.sheet_db = tksheet.Sheet(window, total_rows = len(tests), total_columns = len(Cols), 
-                        headers = Cols,
-                        width = 700, height = 270, show_x_scrollbar = False, show_y_scrollbar = True,
-                        font = (fontname,12,"normal"),
-                        header_font = (fontname,12,"bold"))
-        self.sheet_db.place(anchor = 'n', relx = 0.240, rely = 0.245)
+        self.sheet_db = tksheet.Sheet(
+                                    window, 
+                                    total_rows = len(tests), 
+                                    total_columns = len(Cols), 
+                                    headers = Cols,
+                                    width = self.Placement['Data']['Sheet2'][2], 
+                                    height = self.Placement['Data']['Sheet2'][3], 
+                                    show_x_scrollbar = False, 
+                                    show_y_scrollbar = True,
+                                    font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"normal"),
+                                    header_font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"bold"),
+                                    #table_bg = 'blue' # For checking formatting only
+                                    )
+        self.sheet_db.place(
+                            anchor = 'nw', 
+                            relx = self.Placement['Data']['Sheet2'][0], 
+                            rely = self.Placement['Data']['Sheet2'][1]
+                            )
         self.tab_att_list.append('self.sheet_db')
 
         # Format the sheet
         self.sheet_db.change_theme("blue")
         self.sheet_db.set_index_width(0)
-        self.sheet_db.column_width(column = 0, width = 25, redraw = True)
-        self.sheet_db.column_width(column = 1, width = 90, redraw = True)
-        self.sheet_db.column_width(column = 2, width = 80, redraw = True)
-        self.sheet_db.column_width(column = 3, width = 90, redraw = True)
-        self.sheet_db.column_width(column = 4, width = 90, redraw = True)
-        self.sheet_db.column_width(column = 5, width = 90, redraw = True)
-        self.sheet_db.column_width(column = 6, width = 100, redraw = True)
-        self.sheet_db.column_width(column = 7, width = 90, redraw = True)
+        self.sheet_db.column_width(column = 0, width = self.Placement['Data']['Sheet2'][5], redraw = True)
+        self.sheet_db.column_width(column = 1, width = self.Placement['Data']['Sheet2'][6], redraw = True)
+        self.sheet_db.column_width(column = 2, width = self.Placement['Data']['Sheet2'][7], redraw = True)
+        self.sheet_db.column_width(column = 3, width = self.Placement['Data']['Sheet2'][8], redraw = True)
+        self.sheet_db.column_width(column = 4, width = self.Placement['Data']['Sheet2'][9], redraw = True)
+        self.sheet_db.column_width(column = 5, width = self.Placement['Data']['Sheet2'][10], redraw = True)
+        self.sheet_db.column_width(column = 6, width = self.Placement['Data']['Sheet2'][11], redraw = True)
+        self.sheet_db.column_width(column = 7, width = self.Placement['Data']['Sheet2'][12], redraw = True)
         self.sheet_db.checkbox("A",checked=False)
         self.sheet_db.table_align(align = 'c',redraw=True)
 
@@ -404,14 +466,19 @@ def CreateDataTab(self,window,frmt):
                 if tests[i] in char_tests:
                     self.sheet_db.set_cell_data(i,0, True)
 
-    # Define Local Formating
-    starty = 0.20
-
     # Create the upload from excel button
-    self.btn_loc2 = tk.Button(window, text = "Upload from Excel", command = upload_from_excel, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 18)
-    self.btn_loc2.place(anchor = 'w', relx = self.startx+ self.delx*0, rely = starty)
+    self.btn_loc2 = ttk.Button(
+                            window, 
+                            text = "Upload from Excel", 
+                            command = upload_from_excel,
+                            style = "Modern3.TButton" ,
+                            width = self.Placement['Data']['Button2'][2]
+                            )
+    self.btn_loc2.place(
+                        anchor = 'w', 
+                        relx = self.Placement['Data']['Button2'][0], 
+                        rely = self.Placement['Data']['Button2'][1]
+                        )
     self.loc_att_list.append('self.btn_loc2')
 
     def add_selected():
@@ -467,10 +534,18 @@ def CreateDataTab(self,window,frmt):
             messagebox.showerror(message = 'No tests have been added to the database.')
                      
     # Create button to add data to characterization set
-    self.btn_add_to_char = tk.Button(window, text = "Add To Characterization", command = add_selected, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 18)
-    self.btn_add_to_char.place(anchor = 'w', relx = self.startx+ self.delx*1, rely = starty)
+    self.btn_add_to_char = ttk.Button(
+                                    window, 
+                                    text = "Add To Characterization", 
+                                    command = add_selected,
+                                    style = 'Modern3.TButton', 
+                                    width = self.Placement['Data']['Button3'][2]
+                                    )
+    self.btn_add_to_char.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Data']['Button3'][0], 
+                            rely = self.Placement['Data']['Button3'][1]
+                            )
     self.loc_att_list.append('self.btn_add_to_char')
 
     # Load data
