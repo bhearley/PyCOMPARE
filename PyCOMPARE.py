@@ -40,6 +40,8 @@ from General.BuildGeneralPage import *
 from General.BuildHomePage import *
 from General.GetProjectFile import *
 from General.DeleteWidgets import *
+from GUI.Placements import *
+from GUI.GetStyles import *
 from Model.CreateAnalysisTab import*
 from Model.CreateModelTab import *
 from Model.GVIPS.WriteDSG_GVIPS_ANLY import *
@@ -85,24 +87,40 @@ class PY_COMPARE:
         window.state('zoomed')
         window.configure(bg='white')
 
+        # Get Placement
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        Placements(self, str(screen_width) + "x" + str(screen_height))
+
+        # Get Styles
+        GetStyles(self)
+
         #Add the Title
         img = Image.open(title_img)
-        scale = 0.9
+        scale = self.Placement['HomePage']['Title'][2]
         img = img.resize((int(img.width*scale), int(img.height*scale)))
         self.img_hdr = ImageTk.PhotoImage(img)
         self.panel_hdr = tk.Label(window, image = self.img_hdr, bg = bg_color)
-        self.panel_hdr.place(anchor = 'n', relx = 0.5, rely = 0.005)
+        self.panel_hdr.place(
+                            anchor = 'n', 
+                            relx = self.Placement['HomePage']['Title'][0], 
+                            rely = self.Placement['HomePage']['Title'][1]
+                            )
 
         #Add the NASA Logo
         img = Image.open(logo_img)
-        scale = 0.8
+        scale = self.Placement['HomePage']['Logo'][2]
         img = img.resize((int(img.width*scale), int(img.height*scale)))
         self.img_nasa = ImageTk.PhotoImage(img)
         self.panel_nasa = tk.Label(window, image = self.img_nasa, bg = bg_color)
-        self.panel_nasa.place(anchor = 'e', relx = 0.999, rely = 0.045)
+        self.panel_nasa.place(
+                            anchor = 'e', 
+                            relx = self.Placement['HomePage']['Logo'][0], 
+                            rely = self.Placement['HomePage']['Logo'][1]
+                            )
 
         # Build the home page
-        BuildHomePage(self, window, frmt)
+        BuildHomePage(self, window)
 
         # Ask for save when closing
         def on_closing(self):

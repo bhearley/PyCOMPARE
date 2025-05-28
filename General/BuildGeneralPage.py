@@ -9,6 +9,7 @@
 def BuildGeneralPage(self,window,frmt):
     # Import Modules
     import tkinter as tk
+    from tkinter import ttk
 
     # Unpack Formatting
     fontname = frmt[1]
@@ -24,57 +25,121 @@ def BuildGeneralPage(self,window,frmt):
     starty = 0.13
 
     # Create the Database Tab
-    self.btn_db = tk.Button(window, text = "Database", command = self.data_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_db.place(anchor = 'w', relx = self.startx+self.delx*0, rely = starty)
+    self.btn_db = ttk.Button(
+                            window, 
+                            text = "Database", 
+                            command = self.data_tab,
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button1'][2]
+                            )
+    self.btn_db.place(
+                    anchor = 'w', 
+                    relx = self.Placement['General']['Button1'][0], 
+                    rely = self.Placement['General']['Button1'][1]
+                    )
     self.att_list.append('self.btn_db')
 
     # Create the Characerization Tab
-    self.btn_db = tk.Button(window, text = "Characterization", command = self.char_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_db.place(anchor = 'w', relx = self.startx+self.delx*1, rely = starty)
-    self.att_list.append('self.btn_db')
+    self.btn_ch = ttk.Button(
+                            window, 
+                            text = "Characterization", 
+                            command = self.char_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button2'][2]
+                            )
+    self.btn_ch.place(
+                    anchor = 'w', 
+                    relx = self.Placement['General']['Button2'][0], 
+                    rely = self.Placement['General']['Button2'][1]
+                    )
+    self.att_list.append('self.btn_ch')
 
     # Create the Optimize Model Tab
-    self.btn_mod = tk.Button(window, text = "Optimize Model", command = self.model_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_mod.place(anchor = 'w', relx = self.startx+self.delx*2, rely = starty)
+    self.btn_mod = ttk.Button(
+                            window, 
+                            text = "Optimize Model", 
+                            command = self.model_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button3'][2]
+                            )
+    self.btn_mod.place(
+                    anchor = 'w', 
+                    relx = self.Placement['General']['Button3'][0], 
+                    rely = self.Placement['General']['Button3'][1]
+                    )
     self.att_list.append('self.btn_mod')
 
     # Create the Analyze Model Tab
-    self.btn_anly = tk.Button(window, text = "Analyze Model", command = self.analyze_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_anly.place(anchor = 'w', relx = self.startx+self.delx*3, rely = starty)
+    self.btn_anly = ttk.Button(
+                            window, 
+                            text = "Analyze Model", 
+                            command = self.analyze_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button4'][2]
+                            )
+    self.btn_anly.place(
+                        anchor = 'w', 
+                        relx = self.Placement['General']['Button4'][0], 
+                        rely = self.Placement['General']['Button4'][1]
+                        )
     self.att_list.append('self.btn_anly')
 
     # Create the Visualization Tab
-    self.btn_anly = tk.Button(window, text = "Visualization", command = self.viz_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_anly.place(anchor = 'w', relx = self.startx+self.delx*4, rely = starty)
-    self.att_list.append('self.btn_anly')
+    self.btn_viz = ttk.Button(
+                            window, 
+                            text = "Visualization", 
+                            command = self.viz_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button5'][2]
+                            )
+    self.btn_viz.place(
+                        anchor = 'w', 
+                        relx = self.Placement['General']['Button5'][0], 
+                        rely = self.Placement['General']['Button5'][1]
+                        )
+    self.att_list.append('self.btn_viz')
 
     # Create the Export Tab
-    self.btn_anly = tk.Button(window, text = "Export", command = self.export_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_anly.place(anchor = 'w', relx = self.startx+self.delx*5, rely = starty)
-    self.att_list.append('self.btn_anly')
+    self.btn_exp = ttk.Button(
+                            window, 
+                            text = "Export", 
+                            command = self.export_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button6'][2]
+                            )
+    self.btn_exp.place(
+                    anchor = 'w', 
+                    relx = self.Placement['General']['Button6'][0], 
+                    rely = self.Placement['General']['Button6'][1]
+                    )
+    self.att_list.append('self.btn_exp')
 
     # Create the Settings Tab
-    self.btn_anly = tk.Button(window, text = "Settings", command = self.settings_tab, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 18)
-    self.btn_anly.place(anchor = 'w', relx = self.startx+self.delx*6, rely = starty)
-    self.att_list.append('self.btn_anly')
+    self.btn_set = ttk.Button(
+                            window, 
+                            text = "Settings", 
+                            command = self.settings_tab, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button7'][2]
+                            )
+    self.btn_set.place(
+                        anchor = 'w', 
+                        relx = self.Placement['General']['Button7'][0], 
+                        rely = self.Placement['General']['Button7'][1]
+                        )
+    self.att_list.append('self.btn_set')
 
     # Create the Save Button
-    self.btn_save = tk.Button(window, text = "Save", command = self.save, 
-                                font = (fontname, fsize_s), bg = '#0b3d91', fg='white',
-                                width = 10)
-    self.btn_save.place(anchor = 'w', relx = self.startx, rely = 0.965)
+    self.btn_save = ttk.Button(
+                            window, 
+                            text = "Save", 
+                            command = self.save, 
+                            style = 'Modern1.TButton',
+                            width = self.Placement['General']['Button8'][2]
+                            )
+    self.btn_save.place(
+                        anchor = 'w', 
+                        relx = self.Placement['General']['Button8'][0], 
+                        rely = self.Placement['General']['Button8'][1]
+                        )
     self.att_list.append('self.btn_save')
