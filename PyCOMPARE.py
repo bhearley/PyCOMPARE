@@ -446,10 +446,18 @@ class PY_COMPARE:
                     # Create Add Point Button
                     if hasattr(self, 'btn_loc4'):
                         self.btn_loc4.destroy()
-                    self.btn_loc4 = tk.Button(window, text = "Add", command = AddPoint, 
-                                font = (fontname, 10), bg = '#A9A9A9', fg='white',
-                                width = 8)
-                    self.btn_loc4.place(anchor = 'e', relx = 0.675, rely = 0.95)
+                    self.btn_loc4 = ttk.Button(
+                                            window, 
+                                            text = "Add", 
+                                            command = AddPoint, 
+                                            style = 'Modern4.TButton',
+                                            width = self.Placement['Characterization']['Button4'][2]
+                                            )
+                    self.btn_loc4.place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Characterization']['Button4'][0], 
+                                        rely = self.Placement['Characterization']['Button4'][1]
+                                        )
                     self.tab_att_list.append('self.btn_loc4')
 
                     def DelPoint():
@@ -468,10 +476,18 @@ class PY_COMPARE:
                     # Create Delete Point Button
                     if hasattr(self, 'btn_loc5'):
                         self.btn_loc5.destroy()
-                    self.btn_loc5 = tk.Button(window, text = "Delete", command = DelPoint, 
-                                font = (fontname, 10), bg = '#A9A9A9', fg='white',
-                                width = 8)
-                    self.btn_loc5.place(anchor = 'e', relx = 0.725, rely = 0.95)
+                    self.btn_loc5 = ttk.Button(
+                                            window, 
+                                            text = "Delete", 
+                                            command = DelPoint, 
+                                            style = "Modern4.TButton",
+                                            width = self.Placement['Characterization']['Button5'][2],
+                                            )
+                    self.btn_loc5.place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Characterization']['Button5'][0], 
+                                        rely = self.Placement['Characterization']['Button5'][1]
+                                        )
                     self.tab_att_list.append('self.btn_loc5')
 
         # Set Plot Formatting
@@ -558,6 +574,7 @@ class PY_COMPARE:
                         root.geometry("300x600")
                         root.configure(bg='white')
                         root.title("Segmentation Control Panel")
+                        root.resizable(False, False)
 
                         # Create a sheet with number of stages
                         Cols = ['Stage', 'Points']
@@ -566,23 +583,23 @@ class PY_COMPARE:
                                                             total_rows = len(rows), 
                                                             total_columns = len(Cols), 
                                                             headers = Cols,
-                                                            width = self.Placement['Data']['Sheet3'][2], 
-                                                            height = self.Placement['Data']['Sheet3'][3], 
+                                                            width = self.Placement['Characterization']['Sheet3'][2], 
+                                                            height = self.Placement['Characterization']['Sheet3'][3], 
                                                             show_x_scrollbar = False, 
                                                             show_y_scrollbar = True,
-                                                            font = ("Segoe UI",self.Placement['Data']['Sheet3'][4],"normal"),
-                                                            header_font = ("Segoe UI",self.Placement['Data']['Sheet3'][4],"bold"))
+                                                            font = ("Segoe UI",self.Placement['Characterization']['Sheet3'][4],"normal"),
+                                                            header_font = ("Segoe UI",self.Placement['Characterization']['Sheet3'][4],"bold"))
                         self.stage_pts_sheet.place(
                                                 anchor = 'c', 
-                                                relx = self.Placement['Data']['Sheet3'][0], 
-                                                rely = self.Placement['Data']['Sheet3'][1]
+                                                relx = self.Placement['Characterization']['Sheet3'][0], 
+                                                rely = self.Placement['Characterization']['Sheet3'][1]
                                                 )
 
                         # Format the sheet
                         self.stage_pts_sheet.change_theme("blue")
                         self.stage_pts_sheet.set_index_width(0)
-                        self.stage_pts_sheet.column_width(column = 0, width = self.Placement['Data']['Sheet3'][5], redraw = True)
-                        self.stage_pts_sheet.column_width(column = 1, width = self.Placement['Data']['Sheet3'][6], redraw = True)
+                        self.stage_pts_sheet.column_width(column = 0, width = self.Placement['Characterization']['Sheet3'][5], redraw = True)
+                        self.stage_pts_sheet.column_width(column = 1, width = self.Placement['Characterization']['Sheet3'][6], redraw = True)
                         self.stage_pts_sheet.table_align(align = 'c',redraw=True)
 
                         # Enable Bindings
@@ -630,17 +647,17 @@ class PY_COMPARE:
                             self.plotter()
                                 
                         # Create button to get the reduced data points
-                        self.btn_get_red = tk.Button(
+                        self.btn_get_red = ttk.Button(
                                                     root, 
                                                     text = "Get Data Points", 
                                                     command = GetReducedPts,
                                                     style = 'Modern2.TButton', 
-                                                    width = self.Placement['Data']['Button5'][2]
+                                                    width = self.Placement['Characterization']['Button3'][2]
                                                     )
                         self.btn_get_red.place(
                                             anchor = 'c', 
-                                            relx = self.Placement['Data']['Button5'][0], 
-                                            rely = self.Placement['Data']['Button5'][1]
+                                            relx = self.Placement['Characterization']['Button3'][0], 
+                                            rely = self.Placement['Characterization']['Button3'][1]
                                             )
 
                         def on_closing_root(self):
@@ -666,12 +683,12 @@ class PY_COMPARE:
                                         text = "Reduce Data", 
                                         command = ReduceData,
                                         style = 'Modern2.TButton', 
-                                        width = self.Placement['Data']['Button4'][2]
+                                        width = self.Placement['Characterization']['Button2'][2]
                                         )
                 self.btn_loc3.place(
                                     anchor = 'n', 
-                                    relx = self.Placement['Data']['Button4'][0], 
-                                    rely = self.Placement['Data']['Button4'][1]
+                                    relx = self.Placement['Characterization']['Button2'][0], 
+                                    rely = self.Placement['Characterization']['Button2'][1]
                                     )
                 self.tab_att_list.append('self.btn_loc3')
 

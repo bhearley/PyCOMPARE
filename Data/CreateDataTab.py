@@ -332,6 +332,7 @@ def CreateDataTab(self,window,frmt):
                                     )
             self.optmenu1_plt.set(self.plot_opts[0])
             self.optmenu1_plt.bind("<<ComboboxSelected>>",  lambda event:self.plotter_all(event, 'sheet_db'))
+            self.tab_att_list.append("self.optmenu1_plt")
 
             # Call the plotting function
             self.plotter_all(self.plot_opts[0], 'sheet_db')

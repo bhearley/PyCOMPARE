@@ -68,6 +68,23 @@ def GetStyles(self):
                         background=[("active", "#FC3D21")]
                 )
     
+    # -- Red Mini Text
+    self.style.configure(
+                        "Modern4.TButton",
+                        background='#DD361C',
+                        foreground="white",
+                        font=("Segoe UI", 10),
+                        borderwidth=2,
+                        padding=2,
+                        focuscolor='',
+                        highlightthickness=0
+                        )
+
+    self.style.map(
+                        "Modern4.TButton",
+                        background=[("active", "#FC3D21")]
+                )
+    
     # Combo Box Style
     self.style.configure(
                         "Modern.TCombobox",

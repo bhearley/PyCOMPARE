@@ -10,6 +10,7 @@ def CreateCharacterizationTab(self,window,frmt):
     # Import Modules
     import tkinter as tk
     from tkinter import messagebox
+    from tkinter import ttk
     import tksheet
 
     # Import Functions
@@ -100,64 +101,105 @@ def CreateCharacterizationTab(self,window,frmt):
                     break
 
             # Create the X drop down menu
-            self.opt1_plt = tk.StringVar(window)
-            self.opt1_plt.set(self.plot_opts[idx1]) 
-            self.optmenu1_plt = tk.OptionMenu(window, self.opt1_plt, *self.plot_opts) 
-            self.optmenu1_plt.place(anchor = 'e', relx = 0.73, rely = 0.275)
-            self.optmenu1_plt.configure(font = fsize_s)
+            self.optmenu1_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu1_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Characterization']['Combo1'][0], 
+                                    rely = self.Placement['Characterization']['Combo1'][1]
+                                    )
+            self.optmenu1_plt.set(self.plot_opts[idx1]) 
             self.tab_att_list.append('self.optmenu1_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu1_plt')
 
             # Create the vs Label
-            self.plot_label = tk.Label(window, text="vs", 
-                                        font=(fontname, fsize_s), background='white')
-            self.plot_label.place(anchor = 'e', relx = 0.765, rely = 0.275)
+            self.plot_label = ttk.Label(
+                                    window, 
+                                    text="vs",
+                                    style = 'Modern1.TLabel' 
+                                    )
+            self.plot_label.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Characterization']['Label1'][0], 
+                                rely = self.Placement['Characterization']['Label1'][1]
+                                )
             self.tab_att_list.append('self.plot_label')
 
             # Create the Y drop down menu
-            self.opt2_plt = tk.StringVar(window)
-            self.opt2_plt.set(self.plot_opts[idx2]) 
-            self.optmenu2_plt = tk.OptionMenu(window, self.opt2_plt, *self.plot_opts) 
-            self.optmenu2_plt.place(anchor = 'e', relx = 0.87, rely = 0.275)
-            self.optmenu2_plt.configure(font = fsize_s)
+            self.optmenu2_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu2_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Characterization']['Combo2'][0], 
+                                    rely = self.Placement['Characterization']['Combo2'][1]
+                                    )
+            self.optmenu2_plt.set(self.plot_opts[idx2])
             self.tab_att_list.append('self.optmenu2_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu2_plt')
 
             # Create the plot button
-            self.btn_plot = tk.Button(window, text = "Plot", command = self.plotter, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 6, height = 1)
-            self.btn_plot.place(anchor = 'e', relx = 0.95, rely = 0.275)
+            self.btn_plot = ttk.Button(
+                                window, 
+                                text = "Plot", 
+                                command = self.plotter, 
+                                style = "Modern2.TButton",
+                                width = self.Placement['Characterization']['Button1'][2], 
+                                )
+            self.btn_plot.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Characterization']['Button1'][0], 
+                                rely = self.Placement['Characterization']['Button1'][1]
+                                )
             self.tab_att_list.append('self.btn_plot')
             
             # Create the stage table
-            self.stage_label = tk.Label(window, text="Stage Table:", 
-                                        font=(fontname, fsize_s), background='white')
-            self.stage_label.place(anchor = 'w', relx = self.startx, rely = 0.61)
+            self.stage_label = ttk.Label(
+                                        window, 
+                                        text="Stage Table:", 
+                                        style = "Modern1.TLabel"
+                                        )
+            self.stage_label.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Characterization']['Label2'][0], 
+                                rely = self.Placement['Characterization']['Label2'][1]
+                                )
             self.tab_att_list.append('self.stage_label')
-            self.loc_att_list.append('self.stage_label')
-
-            Cols = ['Type', 'Direction','Control','Load Rate','Target','End Time (s)','Points']
-            self.stage_table = tksheet.Sheet(window, total_rows = len(self.Compare['Data'][self.test_name]['Stage Type']), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 730, height = 240, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-            self.stage_table.place(anchor = 'n', relx = 0.25, rely = 0.63)
+            Cols = ['Type', 'Direction','Control','Load Rate','Target','End Time (s)']
+            self.stage_table = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(self.Compare['Data'][self.test_name]['Stage Type']), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Characterization']['Sheet1'][2], 
+                                            height = self.Placement['Characterization']['Sheet1'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Characterization']['Sheet1'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Characterization']['Sheet1'][4],"bold"),
+                                            #table_bg = 'red' # For checking formatting only
+                                            )
+            self.stage_table.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Characterization']['Sheet1'][0], 
+                                rely = self.Placement['Characterization']['Sheet1'][1]
+                                )
             self.tab_att_list.append('self.stage_table')
 
-            # Format sheet
+            # Format the sheet
             self.stage_table.change_theme("blue")
             self.stage_table.set_index_width(0)
-            self.stage_table.column_width(column = 0, width = 100, redraw = True)
-            self.stage_table.column_width(column = 1, width = 90, redraw = True)
-            self.stage_table.column_width(column = 2, width = 100, redraw = True)
-            self.stage_table.column_width(column = 3, width = 120, redraw = True)
-            self.stage_table.column_width(column = 4, width = 120, redraw = True)
-            self.stage_table.column_width(column = 5, width = 100, redraw = True)
-            self.stage_table.column_width(column = 6, width = 70, redraw = True)
+            self.stage_table.column_width(column = 0, width = self.Placement['Characterization']['Sheet1'][5], redraw = True)
+            self.stage_table.column_width(column = 1, width = self.Placement['Characterization']['Sheet1'][6], redraw = True)
+            self.stage_table.column_width(column = 2, width = self.Placement['Characterization']['Sheet1'][7], redraw = True)
+            self.stage_table.column_width(column = 3, width = self.Placement['Characterization']['Sheet1'][8], redraw = True)
+            self.stage_table.column_width(column = 4, width = self.Placement['Characterization']['Sheet1'][9], redraw = True)
+            self.stage_table.column_width(column = 5, width = self.Placement['Characterization']['Sheet1'][10], redraw = True)
             self.stage_table.table_align(align = 'c',redraw=True)
 
             # Enable Bindings
@@ -212,14 +254,20 @@ def CreateCharacterizationTab(self,window,frmt):
             self.plot_opts = ['Tensile', 'Creep', 'Relaxation','Generic','All']
 
             # Create the plot option menu
-            self.opt1_plt = tk.StringVar(window)
-            self.opt1_plt.set(self.plot_opts[0]) 
-            self.optmenu1_plt = tk.OptionMenu(window, self.opt1_plt, *self.plot_opts, command = lambda event : self.plotter_all(event, 'sheet_char')) 
-            self.optmenu1_plt.place(anchor = 'e', relx = 0.82, rely = 0.275)
-            self.optmenu1_plt.configure(font = fsize_s)
-            self.tab_att_list.append('self.optmenu1_plt')
-            if 'self.optmenu1_plt' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu1_plt')
+            self.optmenu1_plt = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu1_plt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Characterization']['Combo3'][0], 
+                                    rely = self.Placement['Characterization']['Combo3'][1]
+                                    )
+            self.optmenu1_plt.set(self.plot_opts[0])
+            self.optmenu1_plt.bind("<<ComboboxSelected>>",  lambda event:self.plotter_all(event, 'sheet_char'))
+            self.tab_att_list.append("self.optmenu1_plt")
 
             # Call the plotting function
             self.plotter_all(self.plot_opts[0], 'sheet_char')
@@ -262,33 +310,52 @@ def CreateCharacterizationTab(self,window,frmt):
             self.sheet_char.destroy()
 
         # Create the test table
-        self.char_label = tk.Label(window, text="Characterization Set:", 
-                                        font=(fontname, fsize_s), background='white')
-        self.char_label.place(anchor = 'w', relx = self.startx, rely = 0.22)
+        self.char_label = ttk.Label(
+                                    window, 
+                                    text="Characterization Set:",
+                                    style = "Modern1.TLabel" 
+                                    )
+        self.char_label.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Characterization']['Label3'][0], 
+                            rely = self.Placement['Characterization']['Label3'][1]
+                            )
         self.loc_att_list.append('self.char_label')
         self.tab_att_list.append('self.char_label')
 
         tests = list(self.Compare['Characterization'].keys())
         Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Weight']
-        self.sheet_char = tksheet.Sheet(window, total_rows = len(tests), total_columns = len(Cols), 
-                        headers = Cols,
-                        width = 730, height = 270, show_x_scrollbar = False, show_y_scrollbar = True,
-                        font = (fontname,12,"normal"),
-                        header_font = (fontname,12,"bold"))
-        self.sheet_char.place(anchor = 'n', relx = 0.250, rely = 0.245)
+        self.sheet_char = tksheet.Sheet(
+                                        window, 
+                                        total_rows = len(tests), 
+                                        total_columns = len(Cols), 
+                                        headers = Cols,
+                                        width = self.Placement['Characterization']['Sheet2'][2], 
+                                        height = self.Placement['Characterization']['Sheet2'][3], 
+                                        show_x_scrollbar = False, 
+                                        show_y_scrollbar = True,
+                                        font = ('Segoe UI',self.Placement['Characterization']['Sheet2'][4],"normal"),
+                                        header_font = ('Segoe UI',self.Placement['Characterization']['Sheet2'][4],"bold"),
+                                        #table_bg = 'blue' # For formatting purposes only
+                                        )
+        self.sheet_char.place(
+                            anchor = 'nw', 
+                            relx = self.Placement['Characterization']['Sheet2'][0], 
+                            rely = self.Placement['Characterization']['Sheet2'][1]
+                            )
         self.tab_att_list.append('self.sheet_char')
 
         # Format the sheet
         self.sheet_char.change_theme("blue")
         self.sheet_char.set_index_width(0)
-        self.sheet_char.column_width(column = 0, width = 90, redraw = True)
-        self.sheet_char.column_width(column = 1, width = 80, redraw = True)
-        self.sheet_char.column_width(column = 2, width = 90, redraw = True)
-        self.sheet_char.column_width(column = 3, width = 90, redraw = True)
-        self.sheet_char.column_width(column = 4, width = 90, redraw = True)
-        self.sheet_char.column_width(column = 5, width = 100, redraw = True)
-        self.sheet_char.column_width(column = 6, width = 90, redraw = True)
-        self.sheet_char.column_width(column = 7, width = 70, redraw = True)
+        self.sheet_char.column_width(column = 0, width = self.Placement['Characterization']['Sheet2'][5], redraw = True)
+        self.sheet_char.column_width(column = 1, width = self.Placement['Characterization']['Sheet2'][6], redraw = True)
+        self.sheet_char.column_width(column = 2, width = self.Placement['Characterization']['Sheet2'][7], redraw = True)
+        self.sheet_char.column_width(column = 3, width = self.Placement['Characterization']['Sheet2'][8], redraw = True)
+        self.sheet_char.column_width(column = 4, width = self.Placement['Characterization']['Sheet2'][9], redraw = True)
+        self.sheet_char.column_width(column = 5, width = self.Placement['Characterization']['Sheet2'][10], redraw = True)
+        self.sheet_char.column_width(column = 6, width = self.Placement['Characterization']['Sheet2'][11], redraw = True)
+        self.sheet_char.column_width(column = 7, width = self.Placement['Characterization']['Sheet2'][12], redraw = True)
         self.sheet_char.table_align(align = 'c',redraw=True)
         self.sheet_char.extra_bindings([("cell_select", self.cell_select_char)])
 

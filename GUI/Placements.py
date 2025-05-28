@@ -55,11 +55,20 @@ def Placements(self, res):
         Placement['Data']['Toolbar1'] = [0.765, 0.8]
 
         # -- Characterization
-        Placement['Characterization']['Button4'] = [0.725, 0.9, 12]
+        Placement['Characterization']['Combo1'] = [0.685, 0.275]
+        Placement['Characterization']['Label1'] = [0.735, 0.275]
+        Placement['Characterization']['Combo2'] = [0.785, 0.275]
+        Placement['Characterization']['Button1'] = [0.855, 0.27, 6]
+        Placement['Characterization']['Label2'] = [startx, 0.60]
+        Placement['Characterization']['Sheet1'] = [startx, 0.63, 700, 400, 12, 110, 90, 90, 130, 130, 105]
+        Placement['Characterization']['Combo3'] = [0.765, 0.275]
+        Placement['Characterization']['Label3'] = [startx, 0.22]
+        Placement['Characterization']['Sheet2'] = [startx, 0.245, 730, 450, 12, 90, 80, 90, 90, 90, 100, 90, 70]
+        Placement['Characterization']['Button2'] = [0.765, 0.85, 18]
         Placement['Characterization']['Sheet3'] = [0.5, 0.4, 220, 400, 12, 100, 100]
-        Placement['Characterization']['Button5'] = [0.5, 0.9, 12]
-
-
+        Placement['Characterization']['Button3'] = [0.5, 0.9, 18]
+        Placement['Characterization']['Button4'] = [0.74, 0.9, 8]
+        Placement['Characterization']['Button5'] = [0.79, 0.9, 8]
 
 
     # 1536 x 960
@@ -101,9 +110,20 @@ def Placements(self, res):
         Placement['Data']['Toolbar1'] = [0.765, 0.85]
 
         # -- Characterization
-        Placement['Characterization']['Button4'] = [0.725, 0.9, 12]
+        Placement['Characterization']['Combo1'] = [0.67, 0.275]
+        Placement['Characterization']['Label1'] = [0.735, 0.275]
+        Placement['Characterization']['Combo2'] = [0.8, 0.275]
+        Placement['Characterization']['Button1'] = [0.9, 0.265, 6]
+        Placement['Characterization']['Label2'] = [startx, 0.59]
+        Placement['Characterization']['Sheet1'] = [startx, 0.63, 700, 240, 12, 110, 90, 90, 130, 130, 105]
+        Placement['Characterization']['Combo3'] = [0.765, 0.275]
+        Placement['Characterization']['Label3'] = [startx, 0.22]
+        Placement['Characterization']['Sheet2'] = [startx, 0.245, 730, 270, 12, 90, 80, 90, 90, 90, 100, 90, 70]
+        Placement['Characterization']['Button2'] = [0.765, 0.9, 12]
         Placement['Characterization']['Sheet3'] = [0.5, 0.4, 220, 400, 12, 100, 100]
-        Placement['Characterization']['Button5'] = [0.5, 0.9, 12]
+        Placement['Characterization']['Button3'] = [0.5, 0.9, 18]
+        Placement['Characterization']['Button4'] = [0.74, 0.96, 8]
+        Placement['Characterization']['Button5'] = [0.79, 0.96, 8]
 
 
     else:
