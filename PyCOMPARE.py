@@ -1257,7 +1257,7 @@ class PY_COMPARE:
         DeleteLocal(self)
 
         # Create the Optimize Model page
-        CreateModelTab(self,window,frmt)
+        CreateModelTab(self,window)
 
     def analyze_tab(self):
         #--------------------------------------------------------------------------
@@ -1461,7 +1461,7 @@ class PY_COMPARE:
                 
                 # Recreate the Optimize Page
                 DeleteLocal(self)
-                CreateModelTab(self,window,frmt)
+                CreateModelTab(self,window)
 
             else:
                 # Save the Model
@@ -1649,7 +1649,7 @@ class PY_COMPARE:
                             
                             # Recreate the Optimize Page
                             DeleteLocal(self)
-                            CreateModelTab(self,window,frmt)
+                            CreateModelTab(self,window)
 
                         # Populate the Analysis Page
                         else:
@@ -1782,6 +1782,9 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
+        # Update the model
+        UpdateModelData(None, self, 3, 'Model')
+
         # Set error checking flag
         flag = 0
 
@@ -1828,6 +1831,14 @@ class PY_COMPARE:
                     if float(self.sheet2.data[i][4]) < float(self.sheet2.data[i][3]):
                         flag = 1
                         msg = 'Invalid values for plastic parameter bounds.'
+
+        # Set the parameters
+        self.Compare['Model']['Reversible Model Name'] = self.optmenu2.get()
+        self.Compare['Model']['Irreversible Model Name'] = self.optmenu3.get()
+        self.Compare['Model']['M'] = self.optmenu4.get()
+        self.Compare['Model']['N'] = self.optmenu5.get()
+        self.Compare['Model']['VE_Param'] = self.sheet1.data
+        self.Compare['Model']['VP_Param'] = self.sheet2.data
 
         # Run Optimization
         if flag == 0:

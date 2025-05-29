@@ -13,7 +13,8 @@ def Placements(self, res):
                 'HomePage':{},
                 'General':{},
                 'Data':{},
-                'Characterization':{}
+                'Characterization':{},
+                'Optimization':{}
                 }
     
     # 2560 x 1440
@@ -70,6 +71,27 @@ def Placements(self, res):
         Placement['Characterization']['Button4'] = [0.74, 0.9, 8]
         Placement['Characterization']['Button5'] = [0.79, 0.9, 8]
 
+        # -- Optimization
+        Placement['Optimization']['Label1'] = [0.265, 0.205]
+        Placement['Optimization']['Combo1'] = [0.39, 0.205]
+        Placement['Optimization']['Label2'] = [0.615, 0.205]
+        Placement['Optimization']['Combo2'] = [0.74, 0.205]
+        Placement['Optimization']['Sheet1'] = [0.325, 0.33, 750, 700, 12, 90, 65, 110, 110, 110, 120, 95]
+        Placement['Optimization']['Sheet2'] = [0.675, 0.33, 750, 700, 12, 90, 65, 110, 110, 110, 120, 95]
+        Placement['Optimization']['Label3'] = [0.265, 0.25]
+        Placement['Optimization']['Combo3'] = [0.39, 0.25]
+        Placement['Optimization']['Label4'] = [0.615, 0.25]
+        Placement['Optimization']['Combo4'] = [0.74, 0.25]
+        Placement['Optimization']['Label5'] = [0.925, 0.205]
+        Placement['Optimization']['Slider1'] = [0.925, 0.25, 250]
+        Placement['Optimization']['Button1'] = [startx + delx*0, 0.925, btnw]
+        Placement['Optimization']['Button2'] = [startx + delx*1, 0.925, btnw]
+        Placement['Optimization']['Button3'] = [startx + delx*2, 0.925, btnw]
+        Placement['Optimization']['Button4'] = [startx + delx*3, 0.925, btnw]
+        Placement['Optimization']['Button5'] = [0.024, 0.275, 12]
+        Placement['Optimization']['Label6'] = [0.05, 0.205]
+        Placement['Optimization']['Combo5'] = [0.125, 0.205]
+
 
     # 1536 x 960
     if res == "1536x960":
@@ -124,6 +146,27 @@ def Placements(self, res):
         Placement['Characterization']['Button3'] = [0.5, 0.9, 18]
         Placement['Characterization']['Button4'] = [0.74, 0.96, 8]
         Placement['Characterization']['Button5'] = [0.79, 0.96, 8]
+
+        # -- Optimization
+        Placement['Optimization']['Label1'] = [0.28, 0.205]
+        Placement['Optimization']['Combo1'] = [0.42, 0.205]
+        Placement['Optimization']['Label2'] = [0.6, 0.205]
+        Placement['Optimization']['Combo2'] = [0.74, 0.205]
+        Placement['Optimization']['Sheet1'] = [0.255, 0.33, 750, 400, 12, 90, 65, 110, 110, 110, 120, 95]
+        Placement['Optimization']['Sheet2'] = [0.75, 0.33, 750, 400, 12, 90, 65, 110, 110, 110, 120, 95]
+        Placement['Optimization']['Label3'] = [0.28, 0.2725]
+        Placement['Optimization']['Combo3'] = [0.42, 0.2725]
+        Placement['Optimization']['Label4'] = [0.6, 0.2725]
+        Placement['Optimization']['Combo4'] = [0.74, 0.2725]
+        Placement['Optimization']['Label5'] = [0.9, 0.205]
+        Placement['Optimization']['Slider1'] = [0.9, 0.28, 250]
+        Placement['Optimization']['Button1'] = [startx + delx*0, 0.8825, btnw]
+        Placement['Optimization']['Button2'] = [startx + delx*1, 0.8825, btnw]
+        Placement['Optimization']['Button3'] = [startx + delx*2, 0.8825, btnw]
+        Placement['Optimization']['Button4'] = [startx + delx*3, 0.8825, btnw]
+        Placement['Optimization']['Button5'] = [0.0125, 0.28, 12]
+        Placement['Optimization']['Label6'] = [0.055, 0.205]
+        Placement['Optimization']['Combo5'] = [0.16, 0.205]
 
 
     else:

@@ -117,3 +117,12 @@ def GetStyles(self):
                         font=("Segoe UI", 14),
                         padding=0
                         )
+    
+    # Scale Style
+    self.style.configure(
+                        "Modern.Horizontal.TScale",
+                        troughcolor="#DD361C", 
+                        background="white",
+                        borderwidth=1,
+                        relief='rasied'
+                        )

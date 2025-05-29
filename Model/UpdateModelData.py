@@ -26,23 +26,23 @@ def UpdateModelData(event, self, opt, tag):
         # Get the Model Name
         if hasattr(self,"optmenu1"):
             if self.optmenu1.winfo_exists():
-                self.Compare[tag]['Model Name'] = self.opt1.get()
+                self.Compare[tag]['Model Name'] = self.optmenu1.get()
 
         # Get the Reversible Model
         if hasattr(self,"optmenu2"):
             if self.optmenu2.winfo_exists():
-                self.Compare[tag]['Reversible Model Name'] = self.opt2.get() 
+                self.Compare[tag]['Reversible Model Name'] = self.optmenu2.get() 
 
         # Get the Irreversible Model
         if hasattr(self,"optmenu3"):
             if self.optmenu3.winfo_exists():
-                self.Compare[tag]['Irreversible Model Name'] = self.opt3.get() 
+                self.Compare[tag]['Irreversible Model Name'] = self.optmenu3.get() 
 
         # Get the Viscoelastic Mechanisms
         if hasattr(self,"optmenu4"):
             if self.optmenu4.winfo_exists():
                 if opt == 1 or opt == 3:
-                    self.Compare[tag]['M'] = self.opt4.get()
+                    self.Compare[tag]['M'] = self.optmenu4.get()
 
         # Set the model parameter sheet names
         if tag == 'Model':
@@ -66,7 +66,7 @@ def UpdateModelData(event, self, opt, tag):
         if hasattr(self,"optmenu5"):
             if self.optmenu5.winfo_exists():
                 if opt == 2 or opt == 3:
-                    self.Compare[tag]['N'] = self.opt5.get() 
+                    self.Compare[tag]['N'] = self.optmenu5.get() 
 
         # Get the Viscoplastic Parameters
         if hasattr(self,s2):

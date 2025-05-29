@@ -6,7 +6,7 @@
 #          to determine the optimal parameter values
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateModelTab(self,window,frmt):
+def CreateModelTab(self,window):
     # Import Modules
     import copy
     import json
@@ -21,11 +21,6 @@ def CreateModelTab(self,window,frmt):
     # Import Functions
     from General.DeleteWidgets import DeleteTab
     from Model.UpdateModelData import UpdateModelData
-
-    #Unpack Formatting
-    bg_color = frmt[0] 
-    fontname = frmt[1]
-    fsize_s = frmt[2]
 
     # Initialize Model
     if 'Model' not in self.Compare.keys():
@@ -68,12 +63,15 @@ def CreateModelTab(self,window,frmt):
     # Define Available Models
     self.Models = model_info.sheetnames
 
-    def change_model(value):
+    def change_model(values):
         #----------------------------------------------------------------------
         #
         #   PURPOSE: Recreate page based on model choice.
         #
         #----------------------------------------------------------------------
+
+        # Get the model
+        value = self.optmenu1.get()
 
         # Clear the model information if the model type changed
         try:
@@ -118,19 +116,20 @@ def CreateModelTab(self,window,frmt):
         
         if len(self.RevModels) > 0:
             # Create the label
-            text_var = tk.StringVar()
-            text_var.set("Reversible Model:")
-            self.desc2 = tk.Label(window, 
-                            textvariable=text_var, 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc2 = ttk.Label(
+                                window, 
+                                text="Reversible Model:", 
+                                anchor=tk.CENTER,       
+                                style = 'Modern1.TLabel'                    
+                                )
+            self.desc2.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Label1'][0], 
+                            rely = self.Placement['Optimization']['Label1'][1]
                             )
-            self.desc2.place(anchor = 'w', relx = 0.225, rely = 0.205)
             self.tab_att_list.append('self.desc2')
 
             # Create the option variable
-            self.opt2 = tk.StringVar(window)
             rmod_opt = self.RevModels[0]
 
             # Check if previous data exists
@@ -141,10 +140,19 @@ def CreateModelTab(self,window,frmt):
                         rmod_opt = self.Compare['Model']['Reversible Model Name']
 
             # Create the reversible model drop down   
-            self.opt2.set(rmod_opt) 
-            self.optmenu2 = tk.OptionMenu(window, self.opt2, *self.RevModels, command = lambda event:UpdateModelData(event, self, 1, 'Model')) 
-            self.optmenu2.place(anchor = 'w', relx = 0.35, rely = 0.205)
-            self.optmenu2.configure(font = fsize_s)
+            self.optmenu2 = ttk.Combobox(
+                                        window,
+                                        values=self.RevModels,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu2.place(
+                                anchor='n', 
+                                relx = self.Placement['Optimization']['Combo1'][0], 
+                                rely = self.Placement['Optimization']['Combo1'][1]
+                                )
+            self.optmenu2.set(rmod_opt)
+            self.optmenu2.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
             self.tab_att_list.append('self.optmenu2')
 
             # Initialize Parameter List
@@ -156,19 +164,20 @@ def CreateModelTab(self,window,frmt):
 
         if len(self.IrrevModels) > 0:
             # Create the label
-            text_var = tk.StringVar()
-            text_var.set("Irreversible Model:")
-            self.desc3 = tk.Label(window, 
-                            textvariable=text_var, 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc3 = ttk.Label(
+                                window, 
+                                text= "Irreversible Model:", 
+                                anchor=tk.CENTER,       
+                                style = "Modern1.TLabel"
+                                )
+            self.desc3.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Label2'][0], 
+                            rely = self.Placement['Optimization']['Label2'][1]
                             )
-            self.desc3.place(anchor = 'w', relx = 0.525, rely = 0.205)
             self.tab_att_list.append('self.desc3')
 
             # Create the option variable
-            self.opt3 = tk.StringVar(window)
             irmod_opt = self.IrrevModels[0]
 
             # Check if previous data exists
@@ -179,10 +188,19 @@ def CreateModelTab(self,window,frmt):
                         irmod_opt = self.Compare['Model']['Irreversible Model Name']
 
             # Create the irreversible model drop down
-            self.opt3.set(irmod_opt) 
-            self.optmenu3 = tk.OptionMenu(window, self.opt3, *self.IrrevModels, command = lambda event:UpdateModelData(event, self, 1, 'Model')) 
-            self.optmenu3.place(anchor = 'w', relx = 0.65, rely = 0.205)
-            self.optmenu3.configure(font = fsize_s)
+            self.optmenu3 = ttk.Combobox(
+                                        window,
+                                        values=self.IrrevModels,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu3.place(
+                                anchor='n', 
+                                relx = self.Placement['Optimization']['Combo2'][0], 
+                                rely = self.Placement['Optimization']['Combo2'][1]
+                                )
+            self.optmenu3.set(irmod_opt)
+            self.optmenu3.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
             self.tab_att_list.append('self.optmenu3')
 
             # Initialize Parameter List
@@ -223,16 +241,30 @@ def CreateModelTab(self,window,frmt):
                     else:
                         self.sheet1_data = self.Compare['Model']['VE_Param']
 
+            if hasattr(self,"sheet1_data") == False:
+                self.sheet1_data = []
+
             # Set the columns
             Cols = ['Parameter', 'Units','Lower Bound','Initial Guess','Upper Bound','Active/Passive', 'COMPARE']
 
             # Create the table
-            self.sheet1 = tksheet.Sheet(window, total_rows = len(self.Params_VE), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 700, height = 400, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-            self.sheet1.place(anchor = 'n', relx = 0.245, rely = 0.33)
+            self.sheet1 = tksheet.Sheet(
+                                        window, 
+                                        total_rows = len(self.Params_VE), 
+                                        total_columns = len(Cols), 
+                                        headers = Cols,
+                                        width = self.Placement['Optimization']['Sheet1'][2], 
+                                        height = self.Placement['Optimization']['Sheet1'][3], 
+                                        show_x_scrollbar = False, 
+                                        show_y_scrollbar = True,
+                                        font = ("Segoe UI",self.Placement['Optimization']['Sheet1'][4],"normal"),
+                                        header_font = ("Segoe UI",self.Placement['Optimization']['Sheet1'][4],"bold")
+                                        )
+            self.sheet1.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Sheet1'][0], 
+                            rely = self.Placement['Optimization']['Sheet1'][1]
+                            )
             self.tab_att_list.append('self.sheet1')
             self.sheet1.change_theme("blue")
             self.sheet1.set_index_width(0)
@@ -313,13 +345,13 @@ def CreateModelTab(self,window,frmt):
             self.sheet1.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet1'))])
 
             # Set Column Widths
-            self.sheet1.column_width(column = 0, width = 85, redraw = True)
-            self.sheet1.column_width(column = 1, width = 60, redraw = True)
-            self.sheet1.column_width(column = 2, width = 100, redraw = True)
-            self.sheet1.column_width(column = 3, width = 100, redraw = True)
-            self.sheet1.column_width(column = 4, width = 100, redraw = True)
-            self.sheet1.column_width(column = 5, width = 110, redraw = True)
-            self.sheet1.column_width(column = 6, width = 95, redraw = True)
+            self.sheet1.column_width(column = 0, width = self.Placement['Optimization']['Sheet1'][5], redraw = True)
+            self.sheet1.column_width(column = 1, width = self.Placement['Optimization']['Sheet1'][6], redraw = True)
+            self.sheet1.column_width(column = 2, width = self.Placement['Optimization']['Sheet1'][7], redraw = True)
+            self.sheet1.column_width(column = 3, width = self.Placement['Optimization']['Sheet1'][8], redraw = True)
+            self.sheet1.column_width(column = 4, width = self.Placement['Optimization']['Sheet1'][9], redraw = True)
+            self.sheet1.column_width(column = 5, width = self.Placement['Optimization']['Sheet1'][10], redraw = True)
+            self.sheet1.column_width(column = 6, width = self.Placement['Optimization']['Sheet1'][11], redraw = True)
             self.sheet1.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
@@ -387,12 +419,15 @@ def CreateModelTab(self,window,frmt):
             # Update the Model Data
             UpdateModelData(None, self, 1, 'Model')
 
-        def VE_param(value):
+        def VE_param(values):
             #------------------------------------------------------------------
             #
             #   PURPOSE: Get List of of ViscoElastic Mechanisms.
             #
             #------------------------------------------------------------------
+
+            # Get the value
+            value = self.optmenu4.get()
 
             # Initialize Parameters
             self.Params_VE = []
@@ -434,6 +469,7 @@ def CreateModelTab(self,window,frmt):
                 # Delete sheet
                 self.sheet2.destroy()
                 del self.sheet2
+                
 
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
@@ -447,17 +483,30 @@ def CreateModelTab(self,window,frmt):
                     else:
                         self.sheet2_data = self.Compare['Model']['VP_Param']
 
+            if hasattr(self,"sheet2_data") == False:
+                self.sheet2_data = []
 
             # Set the columns
             Cols = ['Parameter', 'Units','Lower Bound','Initial Guess','Upper Bound','Active/Passive','COMPARE']
 
             # Create the table
-            self.sheet2 = tksheet.Sheet(window, total_rows = len(self.Params_VP), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 700, height = 400, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-            self.sheet2.place(anchor = 'n', relx = 0.75, rely = 0.33)
+            self.sheet2 = tksheet.Sheet(
+                                        window, 
+                                        total_rows = len(self.Params_VP), 
+                                        total_columns = len(Cols), 
+                                        headers = Cols,
+                                        width = self.Placement['Optimization']['Sheet2'][2], 
+                                        height = self.Placement['Optimization']['Sheet2'][3], 
+                                        show_x_scrollbar = False, 
+                                        show_y_scrollbar = True,
+                                        font = ("Segoe UI",self.Placement['Optimization']['Sheet2'][4],"normal"),
+                                        header_font = ("Segoe UI",self.Placement['Optimization']['Sheet2'][4],"bold")
+                                        )
+            self.sheet2.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Sheet2'][0], 
+                            rely = self.Placement['Optimization']['Sheet2'][1]
+                            )
             self.tab_att_list.append('self.sheet2')
             self.sheet2.change_theme("blue")
             self.sheet2.set_index_width(0)
@@ -537,13 +586,13 @@ def CreateModelTab(self,window,frmt):
             self.sheet2.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet2'))])
 
             # Set Column Widths
-            self.sheet2.column_width(column = 0, width = 85, redraw = True)
-            self.sheet2.column_width(column = 1, width = 65, redraw = True)
-            self.sheet2.column_width(column = 2, width = 100, redraw = True)
-            self.sheet2.column_width(column = 3, width = 100, redraw = True)
-            self.sheet2.column_width(column = 4, width = 100, redraw = True)
-            self.sheet2.column_width(column = 5, width = 110, redraw = True)
-            self.sheet2.column_width(column = 6, width = 95, redraw = True)
+            self.sheet2.column_width(column = 0, width = self.Placement['Optimization']['Sheet2'][5], redraw = True)
+            self.sheet2.column_width(column = 1, width = self.Placement['Optimization']['Sheet2'][6], redraw = True)
+            self.sheet2.column_width(column = 2, width = self.Placement['Optimization']['Sheet2'][7], redraw = True)
+            self.sheet2.column_width(column = 3, width = self.Placement['Optimization']['Sheet2'][8], redraw = True)
+            self.sheet2.column_width(column = 4, width = self.Placement['Optimization']['Sheet2'][9], redraw = True)
+            self.sheet2.column_width(column = 5, width = self.Placement['Optimization']['Sheet2'][10], redraw = True)
+            self.sheet2.column_width(column = 6, width = self.Placement['Optimization']['Sheet2'][11], redraw = True)
             self.sheet2.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
@@ -613,12 +662,15 @@ def CreateModelTab(self,window,frmt):
             UpdateModelData(None, self, 2, 'Model')
 
         # Get Number of ViscoPlastic Mechanisms
-        def VP_param(value):
+        def VP_param(values):
             #------------------------------------------------------------------
             #
             #   PURPOSE: Get List of of ViscoPlastic Mechanisms.
             #
             #------------------------------------------------------------------
+
+            # Get Value
+            value = self.optmenu5.get()
 
             # Initialize Parameters
             self.Params_VP = []
@@ -645,16 +697,19 @@ def CreateModelTab(self,window,frmt):
         self.VEMech = self.Compare['Model']['Model Info']['Reversible Mechanisms']
         if len(self.VEMech) > 0:
             # Create the label
-            self.desc4 = tk.Label(window, 
-                            text="Viscoelastic Mechanisms (M):", 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc4 = ttk.Label(
+                                window, 
+                                text="Viscoelastic Mechanisms (M):", 
+                                anchor=tk.CENTER,       
+                                style = "Modern1.TLabel"                   
+                                )
+            self.desc4.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Label3'][0], 
+                            rely = self.Placement['Optimization']['Label3'][1]
                             )
-            self.desc4.place(anchor = 'w', relx = 0.225, rely = 0.28)
             self.tab_att_list.append('self.desc4')
 
-            self.opt4 = tk.StringVar(window)
             ve_opt = self.VEMech[0]
 
             # Check if previous data exists
@@ -665,10 +720,19 @@ def CreateModelTab(self,window,frmt):
                         ve_opt = int(self.Compare['Model']['M'])
 
             # Create the drop down
-            self.opt4.set(ve_opt) 
-            self.optmenu4 = tk.OptionMenu(window, self.opt4, *self.VEMech, command = VE_param) 
-            self.optmenu4.place(anchor = 'w', relx = 0.4, rely = 0.28)
-            self.optmenu4.configure(font = fsize_s)
+            self.optmenu4 = ttk.Combobox(
+                                        window,
+                                        values=self.VEMech,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu4.place(
+                                anchor='n', 
+                                relx = self.Placement['Optimization']['Combo3'][0], 
+                                rely = self.Placement['Optimization']['Combo3'][1]
+                                )
+            self.optmenu4.set(ve_opt)
+            self.optmenu4.bind("<<ComboboxSelected>>",  VE_param)
             self.tab_att_list.append('self.optmenu4')
 
             # Get list of viscoelastic parameters
@@ -678,16 +742,19 @@ def CreateModelTab(self,window,frmt):
         self.VPMech = self.Compare['Model']['Model Info']['Irreversible Mechanisms']
         if len(self.VPMech) > 0:
             # Create the label
-            self.desc5 = tk.Label(window, 
+            self.desc5 = ttk.Label(window, 
                             text="Viscoplastic Mechanisms (N):", 
                             anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+                            style = "Modern1.TLabel"                  
                             )
-            self.desc5.place(anchor = 'w', relx = 0.525, rely = 0.28)
+            self.desc5.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Optimization']['Label4'][0], 
+                            rely = self.Placement['Optimization']['Label4'][1]
+                            )
             self.tab_att_list.append('self.desc5')
 
-            self.opt5 = tk.StringVar(window)
+            # Initialize Viscoplastic number of mechanisms
             vp_opt = self.VPMech[0]
 
             # Check if previous data exists
@@ -698,10 +765,19 @@ def CreateModelTab(self,window,frmt):
                         vp_opt = int(self.Compare['Model']['N'])
 
             # Create the drop down menu
-            self.opt5.set(vp_opt) 
-            self.optmenu5 = tk.OptionMenu(window, self.opt5, *self.VPMech, command = VP_param) 
-            self.optmenu5.place(anchor = 'w', relx = 0.7, rely = 0.28)
-            self.optmenu5.configure(font = fsize_s)
+            self.optmenu5 = ttk.Combobox(
+                                        window,
+                                        values=self.VEMech,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu5.place(
+                                anchor='n', 
+                                relx = self.Placement['Optimization']['Combo4'][0], 
+                                rely = self.Placement['Optimization']['Combo4'][1]
+                                )
+            self.optmenu5.set(ve_opt)
+            self.optmenu5.bind("<<ComboboxSelected>>",  VP_param)
             self.tab_att_list.append('self.optmenu5')
 
             # Get list of viscoplastic parameters
@@ -710,46 +786,83 @@ def CreateModelTab(self,window,frmt):
         # Create the bounds slider
         # -- Format slider text
         def update_value(value):
-            formatted_value = f"Bounds: ± {int(value)}%"  # Format to integer decimal places with %
+            formatted_value = f"Bounds: ± {str(int(float(value)))}%"  # Format to integer decimal places with %
             self.desc6.config(text=formatted_value)
 
         # -- Create the label
-        self.desc6 = tk.Label(window, 
+        self.desc6 = ttk.Label(window, 
                         text="Bounds: ± 5%", 
                         anchor=tk.CENTER,       
-                        bg=bg_color,                  
-                        font=(fontname, fsize_s),                    
+                        style = 'Modern1.TLabel'                  
                         )
-        self.desc6.place(anchor = 'w', relx = 0.825, rely = 0.205)
+        self.desc6.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Optimization']['Label5'][0], 
+                        rely = self.Placement['Optimization']['Label5'][1]
+                        )
         self.tab_att_list.append('self.desc6')
 
         # -- Create the slider
-        self.slider1 = tk.Scale(window, from_=5, to=50, orient=tk.HORIZONTAL, length=200, command = update_value, showvalue=False)
-        self.slider1.place(anchor = 'w', relx = 0.8, rely = 0.28)
+        self.slider1 = ttk.Scale(
+                                window, 
+                                from_=5, 
+                                to=50, 
+                                orient='horizontal',  
+                                length=self.Placement['Optimization']['Slider1'][2],
+                                style="Modern.Horizontal.TScale", 
+                                command = update_value, 
+                                )
+        self.slider1.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Optimization']['Slider1'][0], 
+                        rely = self.Placement['Optimization']['Slider1'][1]
+                        )
         self.tab_att_list.append('self.slider1')
 
-        # Local Formatting
-        starty = 0.895
 
         # Create the Load from Excel button
-        self.btn_load_db = tk.Button(window, text = "Load from Excel", command = lambda:self.load_from_db('Optimize'), 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_load_db.place(anchor = 'w', relx = self.startx+ self.delx*0, rely = starty)
+        self.btn_load_db = ttk.Button(
+                                    window, 
+                                    text = "Load from Excel", 
+                                    command = lambda:self.load_from_db('Optimize'), 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Optimization']['Button1'][2]
+                                    )
+        self.btn_load_db.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button1'][0], 
+                            rely = self.Placement['Optimization']['Button1'][1]
+                            )
         self.tab_att_list.append('self.btn_load_db')
 
         # Create button to view/delete models
-        self.btn_modlib = tk.Button(window, text = "Model Library", command = lambda : self.Model_Library('Optimize'), 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_modlib.place(anchor = 'w', relx = self.startx+ self.delx*1, rely = starty)
+        self.btn_modlib = ttk.Button(
+                                    window, 
+                                    text = "Model Library", 
+                                    command = lambda : self.Model_Library('Optimize'), 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Optimization']['Button2'][2]
+                                    )
+        self.btn_modlib.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button2'][0], 
+                            rely = self.Placement['Optimization']['Button2'][1]
+                            )
         self.tab_att_list.append('self.btn_modlib')
 
         # Create the Optimize button
-        self.btn_opt = tk.Button(window, text = "Optimize", command = self.optimizer, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_opt.place(anchor = 'w', relx = self.startx+ self.delx*2, rely = starty)
+        self.btn_opt = ttk.Button(
+                                window, 
+                                text = "Optimize", 
+                                command = self.optimizer, 
+                                style = "Modern3.TButton",
+                                width = self.Placement['Optimization']['Button3'][2]
+                                )
+        self.btn_opt.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button3'][0], 
+                            rely = self.Placement['Optimization']['Button3'][1]
+                            )
         self.tab_att_list.append('self.btn_opt')
 
         
@@ -800,10 +913,18 @@ def CreateModelTab(self,window,frmt):
             self.Compare['Model ID']= user_input
 
         # Create button to save a model
-        self.btn_savemod = tk.Button(window, text = "Save Model", command = save_model_local, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_savemod.place(anchor = 'w', relx = self.startx+ self.delx*3, rely = starty)
+        self.btn_savemod = ttk.Button(
+                                    window, 
+                                    text = "Save Model", 
+                                    command = save_model_local, 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Optimization']['Button4'][2]
+                                    )
+        self.btn_savemod.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button4'][0], 
+                            rely = self.Placement['Optimization']['Button4'][1]
+                            )
         self.tab_att_list.append('self.btn_savemod')
 
         def add_note():
@@ -827,13 +948,19 @@ def CreateModelTab(self,window,frmt):
                 root.title("Enter Model Notes") 
                 
                 # Create the label
-                ttk.Label(root, text="Enter Model Notes:", 
-                            font=(fontname, fsize_s)).place(anchor='n', relx = 0.5, rely = 0.1) 
+                ttk.Label(
+                        root, 
+                        text="Enter Model Notes:", 
+                        style = "Modern1.TLabel"
+                        ).place(anchor='n', relx = 0.5, rely = 0.1) 
                 
                 # Create the note area
-                text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, 
-                                                    width=40, height=8, 
-                                                    font=(fontname, fsize_s)) 
+                text_area = scrolledtext.ScrolledText(
+                                                    root, 
+                                                    wrap=tk.WORD, 
+                                                    width=40, 
+                                                    height=8, 
+                                                    font=("Segoe UI", 14)) 
                 text_area.place(anchor='c', relx = 0.5, rely = 0.5)
 
                 # Display any existing notes
@@ -864,10 +991,18 @@ def CreateModelTab(self,window,frmt):
                 root.protocol("WM_DELETE_WINDOW", lambda:on_closing_root(self))
 
         # Create button to add a note
-        self.btn_addnote = tk.Button(window, text = "Model Notes", command = add_note, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 12)
-        self.btn_addnote.place(anchor = 'w', relx = self.startx+ self.delx*0.25, rely = 0.275)
+        self.btn_addnote = ttk.Button(
+                                    window, 
+                                    text = "Model Notes", 
+                                    command = add_note, 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Optimization']['Button5'][2]
+                                    )
+        self.btn_addnote.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button5'][0], 
+                            rely = self.Placement['Optimization']['Button5'][1]
+                            )
         self.tab_att_list.append('self.btn_addnote')
 
         # Update Model Data
@@ -880,17 +1015,20 @@ def CreateModelTab(self,window,frmt):
             update_irreversible_table(self)
 
     # Create the label for Model Type
-    self.desc1 = tk.Label(window, 
-                     text="Select the Model:", 
-                     anchor=tk.CENTER,       
-                     bg=bg_color,                  
-                     font=(fontname, fsize_s),                    
+    self.desc1 = ttk.Label(
+                        window, 
+                        text="Select the Model:", 
+                        anchor=tk.CENTER,       
+                        style = "Modern1.TLabel"                   
+                        )
+    self.desc1.place(
+                    anchor = 'n', 
+                    relx = self.Placement['Optimization']['Label6'][0], 
+                    rely = self.Placement['Optimization']['Label6'][1]
                     )
-    self.desc1.place(anchor = 'w', relx = 0.025, rely = 0.205)
     self.loc_att_list.append('self.desc1')
 
-    # Create the model text variable
-    self.opt1 = tk.StringVar(window)
+    # Initialize the model option
     mod_opt = self.Models[0]
 
     # Check if previous value exists
@@ -901,9 +1039,18 @@ def CreateModelTab(self,window,frmt):
                 mod_opt = self.Compare['Model']['Model Name']
 
     # Create Option Menu for Model Type
-    self.opt1.set(mod_opt) 
-    self.optmenu1 = tk.OptionMenu(window, self.opt1, *self.Models, command= change_model) 
-    self.optmenu1.place(anchor = 'w', relx = 0.15, rely = 0.205)
-    self.optmenu1.configure(font = fsize_s)
+    self.optmenu1 = ttk.Combobox(
+                                window,
+                                values=self.Models,
+                                style="Modern.TCombobox",
+                                state="readonly"
+                                )
+    self.optmenu1.place(
+                        anchor='n', 
+                        relx = self.Placement['Optimization']['Combo5'][0], 
+                        rely = self.Placement['Optimization']['Combo5'][1]
+                        )
+    self.optmenu1.set(mod_opt)
+    self.optmenu1.bind("<<ComboboxSelected>>",  change_model)
     change_model(mod_opt)
     self.loc_att_list.append('self.optmenu1')
