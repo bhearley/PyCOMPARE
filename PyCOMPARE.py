@@ -1270,7 +1270,7 @@ class PY_COMPARE:
         DeleteLocal(self)
 
         # Create the Analyze Model page
-        CreateAnalysisTab(self,window,frmt)
+        CreateAnalysisTab(self,window)
 
     def cell_select_opt(self, response, tag):
         #--------------------------------------------------------------------------
@@ -1475,7 +1475,7 @@ class PY_COMPARE:
 
                 # Recreate teh Analysis Page
                 DeleteLocal(self)
-                CreateAnalysisTab(self,window,frmt)
+                CreateAnalysisTab(self,window)
         else:
             messagebox.showerror(message=msg)
 
@@ -1524,12 +1524,23 @@ class PY_COMPARE:
                     Cols = ['Name', 'Type', 'Reversible Model','Irreversible Model','Method']
 
                     # Create the table
-                    self.sheet_lib = tksheet.Sheet(root, total_rows = len(self.models), total_columns = len(Cols), 
-                                    headers = Cols,
-                                    width = 800, height = 600, show_x_scrollbar = False, show_y_scrollbar = True,
-                                    font = (fontname,12,"normal"),
-                                    header_font = (fontname,12,"bold"))
-                    self.sheet_lib.place(anchor = 'c', relx = 0.5, rely = 0.5)
+                    self.sheet_lib = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(self.models), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols,
+                                                width = 800, 
+                                                height = 600, 
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI",12,"normal"),
+                                                header_font = ("Segoe UI",12,"bold")
+                                                )
+                    self.sheet_lib.place(
+                                        anchor = 'c', 
+                                        relx = 0.5, 
+                                        rely = 0.5
+                                        )
                     self.sheet_lib.change_theme("blue")
                     self.sheet_lib.set_index_width(0)
            
@@ -1675,7 +1686,7 @@ class PY_COMPARE:
 
                             # Recreate Analysis Page
                             DeleteLocal(self)
-                            CreateAnalysisTab(self,window,frmt)
+                            CreateAnalysisTab(self,window)
 
                     def view_notes(self):
                         #----------------------------------------------------------
@@ -1715,15 +1726,30 @@ class PY_COMPARE:
                             root_v.title("Model Notes") 
                             
                             # Create the label
-                            ttk.Label(root_v, text="Model Notes:", 
-                                        font=(fontname, fsize_s)).place(anchor='n', relx = 0.5, rely = 0.1) 
+                            ttk.Label(
+                                    root_v, 
+                                    text="Model Notes:", 
+                                    font=('Segoe UI', 12)
+                                    ).place(
+                                            anchor='n', 
+                                            relx = 0.5, 
+                                            rely = 0.1
+                                            ) 
                             
                             # Create the note
-                            text_area = scrolledtext.ScrolledText(root_v, wrap=tk.WORD, 
-                                                                width=40, height=8, 
-                                                                font=(fontname, fsize_s)) 
+                            text_area = scrolledtext.ScrolledText(
+                                                                root_v, 
+                                                                wrap=tk.WORD, 
+                                                                width=40, 
+                                                                height=8, 
+                                                                font=("Segoe UI", 12)
+                                                                ) 
                             
-                            text_area.place(anchor='c', relx = 0.5, rely = 0.5)
+                            text_area.place(
+                                            anchor='c', 
+                                            relx = 0.5, 
+                                            rely = 0.5
+                                            )
                             text_area.insert(tk.END, note) 
                             text_area.config(state="disabled")
 
@@ -1890,7 +1916,7 @@ class PY_COMPARE:
                 ct = ct + 1
 
             # Write the NLP files
-            WriteNLP(temp_dir)
+            WriteNLP(temp_dir, 'Opt')
 
             # Run Compare
             command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
@@ -2142,7 +2168,7 @@ class PY_COMPARE:
                 ct = ct + 1
 
             # Write the NLP files
-            WriteNLP(temp_dir)
+            WriteNLP(temp_dir, 'Analy')
 
             # Run Compare
             command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
@@ -2210,6 +2236,7 @@ class PY_COMPARE:
                 # Calculate Error
                 err = float(line_out[line_exp[ct-1]].split(' ')[-1])
                 self.Compare['Prediction'][test]['Error'] = err
+                ct = ct+1
 
             messagebox.showinfo(message = 'Analysis Complete!')
         except:
@@ -2250,12 +2277,12 @@ class PY_COMPARE:
             del self.canvas
 
         # Create the plot
-        self.fig = Figure(figsize=(5,3.6), dpi = 125, constrained_layout = True)
+        self.fig = Figure(figsize=(self.Placement['Visualization']['Figure1'][2],self.Placement['Visualization']['Figure1'][3]), dpi = self.Placement['Visualization']['Figure1'][4], constrained_layout = True)
         self.plot1 = self.fig.add_subplot(111)
 
         # Get the arrays
-        x_val = self.opt1_viz.get()
-        y_val = self.opt2_viz.get()
+        x_val = self.optmenu1_viz.get()
+        y_val = self.optmenu2_viz.get()
 
         # X Value
         xp = None
@@ -2330,10 +2357,18 @@ class PY_COMPARE:
         # Format Toolbar
         self.toolbar.config(bg=bg_color)
         self.toolbar._message_label.config(background=bg_color)
-        self.toolbar.place(anchor = 'e', relx = 0.975, rely = 0.9)
+        self.toolbar.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Visualization']['Toolbar1'][0], 
+                        rely = self.Placement['Visualization']['Toolbar1'][1]
+                        )
 
         # Add the figure to the GUI
-        self.canvas.get_tk_widget().place(anchor = 'n', relx = 0.78, rely = 0.32)
+        self.canvas.get_tk_widget().place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Visualization']['Figure1'][0], 
+                                        rely = self.Placement['Visualization']['Figure1'][1]
+                                        )
         if 'self.canvas' not in self.tab_att_list:
             self.tab_att_list.append('self.canvas')
 
@@ -2633,15 +2668,30 @@ class PY_COMPARE:
                             reset_window()
 
                     # Create label
-                    self.comp_path = tk.Label(root, text="Compare Executable Path: " + self.Compare['Paths']['Compare Executable'] , 
-                                                font=(fontname, 10))
-                    self.comp_path.place(anchor='w', relx = 0.025, rely = 0.1)
+                    self.comp_path = ttk.Label( 
+                                            root, 
+                                            text="Compare Executable Path: " + self.Compare['Paths']['Compare Executable'] ,
+                                            style = "Modern2.TLabel",
+                                            )
+                    self.comp_path.place(
+                                        anchor='w', 
+                                        relx = 0.025, 
+                                        rely = 0.1
+                                        )
 
                     # Create button to edit path
-                    self.comp_path_btn = tk.Button(root, text = "Edit", command = lambda:set_comp_path(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
-                    self.comp_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.15)
+                    self.comp_path_btn = ttk.Button(
+                                                    root, 
+                                                    text = "Edit", 
+                                                    command = lambda:set_comp_path(self), 
+                                                    style = "Modern4.TButton",
+                                                    width = 10
+                                                    )
+                    self.comp_path_btn.place(
+                                            anchor = 'w', 
+                                            relx = 0.025, 
+                                            rely = 0.15
+                                            )
 
                     
                     # -- Model Library
@@ -2662,15 +2712,30 @@ class PY_COMPARE:
                             reset_window()
 
                     # Create the label
-                    self.mod_path = tk.Label(root, text="Available Models: " + self.Compare['Paths']['Model Library'] , 
-                                                font=(fontname, 10))
-                    self.mod_path.place(anchor='w', relx = 0.025, rely = 0.2)
+                    self.mod_path = ttk.Label(
+                                            root, 
+                                            text="Available Models: " + self.Compare['Paths']['Model Library'] , 
+                                            style = "Modern2.TLabel"
+                                            )
+                    self.mod_path.place(
+                                        anchor='w', 
+                                        relx = 0.025, 
+                                        rely = 0.2
+                                        )
 
                     # Create Button to edit the path
-                    self.mod_path_btn = tk.Button(root, text = "Edit", command = lambda:set_mod_path(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
-                    self.mod_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.25)
+                    self.mod_path_btn = ttk.Button(
+                                                root, 
+                                                text = "Edit", 
+                                                command = lambda:set_mod_path(self), 
+                                                style = "Modern4.TButton",
+                                                width = 10
+                                                )
+                    self.mod_path_btn.place(
+                                            anchor = 'w', 
+                                            relx = 0.025, 
+                                            rely = 0.25
+                                            )
                     
                     # -- Excel Import Template
                     def set_imp_path(self):
@@ -2711,21 +2776,39 @@ class PY_COMPARE:
                             shutil.copy(self.Compare['Paths']['Import Template'], file.name)
 
                     # Create the lable
-                    self.imp_path = tk.Label(root, text="Excel Import Template: " + self.Compare['Paths']['Import Template'] , 
-                                                font=(fontname, 10))
-                    self.imp_path.place(anchor='w', relx = 0.025, rely = 0.3)
+                    self.imp_path = ttk.Label(
+                                            root, 
+                                            text="Excel Import Template: " + self.Compare['Paths']['Import Template'] , 
+                                            style = "Modern2.TLabel")
+                    self.imp_path.place(
+                                        anchor='w', 
+                                        relx = 0.025, 
+                                        rely = 0.3
+                                        )
 
                     # Create button to edit the path
-                    self.imp_path_btn = tk.Button(root, text = "Edit", command = lambda:set_imp_path(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
+                    self.imp_path_btn = ttk.Button(
+                                                root, 
+                                                text = "Edit", 
+                                                command = lambda:set_imp_path(self), 
+                                                style = 'Modern4.TButton',
+                                                width = 10
+                                                )
                     self.imp_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.35)
 
                     # Create button to download file
-                    self.imp_dwnld_btn = tk.Button(root, text = "Download", command = lambda:download_imp(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
-                    self.imp_dwnld_btn.place(anchor = 'w', relx = 0.125, rely = 0.35)
+                    self.imp_dwnld_btn = ttk.Button(
+                                                root, 
+                                                text = "Download", 
+                                                command = lambda:download_imp(self), 
+                                                style = 'Modern4.TButton',
+                                                width = 10
+                                                )
+                    self.imp_dwnld_btn.place(
+                                            anchor = 'w', 
+                                            relx = 0.125, 
+                                            rely = 0.35
+                                            )
                     
                     # -- Excel Export Template
                     def set_exp_path(self):
@@ -2765,21 +2848,40 @@ class PY_COMPARE:
                             shutil.copy(self.Compare['Paths']['Export Template'], file.name)
 
                     # Create the label
-                    self.exp_path = tk.Label(root, text="Excel Export Template: " + self.Compare['Paths']['Export Template'] , 
-                                                font=(fontname, 10))
-                    self.exp_path.place(anchor='w', relx = 0.025, rely = 0.4)
+                    self.exp_path = ttk.Label(
+                                            root, 
+                                            text="Excel Export Template: " + self.Compare['Paths']['Export Template'] , 
+                                            style = 'Modern2.TLabel'
+                                            )
+                    self.exp_path.place(
+                                        anchor='w', 
+                                        relx = 0.025, 
+                                        rely = 0.4
+                                        )
 
                     # Create button to edit the path
-                    self.exp_path_btn = tk.Button(root, text = "Edit", command = lambda:set_exp_path(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
+                    self.exp_path_btn = ttk.Button(
+                                                root, 
+                                                text = "Edit", 
+                                                command = lambda:set_exp_path(self), 
+                                                style = "Modern4.TButton",
+                                                width = 10
+                                                )
                     self.exp_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.45)
 
                     # Create button to download the file
-                    self.exp_dwnld_btn = tk.Button(root, text = "Download", command = lambda:download_exp(self), 
-                                                font = (fontname, 10), bg = '#fc3d21', fg='white',
-                                                width = 10)
-                    self.exp_dwnld_btn.place(anchor = 'w', relx = 0.125, rely = 0.45)
+                    self.exp_dwnld_btn = ttk.Button(
+                                                root, 
+                                                text = "Download", 
+                                                command = lambda:download_exp(self), 
+                                                style = "Modern4.TButton",
+                                                width = 10
+                                                )
+                    self.exp_dwnld_btn.place(
+                                            anchor = 'w', 
+                                            relx = 0.125, 
+                                            rely = 0.45
+                                            )
                 
                 # Create the window
                 reset_window()

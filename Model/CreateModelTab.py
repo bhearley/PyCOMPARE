@@ -129,7 +129,7 @@ def CreateModelTab(self,window):
                             )
             self.tab_att_list.append('self.desc2')
 
-            # Create the option variable
+            # Initialize the model
             rmod_opt = self.RevModels[0]
 
             # Check if previous data exists
@@ -177,7 +177,7 @@ def CreateModelTab(self,window):
                             )
             self.tab_att_list.append('self.desc3')
 
-            # Create the option variable
+            # Initialize the irreversible model
             irmod_opt = self.IrrevModels[0]
 
             # Check if previous data exists
@@ -200,7 +200,7 @@ def CreateModelTab(self,window):
                                 rely = self.Placement['Optimization']['Combo2'][1]
                                 )
             self.optmenu3.set(irmod_opt)
-            self.optmenu3.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
+            self.optmenu3.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Model'))
             self.tab_att_list.append('self.optmenu3')
 
             # Initialize Parameter List
@@ -710,6 +710,7 @@ def CreateModelTab(self,window):
                             )
             self.tab_att_list.append('self.desc4')
 
+            # Initialize number of viscoelastic mechanisms
             ve_opt = self.VEMech[0]
 
             # Check if previous data exists

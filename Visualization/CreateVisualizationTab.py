@@ -11,6 +11,7 @@ def CreateVisualizationTab(self,window,frmt):
 
     import tkinter as tk
     from tkinter import messagebox
+    from tkinter import ttk
     import tksheet
 
     # Import Functions
@@ -107,36 +108,64 @@ def CreateVisualizationTab(self,window,frmt):
                     break
 
             # Create the X Option Menu
-            self.opt1_viz = tk.StringVar(window)
-            self.opt1_viz.set(self.plot_opts[idx1]) 
-            self.optmenu1_viz = tk.OptionMenu(window, self.opt1_viz, *self.plot_opts) 
-            self.optmenu1_viz.place(anchor = 'e', relx = 0.73, rely = 0.275)
-            self.optmenu1_viz.configure(font = fsize_s)
+            self.optmenu1_viz = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu1_viz.place(
+                                anchor='n', 
+                                relx = self.Placement['Visualization']['Combo1'][0], 
+                                rely = self.Placement['Visualization']['Combo1'][1]
+                                )
+            self.optmenu1_viz.set(self.plot_opts[idx1])
             self.tab_att_list.append('self.optmenu1_viz')
-            if 'self.optmenu1_viz' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu1_viz')
+
 
             # Create the vs Label
-            self.plot_label = tk.Label(window, text="vs", 
-                                        font=(fontname, fsize_s), background='white')
-            self.plot_label.place(anchor = 'e', relx = 0.765, rely = 0.275)
+            self.plot_label = ttk.Label(
+                                    window, 
+                                    text= "vs.", 
+                                    anchor=tk.CENTER,       
+                                    style = "Modern1.TLabel"
+                                    )
+            self.plot_label.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Visualization']['Label1'][0], 
+                            rely = self.Placement['Visualization']['Label1'][1]
+                            )
             self.tab_att_list.append('self.plot_label')
 
             # Create the Y Option Menu
-            self.opt2_viz = tk.StringVar(window)
-            self.opt2_viz.set(self.plot_opts[idx2]) 
-            self.optmenu2_viz = tk.OptionMenu(window, self.opt2_viz, *self.plot_opts) 
-            self.optmenu2_viz.place(anchor = 'e', relx = 0.87, rely = 0.275)
-            self.optmenu2_viz.configure(font = fsize_s)
+            self.optmenu2_viz = ttk.Combobox(
+                                        window,
+                                        values=self.plot_opts,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu2_viz.place(
+                                anchor='n', 
+                                relx = self.Placement['Visualization']['Combo2'][0], 
+                                rely = self.Placement['Visualization']['Combo2'][1]
+                                )
+            self.optmenu2_viz.set(self.plot_opts[idx2])
             self.tab_att_list.append('self.optmenu2_viz')
-            if 'self.optmenu1_viz' not in self.tab_att_list:
-                    self.tab_att_list.append('self.optmenu2_viz')
+
 
             # Create the plot button
-            self.btn_plot = tk.Button(window, text = "Plot", command = self.plotter_viz, 
-                                font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                width = 6, height = 1)
-            self.btn_plot.place(anchor = 'e', relx = 0.95, rely = 0.275)
+            self.btn_plot = ttk.Button(
+                                    window, 
+                                    text = "Plot", 
+                                    command = self.plotter_viz,
+                                    style = "Modern2.TButton",
+                                    width = self.Placement['Visualization']['Button1'][2]
+                                    )
+            self.btn_plot.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Visualization']['Button1'][0], 
+                                rely = self.Placement['Visualization']['Button1'][1]
+                                )
             self.tab_att_list.append('self.btn_plot')
 
             # Call the plotting function
@@ -149,9 +178,16 @@ def CreateVisualizationTab(self,window,frmt):
             self.char_label.destroy()
 
         # Create the label
-        self.char_label = tk.Label(window, text="Characterization Set:", 
-                                        font=(fontname, fsize_s), background='white')
-        self.char_label.place(anchor = 'w', relx = self.startx, rely = 0.22)
+        self.char_label = ttk.Label(
+                                    window, 
+                                    text="Characterization Set:", 
+                                    style = "Modern1.TLabel"
+                                    )
+        self.char_label.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Visualization']['Label2'][0], 
+                            rely = self.Placement['Visualization']['Label2'][1]
+                            )
         self.tab_att_list.append('self.char_label')
         self.loc_att_list.append('self.char_label')
         
@@ -162,12 +198,23 @@ def CreateVisualizationTab(self,window,frmt):
         Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Weight','Error']
 
         # Create the sheet
-        self.sheet_char_viz = tksheet.Sheet(window, total_rows = len(tests), total_columns = len(Cols), 
-                        headers = Cols,
-                        width = 800, height = 270, show_x_scrollbar = False, show_y_scrollbar = True,
-                        font = (fontname,12,"normal"),
-                        header_font = (fontname,12,"bold"))
-        self.sheet_char_viz.place(anchor = 'n', relx = 0.274, rely = 0.245)
+        self.sheet_char_viz = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(tests), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Visualization']['Sheet1'][2], 
+                                            height = self.Placement['Visualization']['Sheet1'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Visualization']['Sheet1'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Visualization']['Sheet1'][4],"bold")
+                                            )
+        self.sheet_char_viz.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Visualization']['Sheet1'][0], 
+                                rely = self.Placement['Visualization']['Sheet1'][1]
+                                )
 
         # Format the sheet
         self.tab_att_list.append('self.sheet_char_viz')
@@ -179,15 +226,15 @@ def CreateVisualizationTab(self,window,frmt):
         self.sheet_char_viz.popup_menu_add_command('View Data', lambda : view_data(self,'char'), table_menu = True, index_menu = True, header_menu = True)   
         
         # Set Column Widths
-        self.sheet_char_viz.column_width(column = 0, width = 90, redraw = True)
-        self.sheet_char_viz.column_width(column = 1, width = 80, redraw = True)
-        self.sheet_char_viz.column_width(column = 2, width = 90, redraw = True)
-        self.sheet_char_viz.column_width(column = 3, width = 90, redraw = True)
-        self.sheet_char_viz.column_width(column = 4, width = 90, redraw = True)
-        self.sheet_char_viz.column_width(column = 5, width = 100, redraw = True)
-        self.sheet_char_viz.column_width(column = 6, width = 90, redraw = True)
-        self.sheet_char_viz.column_width(column = 7, width = 70, redraw = True)
-        self.sheet_char_viz.column_width(column = 8, width = 70, redraw = True)
+        self.sheet_char_viz.column_width(column = 0, width = self.Placement['Visualization']['Sheet1'][5], redraw = True)
+        self.sheet_char_viz.column_width(column = 1, width = self.Placement['Visualization']['Sheet1'][6], redraw = True)
+        self.sheet_char_viz.column_width(column = 2, width = self.Placement['Visualization']['Sheet1'][7], redraw = True)
+        self.sheet_char_viz.column_width(column = 3, width = self.Placement['Visualization']['Sheet1'][8], redraw = True)
+        self.sheet_char_viz.column_width(column = 4, width = self.Placement['Visualization']['Sheet1'][9], redraw = True)
+        self.sheet_char_viz.column_width(column = 5, width = self.Placement['Visualization']['Sheet1'][10], redraw = True)
+        self.sheet_char_viz.column_width(column = 6, width = self.Placement['Visualization']['Sheet1'][11], redraw = True)
+        self.sheet_char_viz.column_width(column = 7, width = self.Placement['Visualization']['Sheet1'][12], redraw = True)
+        self.sheet_char_viz.column_width(column = 8, width = self.Placement['Visualization']['Sheet1'][13], redraw = True)
         self.sheet_char_viz.table_align(align = 'c',redraw=True)
 
         # Populate Data
@@ -216,9 +263,16 @@ def CreateVisualizationTab(self,window,frmt):
             self.ver_label.destroy()
 
         # Create the label
-        self.ver_label = tk.Label(window, text="Verification Set:", 
-                                        font=(fontname, fsize_s), background='white')
-        self.ver_label.place(anchor = 'w', relx = self.startx, rely = 0.605)
+        self.ver_label = ttk.Label(
+                                window, 
+                                text="Verification Set:", 
+                                style = "Modern1.TLabel"
+                                )
+        self.ver_label.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Visualization']['Label3'][0], 
+                            rely = self.Placement['Visualization']['Label3'][1]
+                            )
         self.tab_att_list.append('self.ver_label')
         self.loc_att_list.append('self.ver_label')
 
@@ -234,12 +288,23 @@ def CreateVisualizationTab(self,window,frmt):
         Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Error']
         
         # Create the sheet
-        self.sheet_ver_viz = tksheet.Sheet(window, total_rows = len(tests_ver), total_columns = len(Cols), 
-                        headers = Cols,
-                        width = 730, height = 240, show_x_scrollbar = False, show_y_scrollbar = True,
-                        font = (fontname,12,"normal"),
-                        header_font = (fontname,12,"bold"))
-        self.sheet_ver_viz.place(anchor = 'n', relx = 0.25, rely = 0.63)
+        self.sheet_ver_viz = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(tests_ver), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Visualization']['Sheet2'][2], 
+                                            height = self.Placement['Visualization']['Sheet2'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Visualization']['Sheet2'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Visualization']['Sheet2'][4],"bold")
+                                            )
+        self.sheet_ver_viz.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Visualization']['Sheet2'][0], 
+                                rely = self.Placement['Visualization']['Sheet2'][1]
+                                )
         self.tab_att_list.append('self.sheet_ver_viz')
 
         # Format the sheet
@@ -251,14 +316,14 @@ def CreateVisualizationTab(self,window,frmt):
         self.sheet_ver_viz.popup_menu_add_command('View Data', lambda : view_data(self,'ver'), table_menu = True, index_menu = True, header_menu = True)   
         
         # Set Column Widths
-        self.sheet_ver_viz.column_width(column = 0, width = 90, redraw = True)
-        self.sheet_ver_viz.column_width(column = 1, width = 80, redraw = True)
-        self.sheet_ver_viz.column_width(column = 2, width = 90, redraw = True)
-        self.sheet_ver_viz.column_width(column = 3, width = 90, redraw = True)
-        self.sheet_ver_viz.column_width(column = 4, width = 90, redraw = True)
-        self.sheet_ver_viz.column_width(column = 5, width = 100, redraw = True)
-        self.sheet_ver_viz.column_width(column = 6, width = 90, redraw = True)
-        self.sheet_ver_viz.column_width(column = 7, width = 70, redraw = True)
+        self.sheet_ver_viz.column_width(column = 0, width = self.Placement['Visualization']['Sheet2'][5], redraw = True)
+        self.sheet_ver_viz.column_width(column = 1, width = self.Placement['Visualization']['Sheet2'][6], redraw = True)
+        self.sheet_ver_viz.column_width(column = 2, width = self.Placement['Visualization']['Sheet2'][7], redraw = True)
+        self.sheet_ver_viz.column_width(column = 3, width = self.Placement['Visualization']['Sheet2'][8], redraw = True)
+        self.sheet_ver_viz.column_width(column = 4, width = self.Placement['Visualization']['Sheet2'][9], redraw = True)
+        self.sheet_ver_viz.column_width(column = 5, width = self.Placement['Visualization']['Sheet2'][10], redraw = True)
+        self.sheet_ver_viz.column_width(column = 6, width = self.Placement['Visualization']['Sheet2'][11], redraw = True)
+        self.sheet_ver_viz.column_width(column = 7, width = self.Placement['Visualization']['Sheet2'][12], redraw = True)
         self.sheet_ver_viz.table_align(align = 'c',redraw=True)
 
         # Populate Data

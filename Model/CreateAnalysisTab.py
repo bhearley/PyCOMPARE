@@ -5,7 +5,7 @@
 # PURPOSE: Create the Analyze Model tab. The Analyze Model tab allows users to define a model manually and evaluate.
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateAnalysisTab(self,window,frmt):
+def CreateAnalysisTab(self,window):
     # Import Modules
     import copy
     import json
@@ -20,11 +20,6 @@ def CreateAnalysisTab(self,window,frmt):
     # Import Functions
     from General.DeleteWidgets import DeleteTab
     from Model.UpdateModelData import UpdateModelData
-
-    #Unpack Formatting
-    bg_color = frmt[0] 
-    fontname = frmt[1]
-    fsize_s = frmt[2]
 
     # Initialize Model
     if 'Analysis' not in self.Compare.keys():
@@ -114,18 +109,20 @@ def CreateAnalysisTab(self,window,frmt):
         
         if len(self.RevModels) > 0:
             # Create the label
-            text_var = tk.StringVar()
-            text_var.set("Reversible Model:")
-            self.desc2 = tk.Label(window, 
-                            textvariable=text_var, 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc2 = ttk.Label(
+                                window, 
+                                text="Reversible Model:", 
+                                anchor=tk.CENTER,       
+                                style = 'Modern1.TLabel'                    
+                                )
+            self.desc2.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Label1'][0], 
+                            rely = self.Placement['Analysis']['Label1'][1]
                             )
-            self.desc2.place(anchor = 'w', relx = 0.225, rely = 0.205)
             self.tab_att_list.append('self.desc2')
 
-            self.opt2 = tk.StringVar(window)
+            # Initialize the model
             rmod_opt = self.RevModels[0]
 
             # Check if previous data exists
@@ -136,10 +133,19 @@ def CreateAnalysisTab(self,window,frmt):
                         rmod_opt = self.Compare['Analysis']['Reversible Model Name']
 
             # Create the reversible model drop down   
-            self.opt2.set(rmod_opt) 
-            self.optmenu2 = tk.OptionMenu(window, self.opt2, *self.RevModels, command = lambda event:UpdateModelData(event, self, 1, 'Analysis')) 
-            self.optmenu2.place(anchor = 'w', relx = 0.35, rely = 0.205)
-            self.optmenu2.configure(font = fsize_s)
+            self.optmenu2 = ttk.Combobox(
+                                        window,
+                                        values=self.RevModels,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu2.place(
+                                anchor='n', 
+                                relx = self.Placement['Analysis']['Combo1'][0], 
+                                rely = self.Placement['Analysis']['Combo1'][1]
+                                )
+            self.optmenu2.set(rmod_opt)
+            self.optmenu2.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Analysis'))
             self.tab_att_list.append('self.optmenu2')
 
             # Initialize Parameter List
@@ -151,18 +157,20 @@ def CreateAnalysisTab(self,window,frmt):
 
         if len(self.IrrevModels) > 0:
             # Create the label
-            text_var = tk.StringVar()
-            text_var.set("Irreversible Model:")
-            self.desc3 = tk.Label(window, 
-                            textvariable=text_var, 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc3 = ttk.Label(
+                                window, 
+                                text= "Irreversible Model:", 
+                                anchor=tk.CENTER,       
+                                style = "Modern1.TLabel"
+                                )
+            self.desc3.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Label2'][0], 
+                            rely = self.Placement['Analysis']['Label2'][1]
                             )
-            self.desc3.place(anchor = 'w', relx = 0.525, rely = 0.205)
             self.tab_att_list.append('self.desc3')
 
-            self.opt3 = tk.StringVar(window)
+            # Initialize the irreversible model
             irmod_opt = self.IrrevModels[0]
 
             # Check if previous data exists
@@ -173,10 +181,19 @@ def CreateAnalysisTab(self,window,frmt):
                         irmod_opt = self.Compare['Analysis']['Irreversible Model Name']
 
             # Create the irreversible model drop down
-            self.opt3.set(irmod_opt) 
-            self.optmenu3 = tk.OptionMenu(window, self.opt3, *self.IrrevModels, command = lambda event:UpdateModelData(event, self, 2, 'Analysis')) 
-            self.optmenu3.place(anchor = 'w', relx = 0.65, rely = 0.205)
-            self.optmenu3.configure(font = fsize_s)
+            self.optmenu3 = ttk.Combobox(
+                                        window,
+                                        values=self.IrrevModels,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu3.place(
+                                anchor='n', 
+                                relx = self.Placement['Analysis']['Combo2'][0], 
+                                rely = self.Placement['Analysis']['Combo2'][1]
+                                )
+            self.optmenu3.set(irmod_opt)
+            self.optmenu3.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Analysis'))
             self.tab_att_list.append('self.optmenu3')
 
             # Initialize Parameter List
@@ -216,16 +233,30 @@ def CreateAnalysisTab(self,window,frmt):
                     else:
                         self.sheet_anly1_data = self.Compare['Analysis']['VE_Param']
 
+            if hasattr(self,"sheet_anly1_data") == False:
+                self.sheet_anly1_data = []
+
             # Set the columns
             Cols = ['Parameter', 'Units', 'Value']
 
             # Create the table
-            self.sheet_anly1 = tksheet.Sheet(window, total_rows = len(self.Params_VE), total_columns = len(Cols), 
-                        headers = Cols,
-                        width = 300, height = 400, show_x_scrollbar = False, show_y_scrollbar = True,
-                        font = (fontname,12,"normal"),
-                        header_font = (fontname,12,"bold"))
-            self.sheet_anly1.place(anchor = 'n', relx = 0.325, rely = 0.33)
+            self.sheet_anly1 = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(self.Params_VE), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Analysis']['Sheet1'][2], 
+                                            height = self.Placement['Analysis']['Sheet1'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Analysis']['Sheet1'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Analysis']['Sheet1'][4],"bold")
+                                            )
+            self.sheet_anly1.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Sheet1'][0], 
+                            rely = self.Placement['Analysis']['Sheet1'][1]
+                            )
             self.tab_att_list.append('self.sheet_anly1')
             self.sheet_anly1.change_theme("blue")
             self.sheet_anly1.set_index_width(0)
@@ -259,9 +290,9 @@ def CreateAnalysisTab(self,window,frmt):
             self.sheet_anly1.extra_bindings([("cell_select", lambda event: self.cell_select_anly(event, 'sheet_anly1'))])
 
             # Set Column Widths
-            self.sheet_anly1.column_width(column = 0, width = 90, redraw = True)
-            self.sheet_anly1.column_width(column = 1, width = 90, redraw = True)
-            self.sheet_anly1.column_width(column = 2, width = 100, redraw = True)
+            self.sheet_anly1.column_width(column = 0, width = self.Placement['Analysis']['Sheet1'][5], redraw = True)
+            self.sheet_anly1.column_width(column = 1, width = self.Placement['Analysis']['Sheet1'][6], redraw = True)
+            self.sheet_anly1.column_width(column = 2, width = self.Placement['Analysis']['Sheet1'][7], redraw = True)
             self.sheet_anly1.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
@@ -369,16 +400,30 @@ def CreateAnalysisTab(self,window,frmt):
                     else:
                         self.sheet_anly2_data = self.Compare['Analysis']['VP_Param']
 
+            if hasattr(self,"sheet_anly2_data") == False:
+                self.sheet_anly2_data = []
+
             # Set the columns
             Cols = ['Parameter', 'Units','Value']
 
             # Create the table
-            self.sheet_anly2 = tksheet.Sheet(window, total_rows = len(self.Params_VP), total_columns = len(Cols), 
-                            headers = Cols,
-                            width = 300, height = 400, show_x_scrollbar = False, show_y_scrollbar = True,
-                            font = (fontname,12,"normal"),
-                            header_font = (fontname,12,"bold"))
-            self.sheet_anly2.place(anchor = 'n', relx = 0.625, rely = 0.33)
+            self.sheet_anly2 = tksheet.Sheet(
+                                            window, 
+                                            total_rows = len(self.Params_VP), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = self.Placement['Analysis']['Sheet2'][2], 
+                                            height = self.Placement['Analysis']['Sheet2'][3], 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",self.Placement['Analysis']['Sheet2'][4],"normal"),
+                                            header_font = ("Segoe UI",self.Placement['Analysis']['Sheet2'][4],"bold")
+                                            )
+            self.sheet_anly2.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Sheet2'][0], 
+                            rely = self.Placement['Analysis']['Sheet2'][1]
+                            )
             self.tab_att_list.append('self.sheet_anly2')
             self.sheet_anly2.change_theme("blue")
             self.sheet_anly2.set_index_width(0)
@@ -412,9 +457,9 @@ def CreateAnalysisTab(self,window,frmt):
             self.sheet_anly2.extra_bindings([("cell_select", lambda event: self.cell_select_anly(event, 'sheet_anly2'))])
 
             # Set Column Widths
-            self.sheet_anly2.column_width(column = 0, width = 90, redraw = True)
-            self.sheet_anly2.column_width(column = 1, width = 90, redraw = True)
-            self.sheet_anly2.column_width(column = 2, width = 100, redraw = True)
+            self.sheet_anly2.column_width(column = 0, width = self.Placement['Analysis']['Sheet2'][5], redraw = True)
+            self.sheet_anly2.column_width(column = 1, width = self.Placement['Analysis']['Sheet2'][6], redraw = True)
+            self.sheet_anly2.column_width(column = 2, width = self.Placement['Analysis']['Sheet2'][7], redraw = True)
             self.sheet_anly2.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
@@ -495,16 +540,20 @@ def CreateAnalysisTab(self,window,frmt):
         self.VEMech = self.Compare['Analysis']['Model Info']['Reversible Mechanisms']
         if len(self.VEMech) > 0:
             # Create the label
-            self.desc4 = tk.Label(window, 
-                            text="Viscoelastic Mechanisms (M):", 
-                            anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+            self.desc4 = ttk.Label(
+                                window, 
+                                text="Viscoelastic Mechanisms (M):", 
+                                anchor=tk.CENTER,       
+                                style = "Modern1.TLabel"                   
+                                )
+            self.desc4.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Label3'][0], 
+                            rely = self.Placement['Analysis']['Label3'][1]
                             )
-            self.desc4.place(anchor = 'w', relx = 0.225, rely = 0.28)
             self.tab_att_list.append('self.desc4')
 
-            self.opt4 = tk.StringVar(window)
+            # Initialize number of viscoelastic mechanisms
             ve_opt = self.VEMech[0]
 
             # Check if previous data exists
@@ -515,10 +564,19 @@ def CreateAnalysisTab(self,window,frmt):
                         ve_opt = int(self.Compare['Analysis']['M'])
 
             # Create the drop down
-            self.opt4.set(ve_opt) 
-            self.optmenu4 = tk.OptionMenu(window, self.opt4, *self.VEMech, command = VE_param) 
-            self.optmenu4.place(anchor = 'w', relx = 0.4, rely = 0.28)
-            self.optmenu4.configure(font = fsize_s)
+            self.optmenu4 = ttk.Combobox(
+                                        window,
+                                        values=self.VEMech,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu4.place(
+                                anchor='n', 
+                                relx = self.Placement['Analysis']['Combo3'][0], 
+                                rely = self.Placement['Analysis']['Combo3'][1]
+                                )
+            self.optmenu4.set(ve_opt)
+            self.optmenu4.bind("<<ComboboxSelected>>",  VE_param)
             self.tab_att_list.append('self.optmenu4')
 
             # Get list of viscoelastic parameters
@@ -528,57 +586,83 @@ def CreateAnalysisTab(self,window,frmt):
         self.VPMech = self.Compare['Analysis']['Model Info']['Irreversible Mechanisms']
         if len(self.VPMech) > 0:
             # Create the label
-            self.desc5 = tk.Label(window, 
+            self.desc5 = ttk.Label(window, 
                             text="Viscoplastic Mechanisms (N):", 
                             anchor=tk.CENTER,       
-                            bg=bg_color,                  
-                            font=(fontname, fsize_s),                    
+                            style = "Modern1.TLabel"                  
                             )
-            self.desc5.place(anchor = 'w', relx = 0.525, rely = 0.28)
+            self.desc5.place(
+                            anchor = 'n', 
+                            relx = self.Placement['Analysis']['Label4'][0], 
+                            rely = self.Placement['Analysis']['Label4'][1]
+                            )
             self.tab_att_list.append('self.desc5')
 
-            self.opt5 = tk.StringVar(window)
+            # Initialize Viscoplastic number of mechanisms
             vp_opt = self.VPMech[0]
 
-            # Check if previous data exists
-            if 'Analysis' in list(self.Compare.keys()):
-                # Set the reversible model type
-                if 'N' in list(self.Compare['Analysis'].keys()):
-                    if int(self.Compare['Analysis']['N']) in self.VPMech:
-                        vp_opt = int(self.Compare['Analysis']['N'])
-
             # Create the drop down menu
-            self.opt5.set(vp_opt) 
-            self.optmenu5 = tk.OptionMenu(window, self.opt5, *self.VPMech, command = VP_param) 
-            self.optmenu5.place(anchor = 'w', relx = 0.7, rely = 0.28)
-            self.optmenu5.configure(font = fsize_s)
+            self.optmenu5 = ttk.Combobox(
+                                        window,
+                                        values=self.VEMech,
+                                        style="Modern.TCombobox",
+                                        state="readonly"
+                                        )
+            self.optmenu5.place(
+                                anchor='n', 
+                                relx = self.Placement['Analysis']['Combo4'][0], 
+                                rely = self.Placement['Analysis']['Combo4'][1]
+                                )
+            self.optmenu5.set(ve_opt)
+            self.optmenu5.bind("<<ComboboxSelected>>",  VP_param)
             self.tab_att_list.append('self.optmenu5')
 
             # Get list of viscoplastic parameters
             VP_param(vp_opt)
 
-        # Local Formatting
-        starty = 0.895
-
         # Create the Load from Database button
-        self.btn_load_db = tk.Button(window, text = "Load from Excel", command = lambda:self.load_from_db('Analysis'), 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_load_db.place(anchor = 'w', relx = self.startx+ self.delx*0, rely = starty)
+        self.btn_load_db = ttk.Button(
+                                    window, 
+                                    text = "Load from Excel", 
+                                    command = lambda:self.load_from_db('Analysis'), 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Analysis']['Button1'][2]
+                                    )
+        self.btn_load_db.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['Button1'][0], 
+                            rely = self.Placement['Analysis']['Button1'][1]
+                            )
         self.tab_att_list.append('self.btn_load_db')
 
         # Create button to view/delete models
-        self.btn_modlib = tk.Button(window, text = "Model Library", command = lambda : self.Model_Library('Analysis'), 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_modlib.place(anchor = 'w', relx = self.startx+ self.delx*1, rely = starty)
+        self.btn_modlib = ttk.Button(
+                                    window, 
+                                    text = "Model Library", 
+                                    command = lambda : self.Model_Library('Analysis'), 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Analysis']['Button2'][2]
+                                    )
+        self.btn_modlib.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['Button2'][0], 
+                            rely = self.Placement['Analysis']['Button2'][1]
+                            )
         self.tab_att_list.append('self.btn_modlib')
 
         # Create the Optimize button
-        self.btn_anly = tk.Button(window, text = "Analyze", command = self.analyze, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_anly.place(anchor = 'w', relx = self.startx+ self.delx*2, rely = starty)
+        self.btn_anly = ttk.Button(
+                                window, 
+                                text = "Analyze", 
+                                command = self.analyze, 
+                                style = "Modern3.TButton",
+                                width = self.Placement['Analysis']['Button3'][2]
+                                )
+        self.btn_anly.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['Button3'][0], 
+                            rely = self.Placement['Analysis']['Button3'][1]
+                            )
         self.tab_att_list.append('self.btn_anly')
 
         def save_model_local():
@@ -612,10 +696,18 @@ def CreateAnalysisTab(self,window,frmt):
             self.Compare['Model ID'] = user_input
 
         # Create button to save a model
-        self.btn_savemod = tk.Button(window, text = "Save Model", command = save_model_local, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 18)
-        self.btn_savemod.place(anchor = 'w', relx = self.startx+ self.delx*3, rely = starty)
+        self.btn_savemod = ttk.Button(
+                                    window, 
+                                    text = "Save Model", 
+                                    command = save_model_local, 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Analysis']['Button4'][2]
+                                    )
+        self.btn_savemod.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['Button4'][0], 
+                            rely = self.Placement['Analysis']['Button4'][1]
+                            )
         self.tab_att_list.append('self.btn_savemod')
 
         def add_note():
@@ -639,13 +731,19 @@ def CreateAnalysisTab(self,window,frmt):
                 root.title("Enter Model Notes") 
                 
                 # Create the label
-                ttk.Label(root, text="Enter Model Notes:", 
-                            font=(fontname, fsize_s)).place(anchor='n', relx = 0.5, rely = 0.1) 
+                ttk.Label(
+                        root, 
+                        text="Enter Model Notes:", 
+                        style = "Modern1.TLabel"
+                        ).place(anchor='n', relx = 0.5, rely = 0.1) 
                 
                 # Create the note area
-                text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, 
-                                                    width=40, height=8, 
-                                                    font=(fontname, fsize_s))           
+                text_area = scrolledtext.ScrolledText(
+                                                    root, 
+                                                    wrap=tk.WORD, 
+                                                    width=40, 
+                                                    height=8, 
+                                                    font=("Segoe UI", 14)) 
                 text_area.place(anchor='c', relx = 0.5, rely = 0.5)
 
                 # Display any existing notes
@@ -664,7 +762,7 @@ def CreateAnalysisTab(self,window,frmt):
 
                     # Save the note
                     try:
-                        self.Compare['Anlaysis']['Note'] = text_area.get("1.0",'end-1c')
+                        self.Compare['Analysis']['Note'] = text_area.get("1.0",'end-1c')
                     except:
                         pass
 
@@ -677,10 +775,18 @@ def CreateAnalysisTab(self,window,frmt):
 
 
         # Create button to add a note
-        self.btn_addnote = tk.Button(window, text = "Model Notes", command = add_note, 
-                                    font = (fontname, fsize_s), bg = '#fc3d21', fg='white',
-                                    width = 12)
-        self.btn_addnote.place(anchor = 'w', relx = self.startx+ self.delx*0.25, rely = 0.275)
+        self.btn_addnote = ttk.Button(
+                                    window, 
+                                    text = "Model Notes", 
+                                    command = add_note, 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Analysis']['Button5'][2]
+                                    )
+        self.btn_addnote.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['Button5'][0], 
+                            rely = self.Placement['Analysis']['Button5'][1]
+                            )
         self.tab_att_list.append('self.btn_addnote')
 
         # Update Model Data
@@ -692,17 +798,21 @@ def CreateAnalysisTab(self,window,frmt):
         if len(self.Compare['Analysis']['Model Info']['Irreversible Models']) > 0:
             update_irreversible_table(self)
 
-    # Create label for Model Type
-    self.desc1 = tk.Label(window, 
-                     text="Select the Model:", 
-                     anchor=tk.CENTER,       
-                     bg=bg_color,                  
-                     font=(fontname, fsize_s),                    
+    # Create the label for Model Type
+    self.desc1 = ttk.Label(
+                        window, 
+                        text="Select the Model:", 
+                        anchor=tk.CENTER,       
+                        style = "Modern1.TLabel"                   
+                        )
+    self.desc1.place(
+                    anchor = 'n', 
+                    relx = self.Placement['Analysis']['Label6'][0], 
+                    rely = self.Placement['Analysis']['Label6'][1]
                     )
-    self.desc1.place(anchor = 'w', relx = 0.025, rely = 0.205)
     self.loc_att_list.append('self.desc1')
 
-    self.opt1 = tk.StringVar(window)
+    # Initialize the model option
     mod_opt = self.Models[0]
 
     # Check if previous value exists
@@ -712,10 +822,19 @@ def CreateAnalysisTab(self,window,frmt):
             if self.Compare['Analysis']['Model Name'] in self.Models:
                 mod_opt = self.Compare['Analysis']['Model Name']
 
-    # Create Option Menu for Model Type
-    self.opt1.set(mod_opt) 
-    self.optmenu1 = tk.OptionMenu(window, self.opt1, *self.Models, command= change_model) 
-    self.optmenu1.place(anchor = 'w', relx = 0.15, rely = 0.205)
-    self.optmenu1.configure(font = fsize_s)
+     # Create Option Menu for Model Type
+    self.optmenu1 = ttk.Combobox(
+                                window,
+                                values=self.Models,
+                                style="Modern.TCombobox",
+                                state="readonly"
+                                )
+    self.optmenu1.place(
+                        anchor='n', 
+                        relx = self.Placement['Analysis']['Combo5'][0], 
+                        rely = self.Placement['Analysis']['Combo5'][1]
+                        )
+    self.optmenu1.set(mod_opt)
+    self.optmenu1.bind("<<ComboboxSelected>>",  change_model)
     change_model(mod_opt)
     self.loc_att_list.append('self.optmenu1')

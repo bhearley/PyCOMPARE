@@ -118,6 +118,15 @@ def GetStyles(self):
                         padding=0
                         )
     
+    # -- Label 2
+    self.style.configure(
+                        "Modern2.TLabel",
+                        foreground="black",
+                        background="white",
+                        font=("Segoe UI", 10),
+                        padding=0
+                        )
+    
     # Scale Style
     self.style.configure(
                         "Modern.Horizontal.TScale",
