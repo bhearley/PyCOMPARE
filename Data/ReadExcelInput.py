@@ -82,7 +82,7 @@ def ReadExcelInput(df):
     if pd.isna(df.values[2][4]) == False:
         i = 2
         while pd.isna(df.values[i][4]) == False:
-            data['load_dir'].append(df.values[i][5])
+            data['load_dir'].append(int(df.values[i][5]))
             if df.values[i][6] == 'Strain':
                 data['control'].append(df.values[i][6])
                 data['load_rate'].append([df.values[i][7],'1/s'])

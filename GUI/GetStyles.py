@@ -108,6 +108,12 @@ def GetStyles(self):
                         selectforeground=[("active", "black"), ("readonly", "black")]  
                  )
     
+    # Frame
+    self.style.configure(
+                        'White.TFrame',
+                        background = 'white'
+                        )
+    
     # Label
     # -- Label 1
     self.style.configure(
@@ -127,6 +133,23 @@ def GetStyles(self):
                         padding=0
                         )
     
+    # -- Label 2
+    self.style.configure(
+                        "Modern3.TLabel",
+                        foreground="black",
+                        background="white",
+                        font=("Segoe UI", 12),
+                        padding=0
+                        )
+    
+    # Progress Bar
+    self.style.configure(
+                        "Modern.Horizontal.TProgressbar",
+                        thickness=20,             
+                        troughcolor="#d3d3d3",    
+                        background="#0b3d91",     
+                        )
+    
     # Scale Style
     self.style.configure(
                         "Modern.Horizontal.TScale",
@@ -134,4 +157,13 @@ def GetStyles(self):
                         background="white",
                         borderwidth=1,
                         relief='rasied'
+                        )
+
+    # Scrollbar Style
+    self.style.configure(
+                        "Vertical.TScrollbar",
+                        background="#0b3d91",
+                        troughcolor="#d9d9d9",
+                        bordercolor="#cccccc",
+                        arrowcolor="#d9d9d9"#"#0b3d91",
                         )
