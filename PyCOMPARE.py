@@ -12,6 +12,7 @@
 # Import Modules
 import copy
 import json
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.ticker import ScalarFormatter
@@ -25,6 +26,7 @@ import pickle
 from PIL import ImageTk, Image
 from scipy.interpolate import CubicSpline
 import shutil
+import threading
 import tkinter as tk
 from tkinter import filedialog 
 from tkinter import messagebox
@@ -82,15 +84,15 @@ class PY_COMPARE:
         global window, frmt
 
         #Create Background Window
+        win_size = '1536x960'
         window = tk.Tk()
         window.title("PyCOMPARE")
-        window.state('zoomed')
+        window.geometry(win_size)
         window.configure(bg='white')
+        window.resizable(False, False)
 
         # Get Placement
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        Placements(self, str(screen_width) + "x" + str(screen_height))
+        Placements(self, win_size)
 
         # Get Styles
         GetStyles(self)
@@ -416,8 +418,8 @@ class PY_COMPARE:
                 start_idx = 0
             else:
                 start_idx = int(self.Compare['Data'][self.test_name]['Stage Index'][i-1])
-            self.plot1.plot(x[start_idx:int(self.Compare['Data'][self.test_name]['Stage Index'][i])],
-                            y[start_idx:int(self.Compare['Data'][self.test_name]['Stage Index'][i])],
+            self.plot1.plot(x[start_idx:int(self.Compare['Data'][self.test_name]['Stage Index'][i])+1],
+                            y[start_idx:int(self.Compare['Data'][self.test_name]['Stage Index'][i])+1],
                             label=self.Compare['Data'][self.test_name]['Stage Type'][i])
 
         # Plot Reduced Data Points on the Characterization Tab
@@ -734,16 +736,19 @@ class PY_COMPARE:
             if self.Compare['Data'][test]['Stage Type'][i] == 'Tensile':
                 x = self.Compare['Data'][test]['Strain'][load_dir][sindex:eindex]
                 y = self.Compare['Data'][test]['Stress'][load_dir][sindex:eindex]
+                time_flag = 0
 
             # - Creep -> Strain vs Time
             if self.Compare['Data'][test]['Stage Type'][i] == 'Creep':
                 x = self.Compare['Data'][test]['Time'][sindex:eindex]
                 y = self.Compare['Data'][test]['Strain'][load_dir][sindex:eindex]
+                time_flag = 1
 
             # - Relaxation -> Stress vs Time
             if self.Compare['Data'][test]['Stage Type'][i] == 'Relaxation':
                 x = self.Compare['Data'][test]['Time'][sindex:eindex]
                 y = self.Compare['Data'][test]['Strain'][load_dir][sindex:eindex]
+                time_flag = 1
 
             # Reduce and Smooth Data with Cubic Spline
             xall = x
@@ -752,7 +757,7 @@ class PY_COMPARE:
             y = [yall[0]]
             ct = 1
             while ct < len(xall) -1:
-                if self.Compare['Data'][test]['Load Rate'][i][0] >= 0:
+                if self.Compare['Data'][test]['Load Rate'][i][0] >= 0 or time_flag == 1:
                     if xall[ct] > x[-1]:
                         x.append(xall[ct])
                         y.append(yall[ct])
@@ -1280,6 +1285,18 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
+        # Try Deselecting from other table
+        if tag == 'sheet1':
+            try:
+                self.sheet2.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet2':
+            try:
+                self.sheet1.deselect("all", redraw=True)
+            except:
+                pass
+
         # Define the table
         table_name = "self." + tag
 
@@ -1295,6 +1312,8 @@ class PY_COMPARE:
                 self.sheet_tag = tag
                 eval(table_name).enable_bindings(("edit_cell"))
                 eval(table_name).extra_bindings([("edit_cell", self.save_model)])
+                
+                eval(table_name).bind("<<SheetCellEdited>>", self.on_cell_edited)
 
                 # Check bounds
                 tags = ['sheet1', 'sheet2']
@@ -1319,6 +1338,9 @@ class PY_COMPARE:
                             except:
                                 pass
             eval(table_name).redraw()
+
+    def on_cell_edited(evet):
+        print("Cell was edited")
 
     def save_model(self, response):
         #--------------------------------------------------------------------------
@@ -1388,6 +1410,18 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
+        # Try Deselecting from other table
+        if tag == 'sheet_anly1':
+            try:
+                self.sheet_anly2.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_anly2':
+            try:
+                self.sheet_anly1.deselect("all", redraw=True)
+            except:
+                pass
+        
         # Define the table
         table_name = "self." + tag
 
@@ -1900,6 +1934,10 @@ class PY_COMPARE:
             # Copy the executable
             shutil.copy(self.Compare['Paths']['Compare Executable'], temp_dir)
 
+        except:
+            messagebox.showerror(message = 'Unable to clear TEMP directory - clear manually.')
+
+        try:
             # Determine Model Type
             if self.Compare['Model']['Model Name'] == 'GVIPS':
                 if self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic' and self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
@@ -1907,7 +1945,10 @@ class PY_COMPARE:
                     # Write the DGS file
                     mod, Param, Param_U, Param_N = WriteDSG_GVIPS_OPT_IN(self, temp_dir)
 
+        except:
+            messagebox.showerror(message = 'Error writing DSG file.')
 
+        try:
             # Write the Simulation files
             ct = 1
             sim_tests = list(self.Compare['Characterization'].keys())
@@ -1915,13 +1956,83 @@ class PY_COMPARE:
                 WriteSIM(self, self.Compare['Characterization'][sim_test], temp_dir, ct, mod, Param)
                 ct = ct + 1
 
+        except:
+            messagebox.showerror(message = 'Error Writing SIM files.')
+
+        try:
             # Write the NLP files
             WriteNLP(temp_dir, 'Opt')
 
-            # Run Compare
-            command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
-            os.system(command)
+        except:
+            messagebox.showerror(message = 'Error Writing NLP file.')
 
+        try:
+            # Run Compare
+            def run_cmd_opt(callback, temp_dir):
+
+                command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
+                os.system(command)
+            
+                # Notify when done
+                callback()
+            
+            # Function to display progress bar while running
+            def run_compare_opt(self):
+
+                # Create the window
+                loading = tk.Toplevel(window)
+                loading.title("Running Compare")
+                loading.geometry("300x100")
+                loading.resizable(False, False)
+                loading.configure(bg='white')
+                loading.grab_set()  
+
+                # Function for progress bar Exit Protocol
+                def on_closing_saving(self):
+
+                    # Don't allow exit while saving
+                    return
+                
+                # Create the window exit protocal
+                loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
+
+                # Create the loading label
+                ttk.Label(
+                        loading, 
+                        text="Running COMPARE - Please Wait", 
+                        style = "Modern2.TLabel"
+                        ).pack(pady=10)
+
+                # Create the progress bar
+                pb = ttk.Progressbar(
+                                    loading, 
+                                    mode='indeterminate',
+                                    style = "Modern.Horizontal.TProgressbar"
+                                    )
+                pb.pack(fill='x', padx=20, pady=10)
+                pb.start(10)
+
+                # Function to close window when task is completed
+                def on_task_done():
+
+                    # Stop Progress bar
+                    pb.stop()
+
+                    # Destroy Window
+                    loading.destroy()
+
+                # Begin save on background thread
+                threading.Thread(target=run_cmd_opt, args=(on_task_done,temp_dir), daemon=True).start()
+
+                # Wait until loading window is closed
+                window.wait_window(loading)
+
+            # Start Optmization
+            run_compare_opt(self)
+        except:
+            messagebox.showerror(message = 'Error running COMPARE.')
+
+        try:
             # Read Values
             Vals=  []
             with open(os.path.join(temp_dir,"final.val"), "r") as file:
@@ -1986,13 +2097,13 @@ class PY_COMPARE:
                     else:
                         save_flag = 1
 
+                    # Write model data to binary in the mode library
+                    json_string = json.dumps(self.Compare['Model'])
+                    binary_data = json_string.encode('utf-8')
+                    self.Compare['Model Library'][user_input] = binary_data
+
                 # Set the model name
                 self.Compare['Model ID'] = user_input
-
-            # Save to binary in the model library
-            json_string = json.dumps(self.Compare['Model'])
-            binary_data = json_string.encode('utf-8')
-            self.Compare['Model Library'][self.Compare['Model ID']] = binary_data
 
             # Set model status to 1
             self.Compare['Model']['Status'] = 1
@@ -2003,14 +2114,22 @@ class PY_COMPARE:
             line_ct = 1
             line_exp = []
             with open(out_file, "r") as file:
-                    for line in file:
-                        line = line.strip()
-                        line_out.append(line)
-                        if "Experiment number:" in line:
-                            line_exp.append(line_ct+4)
-                        line_ct = line_ct + 1
+                for line in file:
+                    line = line.strip()
+                    line_out.append(line)
+                    if "Experiment number:" in line:
+                        line_exp.append(line_ct+4)
+                    line_ct = line_ct + 1
 
-            
+            # Get the Global Error
+            with open(out_file, "r") as file:
+                for line in file:
+                    line = line.strip()
+                    line_out.append(line)
+                    if "FINAL CONVERGENCE ANALYSIS" in line:
+                        self.Compare['Global Error'] = float(line_out[line_out.index(line)+2].split('=')[1].replace('D','E'))
+
+        
             # Evaluate all tests in the characterization set
             tests = list(self.Compare['Characterization'].keys())
             self.Compare['Prediction'] = dict.fromkeys(self.Compare['Data'])
@@ -2062,7 +2181,7 @@ class PY_COMPARE:
 
             messagebox.showinfo(message = 'Optimization Complete!')
         except:
-            messagebox.showerror(message = 'Optimization Failed')
+            messagebox.showerror(message = 'Error reading output data from COMPARE.')
 
     def analyze(self):
         #--------------------------------------------------------------------------
@@ -2102,7 +2221,7 @@ class PY_COMPARE:
         else:
             messagebox.showinfo(message=msg)
 
-    def run_compare_anly(self, tests):
+    def run_compare_anly(self, tests, flag = 0):
         #--------------------------------------------------------------------------
         #
         #   PURPOSE: Run COMPARE Analysis.
@@ -2115,6 +2234,13 @@ class PY_COMPARE:
                 data = copy.deepcopy(self.Compare['Model'])
                 if 'Analysis' not in self.Compare.keys():                    
                     self.Compare['Analysis'] = data
+
+                # Reset Model Names and Number of Mechanisms
+                self.Compare['Analysis']['Reversible Model Name'] = data['Reversible Model Name']
+                self.Compare['Analysis']['Irreversible Model Name'] = data['Irreversible Model Name']
+                self.Compare['Analysis']['M'] = data['M']
+                self.Compare['Analysis']['N'] = data['N']
+                
                 # Reformat Parameters
                 if 'VE_Param' in list(data.keys()):
                     self.Compare['Analysis']['VE_Param'] = []
@@ -2131,8 +2257,9 @@ class PY_COMPARE:
                                                                 data['VP_Param'][i][1],
                                                                 data['VP_Param'][i][6],
                                                                 ])
-
-
+        except:
+            messagebox.showerror(message='Unable to set Analysis model parameters. Ensure a model has been loaded.')
+        try:
             # Create and clear the Temp Directory
             temp_dir = os.path.join(os.getcwd(),'Temp')
             try:
@@ -2152,14 +2279,20 @@ class PY_COMPARE:
             # Copy the executable
             shutil.copy(self.Compare['Paths']['Compare Executable'], temp_dir)
 
+        except:
+            messagebox.showerror(message = 'Unable to clear TEMP directory - clear manually.')
+
+        try:
             # Determine Model Type
             if self.Compare['Analysis']['Model Name'] == 'GVIPS':
                 if self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic' and self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
                     
                     # Write the DGS file
                     mod, Param, Param_U, Param_N = WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests)
+        except:
+            messagebox.showerror(message = 'Error writing DSG file.')
 
-
+        try:
             # Write the Simulation files
             ct = 1
             sim_tests = tests
@@ -2167,13 +2300,83 @@ class PY_COMPARE:
                 WriteSIM(self, self.Compare['Data'][sim_test], temp_dir, ct, mod, Param)
                 ct = ct + 1
 
+        except:
+            messagebox.showerror(message = 'Error writing SIM files.')
+
+        try:
             # Write the NLP files
             WriteNLP(temp_dir, 'Analy')
+        except:
+            messagebox.showerror(message = 'Error writing NLP file.')
 
+        try:
             # Run Compare
-            command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
-            os.system(command)
+            def run_cmd_analy(callback, temp_dir):
 
+                command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
+                os.system(command)
+            
+                # Notify when done
+                callback()
+            
+            # Function to display progress bar while running
+            def run_compare_analy(self):
+
+                # Create the window
+                loading = tk.Toplevel(window)
+                loading.title("Running Compare")
+                loading.geometry("300x100")
+                loading.resizable(False, False)
+                loading.configure(bg='white')
+                loading.grab_set()  
+
+                # Function for progress bar Exit Protocol
+                def on_closing_saving(self):
+
+                    # Don't allow exit while saving
+                    return
+                
+                # Create the window exit protocal
+                loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
+
+                # Create the loading label
+                ttk.Label(
+                        loading, 
+                        text="Running COMPARE - Please Wait", 
+                        style = "Modern2.TLabel"
+                        ).pack(pady=10)
+
+                # Create the progress bar
+                pb = ttk.Progressbar(
+                                    loading, 
+                                    mode='indeterminate',
+                                    style = "Modern.Horizontal.TProgressbar"
+                                    )
+                pb.pack(fill='x', padx=20, pady=10)
+                pb.start(10)
+
+                # Function to close window when task is completed
+                def on_task_done():
+
+                    # Stop Progress bar
+                    pb.stop()
+
+                    # Destroy Window
+                    loading.destroy()
+
+                # Begin save on background thread
+                threading.Thread(target=run_cmd_analy, args=(on_task_done,temp_dir), daemon=True).start()
+
+                # Wait until loading window is closed
+                window.wait_window(loading)
+
+            # Start Optmization
+            run_compare_analy(self)
+
+        except:
+            messagebox.showerror(message = 'Error running COMPARE.')
+
+        try:
             # Set model status to 1
             self.Compare['Model']['Status'] = 1
 
@@ -2238,9 +2441,10 @@ class PY_COMPARE:
                 self.Compare['Prediction'][test]['Error'] = err
                 ct = ct+1
 
-            messagebox.showinfo(message = 'Analysis Complete!')
+            if flag == 0:
+                messagebox.showinfo(message = 'Analysis Complete!')
         except:
-            messagebox.showerror(message = 'Analysis Failed')
+            messagebox.showerror(message = 'Error reading output data from COMPARE.')
 
     #------------------------------------------------------------------------------------------------------------------------------------------
     #
@@ -2270,19 +2474,27 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
-        #  Delete the canvas and drop down if it exists
+        #  Delete the canvases and drop downs if it exists
         if hasattr(self, 'canvas'):
             self.toolbar.destroy()
             self.canvas.get_tk_widget().destroy()
             del self.canvas
+
+        if hasattr(self, 'canvas2'):
+            self.toolbar2.destroy()
+            self.canvas2.get_tk_widget().destroy()
+            del self.canvas2
+
+        # -- LEFT PLOT
 
         # Create the plot
         self.fig = Figure(figsize=(self.Placement['Visualization']['Figure1'][2],self.Placement['Visualization']['Figure1'][3]), dpi = self.Placement['Visualization']['Figure1'][4], constrained_layout = True)
         self.plot1 = self.fig.add_subplot(111)
 
         # Get the arrays
-        x_val = self.optmenu1_viz.get()
-        y_val = self.optmenu2_viz.get()
+        val = self.optmenu1_viz.get().split(' vs ')
+        y_val = val[0]
+        x_val = val[1]
 
         # X Value
         xp = None
@@ -2327,7 +2539,7 @@ class PY_COMPARE:
         if xs is not None:
             self.plot1.plot(xs,ys,'ko',label = 'Reduced Data')
         if xp is not None:
-            self.plot1.plot(xp,yp, color = 'r', marker='o', markerfacecolor='r',label ='Prediction')
+            self.plot1.plot(xp,yp, color = 'r', linestyle='--', marker='o', markerfacecolor='none',label ='Prediction')
 
         # Set Formatting
         xlab = xu
@@ -2371,6 +2583,319 @@ class PY_COMPARE:
                                         )
         if 'self.canvas' not in self.tab_att_list:
             self.tab_att_list.append('self.canvas')
+
+        # -- RIGHT PLOT
+
+        # Create the plot
+        self.fig2 = Figure(figsize=(self.Placement['Visualization']['Figure2'][2],self.Placement['Visualization']['Figure2'][3]), dpi = self.Placement['Visualization']['Figure2'][4], constrained_layout = True)
+        self.plot2 = self.fig2.add_subplot(111)
+
+        # Get the arrays
+        val = self.optmenu2_viz.get().split(' vs ')
+        y_val2 = val[0]
+        x_val2 = val[1]
+
+        # X Value
+        xp = None
+        if 'Time' in x_val2:
+            x = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+            xs = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+            if 'Prediction' in list(self.Compare.keys()):
+                xp = self.Compare['Prediction'][self.test_name]['Time']
+            xu = 'Time [s]'
+        else:
+            x_val2 = x_val2.split('-')
+            x = self.Compare['Data'][self.test_name][x_val2[0]][int(x_val2[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+            xs = self.Compare['Data'][self.test_name]['Reduced Data'][x_val2[0]][int(x_val2[1])]
+            if 'Prediction' in list(self.Compare.keys()):
+                xp = self.Compare['Prediction'][self.test_name][x_val2[0]][int(x_val2[1])]
+            if x_val2[0] == 'Strain':
+                xu = 'Strain'
+            else:
+                xu = 'Stress [MPa]'
+
+         # Y Value
+        yp = None
+        if 'Time' in y_val2:
+            y = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+            ys = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+            if 'Prediction' in list(self.Compare.keys()):
+                yp = self.Compare['Prediction'][self.test_name]['Time']
+            yu = 'Time [s]'
+        else:
+            y_val2 = y_val2.split('-')
+            y = self.Compare['Data'][self.test_name][y_val2[0]][int(y_val2[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+            ys = self.Compare['Data'][self.test_name]['Reduced Data'][y_val2[0]][int(y_val2[1])]
+            if 'Prediction' in list(self.Compare.keys()):
+                yp = self.Compare['Prediction'][self.test_name][y_val2[0]][int(y_val2[1])]
+            if y_val2[0] == 'Strain':
+                yu = 'Strain'
+            else:
+                yu = 'Stress [MPa]'
+
+        # Plot the data
+        self.plot2.plot(x,y,'k',label = 'Raw Data')
+        if xs is not None:
+            self.plot2.plot(xs,ys,'ko',label = 'Reduced Data')
+        if xp is not None:
+            self.plot2.plot(xp,yp, color = 'r', linestyle='--', marker='o', markerfacecolor='none',label ='Prediction')
+
+        # Set Formatting
+        xlab = xu
+        ylab = yu
+        xlab_frmt = ScalarFormatter() 
+        ylab_frmt = ScalarFormatter()
+
+        # Format the plot
+        self.plot2.set_xlabel(xlab)
+        self.plot2.set_ylabel(ylab)
+        self.plot2.xaxis.set_major_formatter(xlab_frmt)
+        self.plot2.yaxis.set_major_formatter(ylab_frmt)
+        if "Strain" in xlab or "Time" in xlab:
+            self.plot2.ticklabel_format(style='sci',scilimits=(-6,-3),axis='x')
+        if "Strain" in ylab or "Time" in ylab:
+            self.plot2.ticklabel_format(style='sci',scilimits=(-6,-3),axis='y')
+        self.plot2.legend()
+
+        # Create the Tkinter canvas
+        self.canvas2 = FigureCanvasTkAgg(self.fig2, master = window)
+        self.canvas2.draw()
+
+        # Create the Matplotlib toolbar
+        self.toolbar2 = NavigationToolbar2Tk(self.canvas2, window)
+        self.toolbar2.update()
+
+        # Format Toolbar
+        self.toolbar2.config(bg=bg_color)
+        self.toolbar2._message_label.config(background=bg_color)
+        self.toolbar2.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Visualization']['Toolbar2'][0], 
+                        rely = self.Placement['Visualization']['Toolbar2'][1]
+                        )
+
+        # Add the figure to the GUI
+        self.canvas2.get_tk_widget().place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Visualization']['Figure2'][0], 
+                                        rely = self.Placement['Visualization']['Figure2'][1]
+                                        )
+        if 'self.canvas2' not in self.tab_att_list:
+            self.tab_att_list.append('self.canvas2')
+
+    def plotter_viz_all(self):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Plot Visualization curves.
+        #
+        #--------------------------------------------------------------------------
+
+        #  Delete the canvases and drop downs if it exists
+        if hasattr(self, 'canvas'):
+            self.toolbar.destroy()
+            self.canvas.get_tk_widget().destroy()
+            del self.canvas
+
+        if hasattr(self, 'canvas2'):
+            self.toolbar2.destroy()
+            self.canvas2.get_tk_widget().destroy()
+            del self.canvas2
+
+        # Generate colors
+        colors = plt.cm.tab10.colors
+        while len(colors) < len(self.tests_all):
+            colors = colors + colors
+
+        # -- LEFT PLOT
+
+        # Create the plot
+        self.fig = Figure(figsize=(self.Placement['Visualization']['Figure1'][2],self.Placement['Visualization']['Figure1'][3]), dpi = self.Placement['Visualization']['Figure1'][4], constrained_layout = True)
+        self.plot1 = self.fig.add_subplot(111)
+
+        # Get the arrays
+        val = self.optmenu3_viz.get().split(' vs ')
+        y_val_all = val[0]
+        x_val_all = val[1]
+
+        for i, test in enumerate(self.tests_all):
+            self.test_name = test
+            # X Value
+            xp = None
+            if 'Time' in x_val_all:
+                x = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                xs = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+                xu = 'Time [s]'
+            else:
+                x_val = x_val_all.split('-')
+                x = self.Compare['Data'][self.test_name][x_val[0]][int(x_val[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                xs = self.Compare['Data'][self.test_name]['Reduced Data'][x_val[0]][int(x_val[1])]
+                if x_val[0] == 'Strain':
+                    xu = 'Strain'
+                else:
+                    xu = 'Stress [MPa]'
+
+            # Y Value
+            yp = None
+            if 'Time' in y_val_all:
+                y = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                ys = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+                yu = 'Time [s]'
+            else:
+                y_val = y_val_all.split('-')
+                y = self.Compare['Data'][self.test_name][y_val[0]][int(y_val[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                ys = self.Compare['Data'][self.test_name]['Reduced Data'][y_val[0]][int(y_val[1])]
+                if y_val[0] == 'Strain':
+                    yu = 'Strain'
+                else:
+                    yu = 'Stress [MPa]'
+
+            # Plot the data
+            self.plot1.plot(x,y,color = colors[i],label = test)
+            if xs is not None:
+                self.plot1.plot(xs,ys,color = colors[i], label = None)
+
+
+        # Set Formatting
+        xlab = xu
+        ylab = yu
+        xlab_frmt = ScalarFormatter() 
+        ylab_frmt = ScalarFormatter()
+
+        # Format the plot
+        self.plot1.set_xlabel(xlab)
+        self.plot1.set_ylabel(ylab)
+        self.plot1.xaxis.set_major_formatter(xlab_frmt)
+        self.plot1.yaxis.set_major_formatter(ylab_frmt)
+        if "Strain" in xlab or "Time" in xlab:
+            self.plot1.ticklabel_format(style='sci',scilimits=(-6,-3),axis='x')
+        if "Strain" in ylab or "Time" in ylab:
+            self.plot1.ticklabel_format(style='sci',scilimits=(-6,-3),axis='y')
+        self.plot1.legend()
+
+        # Create the Tkinter canvas
+        self.canvas = FigureCanvasTkAgg(self.fig, master = window)
+        self.canvas.draw()
+
+        # Create the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas, window)
+        self.toolbar.update()
+
+        # Format Toolbar
+        self.toolbar.config(bg=bg_color)
+        self.toolbar._message_label.config(background=bg_color)
+        self.toolbar.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Visualization']['Toolbar1'][0], 
+                        rely = self.Placement['Visualization']['Toolbar1'][1]
+                        )
+
+        # Add the figure to the GUI
+        self.canvas.get_tk_widget().place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Visualization']['Figure1'][0], 
+                                        rely = self.Placement['Visualization']['Figure1'][1]
+                                        )
+        if 'self.canvas' not in self.tab_att_list:
+            self.tab_att_list.append('self.canvas')
+
+        # -- RIGHT PLOT
+
+        # Create the plot
+        self.fig2 = Figure(figsize=(self.Placement['Visualization']['Figure2'][2],self.Placement['Visualization']['Figure2'][3]), dpi = self.Placement['Visualization']['Figure2'][4], constrained_layout = True)
+        self.plot2 = self.fig2.add_subplot(111)
+
+        # Get the arrays
+        val = self.optmenu3_viz.get().split(' vs ')
+        y_val_all2 = val[0]
+        x_val_all2 = val[1]
+
+        for i, test in enumerate(self.tests_all):
+            self.test_name = test
+
+            # X Value
+            xp = None
+            if 'Time' in x_val_all2:
+                x = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                xs = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+                if 'Prediction' in list(self.Compare.keys()):
+                    xp = self.Compare['Prediction'][self.test_name]['Time']
+                xu = 'Time [s]'
+            else:
+                x_val2 = x_val_all2.split('-')
+                x = self.Compare['Data'][self.test_name][x_val2[0]][int(x_val2[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                xs = self.Compare['Data'][self.test_name]['Reduced Data'][x_val2[0]][int(x_val2[1])]
+                if 'Prediction' in list(self.Compare.keys()):
+                    xp = self.Compare['Prediction'][self.test_name][x_val2[0]][int(x_val2[1])]
+                if x_val2[0] == 'Strain':
+                    xu = 'Strain'
+                else:
+                    xu = 'Stress [MPa]'
+
+            # Y Value
+            yp = None
+            if 'Time' in y_val_all2:
+                y = self.Compare['Data'][self.test_name]['Time'][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                ys = self.Compare['Data'][self.test_name]['Reduced Data']['Time']
+                if 'Prediction' in list(self.Compare.keys()):
+                    yp = self.Compare['Prediction'][self.test_name]['Time']
+                yu = 'Time [s]'
+            else:
+                y_val2 = y_val_all2.split('-')
+                y = self.Compare['Data'][self.test_name][y_val2[0]][int(y_val2[1])][:self.Compare['Data'][self.test_name]['Stage Index'][-1]]
+                ys = self.Compare['Data'][self.test_name]['Reduced Data'][y_val2[0]][int(y_val2[1])]
+                if 'Prediction' in list(self.Compare.keys()):
+                    yp = self.Compare['Prediction'][self.test_name][y_val2[0]][int(y_val2[1])]
+                if y_val2[0] == 'Strain':
+                    yu = 'Strain'
+                else:
+                    yu = 'Stress [MPa]'
+
+            # Plot the data
+            if xp is not None:
+                self.plot2.plot(xp,yp, color = colors[i], linestyle='--', markerfacecolor='none',label =self.test_name)
+
+        # Set Formatting
+        xlab = xu
+        ylab = yu
+        xlab_frmt = ScalarFormatter() 
+        ylab_frmt = ScalarFormatter()
+
+        # Format the plot
+        self.plot2.set_xlabel(xlab)
+        self.plot2.set_ylabel(ylab)
+        self.plot2.xaxis.set_major_formatter(xlab_frmt)
+        self.plot2.yaxis.set_major_formatter(ylab_frmt)
+        if "Strain" in xlab or "Time" in xlab:
+            self.plot2.ticklabel_format(style='sci',scilimits=(-6,-3),axis='x')
+        if "Strain" in ylab or "Time" in ylab:
+            self.plot2.ticklabel_format(style='sci',scilimits=(-6,-3),axis='y')
+        self.plot2.legend()
+
+        # Create the Tkinter canvas
+        self.canvas2 = FigureCanvasTkAgg(self.fig2, master = window)
+        self.canvas2.draw()
+
+        # Create the Matplotlib toolbar
+        self.toolbar2 = NavigationToolbar2Tk(self.canvas2, window)
+        self.toolbar2.update()
+
+        # Format Toolbar
+        self.toolbar2.config(bg=bg_color)
+        self.toolbar2._message_label.config(background=bg_color)
+        self.toolbar2.place(
+                        anchor = 'n', 
+                        relx = self.Placement['Visualization']['Toolbar2'][0], 
+                        rely = self.Placement['Visualization']['Toolbar2'][1]
+                        )
+
+        # Add the figure to the GUI
+        self.canvas2.get_tk_widget().place(
+                                        anchor = 'n', 
+                                        relx = self.Placement['Visualization']['Figure2'][0], 
+                                        rely = self.Placement['Visualization']['Figure2'][1]
+                                        )
+        if 'self.canvas2' not in self.tab_att_list:
+            self.tab_att_list.append('self.canvas2')
 
     #------------------------------------------------------------------------------------------------------------------------------------------
     #

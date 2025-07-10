@@ -90,13 +90,13 @@ def ExportData(record, temp_path):
     if time_unit != 's':
         time = UnitConversion(time_unit, np.array(time), 's')
     idx = np.where(np.array(time) <= end_times[-1])[0][-1]
-    time = time[:idx]
+    time = time[:idx+1]
     
     strain = [row[0] for row in data.value][1:]
     strain_unit = data.unit
     if strain_unit != '-':
         strain = UnitConversion(strain_unit, np.array(strain), '-')
-    strain = strain[:idx]
+    strain = strain[:idx+1]
 
     # -- Get Stress vs Time data arrays
     data = record.attributes['Stress (' + test_dir + ' axis) vs Time']
@@ -104,7 +104,7 @@ def ExportData(record, temp_path):
     stress_unit = data.unit
     if stress_unit != 'MPa':
         stress = UnitConversion(stress_unit, np.array(stress), 'MPa')
-    stress = stress[:idx]
+    stress = stress[:idx+1]
 
     # -- Check for Poisson Strain Data
     pr_dir = None
@@ -120,7 +120,7 @@ def ExportData(record, temp_path):
             trans_strain_unit = data.unit
             if trans_strain_unit != '-':
                 trans_strain = UnitConversion(trans_strain_unit, np.array(trans_strain), '-')
-            trans_strain = trans_strain[:idx]
+            trans_strain = trans_strain[:idx+1]
 
     # -- Get columns
     time_col = 12
@@ -187,9 +187,19 @@ def ExportData(record, temp_path):
                 ws.cell(row = 4+i, column = 10).value = strain[idx_c]
 
             # ---- Stress Target Value
-            if test_summary.value[i][test_summary.columns.index('Target Stress (' + test_dir + ' axis)')] is not None:
+            elif test_summary.value[i][test_summary.columns.index('Target Stress (' + test_dir + ' axis)')] is not None:
                 ws.cell(row = 4+i, column = 9).value = 'Stress'
                 ws.cell(row = 4+i, column = 10).value = stress[idx_c]
+
+            # ---- Target Not Defined - default to control mode
+            else:
+                if ws.cell(row = 4+i, column = 7).value == 'Strain':
+                    ws.cell(row = 4+i, column = 9).value = 'Strain'
+                    ws.cell(row = 4+i, column = 10).value = strain[time.index(ws.cell(row = 4+i, column = 5).value)]
+                if ws.cell(row = 4+i, column = 7).value == 'Stress':
+                    ws.cell(row = 4+i, column = 9).value = 'Stress'
+                    ws.cell(row = 4+i, column = 10).value = stress[time.index(ws.cell(row = 4+i, column = 5).value)]
+
 
     # Save the file
     fname = os.path.join(temp_path, record.attributes['Specimen ID'].value + "_PyCOMP_IN.xlsx")

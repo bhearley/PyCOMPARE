@@ -20,17 +20,19 @@ def FunctionalDataSampling(data):
         strain = data['Strain'][int(ld_i)]
         stress = data['Stress'][int(ld_i)]
         target = data['target'][i][0]
+        time_flag = 0
         if data['target'][i][1] == '-':
             vec = np.array(strain)
         elif data['target'][i][1] == 'MPa':
             vec = np.array(stress)
         else:
             vec = np.array(time)
+            time_flag = 1
             if i >0:
                 target = target + time[index[-1]]
 
         # Find where the target is met
-        if data['load_rate'][i][0] >= 0:
+        if data['load_rate'][i][0] >= 0 or time_flag == 1:
             idx = np.where(vec >= target)[0]
         else:
             idx = np.where(vec <= target)[0]

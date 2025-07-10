@@ -17,9 +17,18 @@ def CreateVisualizationTab(self,window,frmt):
     # Import Functions
     from General.DeleteWidgets import DeleteTab
 
-    #Unpack Formatting
-    fontname = frmt[1]
-    fsize_s = frmt[2]
+    # Function to deselect sheet
+    def deselect_sheet(event,self,tag):
+        if tag == 'sheet_char_viz':
+            try:
+                self.sheet_ver_viz.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_ver_viz':
+            try:
+                self.sheet_char_viz.deselect("all", redraw=True)
+            except:
+                pass
 
     # Delete all tab attributes
     if hasattr(self,"tab_att_list"):
@@ -30,6 +39,11 @@ def CreateVisualizationTab(self,window,frmt):
             self.toolbar.destroy()
             self.canvas.get_tk_widget().destroy()
             del self.canvas
+
+        if hasattr(self, 'canvas2'):
+            self.toolbar2.destroy()
+            self.canvas2.get_tk_widget().destroy()
+            del self.canvas2
 
     # Preallocate the att list
     self.att_list = []
@@ -55,12 +69,22 @@ def CreateVisualizationTab(self,window,frmt):
                 self.optmenu1_viz.destroy()
             if hasattr(self, 'optmenu2_viz'):
                 self.optmenu2_viz.destroy()
+            if hasattr(self, 'optmenu3_viz'):
+                self.optmenu3_viz.destroy()
+            if hasattr(self, 'pred_label'):
+                self.pred_label.destroy()
+            if hasattr(self, 'raw_label'):
+                self.raw_label.destroy()
             if hasattr(self, 'btn_plot'):
                 self.btn_plot.destroy()
             if hasattr(self, 'canvas'):
                 self.toolbar.destroy()
                 self.canvas.get_tk_widget().destroy()
                 del self.canvas
+            if hasattr(self, 'canvas2'):
+                self.toolbar2.destroy()
+                self.canvas2.get_tk_widget().destroy()
+                del self.canvas2
         
             # Get the selected row and name
             if tag == 'char':
@@ -68,15 +92,15 @@ def CreateVisualizationTab(self,window,frmt):
             else:
                 table_name = "self.sheet_ver_viz"
             currently_selected = eval(table_name).get_currently_selected()
-            self.test_name = eval(table_name).data[currently_selected.row][0]
-            self.test_type = eval(table_name).data[currently_selected.row][1]
+            self.test_name = eval(table_name).data[currently_selected.row][1]
+            self.test_type = eval(table_name).data[currently_selected.row][2]
 
             # Create a model prediction if it doesn't exist
             if self.test_name not in list(self.Compare['Prediction'].keys()):
                 self.Compare['Prediction'][self.test_name] = None
             if self.Compare['Prediction'][self.test_name] is None:
                 self.run_compare_anly([self.test_name])
-                eval(table_name).set_cell_data(currently_selected.row, -1, self.Compare['Prediction'][self.test_name]['Error'])
+                eval(table_name).set_cell_data(currently_selected.row, -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
                 eval(table_name).redraw()
 
             # Remove Highlights from all tables and add the selected row
@@ -87,25 +111,51 @@ def CreateVisualizationTab(self,window,frmt):
             eval(table_name).highlight_rows(currently_selected.row,'lightblue1','black')
 
             # -- Get list of options
-            self.plot_opts = ['Time']
             data = self.Compare['Data'][self.test_name]
-            data_keys = ['Strain','Stress']
-            for key in data_keys:
-                dir_keys = list(data[key].keys())
-                for dir_key in dir_keys:
-                    self.plot_opts.append(key + '-' + str(dir_key))
+            self.plot_opts = []
+            # -- Stress vs Strain
+            for keys in data['Stress'].keys():
+                for keye in data['Strain'].keys():
+                    self.plot_opts.append('Stress-' + str(keys) + ' vs Strain-' + str(keye))
+
+            # -- Strain vs Time
+            for keye in data['Strain'].keys():
+                self.plot_opts.append('Strain-' + str(keye) + ' vs Time')
+
+            # -- Stress vs Time
+            for keys in data['Stress'].keys():
+                self.plot_opts.append('Stress-' + str(keys) + ' vs Time')
 
             # Find first stress and first strain
             idx1 = 0
             idx2 = 1
             for i in range(len(self.plot_opts)):
-                if 'Strain' in self.plot_opts[i]:
+                if 'Strain' in self.plot_opts[i] and 'Stress' in self.plot_opts[i] :
                     idx1 = i
                     break
-            for i in range(len(self.plot_opts)):
-                if 'Stress' in self.plot_opts[i]:
-                    idx2 = i
-                    break
+            if data['Test Type'] == 'Relaxation':
+                for i in range(len(self.plot_opts)):
+                    if 'Stress' in self.plot_opts[i] and 'Time' in self.plot_opts[i] :
+                        idx2 = i
+                        break
+
+            elif data['Test Type'] == 'Creep':
+                for i in range(len(self.plot_opts)):
+                    if 'Strain' in self.plot_opts[i] and 'Time' in self.plot_opts[i] :
+                        idx2 = i
+                        break
+
+            else:
+                if data['Control'][0] == 'Strain':
+                    for i in range(len(self.plot_opts)):
+                        if 'Stress' in self.plot_opts[i] and 'Time' in self.plot_opts[i] :
+                            idx2 = i
+                            break
+                else:
+                    for i in range(len(self.plot_opts)):
+                        if 'Strain' in self.plot_opts[i] and 'Time' in self.plot_opts[i] :
+                            idx2 = i
+                            break
 
             # Create the X Option Menu
             self.optmenu1_viz = ttk.Combobox(
@@ -122,20 +172,6 @@ def CreateVisualizationTab(self,window,frmt):
             self.optmenu1_viz.set(self.plot_opts[idx1])
             self.tab_att_list.append('self.optmenu1_viz')
 
-
-            # Create the vs Label
-            self.plot_label = ttk.Label(
-                                    window, 
-                                    text= "vs.", 
-                                    anchor=tk.CENTER,       
-                                    style = "Modern1.TLabel"
-                                    )
-            self.plot_label.place(
-                            anchor = 'n', 
-                            relx = self.Placement['Visualization']['Label1'][0], 
-                            rely = self.Placement['Visualization']['Label1'][1]
-                            )
-            self.tab_att_list.append('self.plot_label')
 
             # Create the Y Option Menu
             self.optmenu2_viz = ttk.Combobox(
@@ -171,6 +207,241 @@ def CreateVisualizationTab(self,window,frmt):
             # Call the plotting function
             self.plotter_viz()
 
+        def eval_all(self):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Evaluate all tests in the verificaiton set
+            #
+            #------------------------------------------------------------------
+
+            # Get All Tests
+            test_names = []
+            for i in range(len(self.sheet_ver_viz.data)):
+                test_names.append(self.sheet_ver_viz.data[i][1])
+
+            for i in range(len(test_names)):
+                self.test_name = test_names[i]
+                           
+                # Create a model prediction if it doesn't exist
+                if self.test_name not in list(self.Compare['Prediction'].keys()):
+                    self.Compare['Prediction'][self.test_name] = None
+                if self.Compare['Prediction'][self.test_name] is None:
+                    self.run_compare_anly([self.test_name], 1)
+                    self.sheet_ver_viz.set_cell_data(i, -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
+        
+        def select_all(self, tag):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Select or unselect all tests
+            #
+            #------------------------------------------------------------------
+        
+            # Get the selected row and name
+            if tag == 'char':
+                table_name = "self.sheet_char_viz"
+            else:
+                table_name = "self.sheet_ver_viz"
+
+            # Check if any are false
+            val = False
+            for i in range(len(eval(table_name).data)):
+                if eval(table_name).data[i][0] == False:
+                    val = True
+            for i in range(len(eval(table_name).data)):
+                eval(table_name).data[i][0] = val
+            eval(table_name).redraw()
+
+        def select_all_type(self, tag):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Select or unselect all tests of the same type
+            #
+            #------------------------------------------------------------------
+        
+            # Get the selected row and name
+            if tag == 'char':
+                table_name = "self.sheet_char_viz"
+            else:
+                table_name = "self.sheet_ver_viz"
+            currently_selected = eval(table_name).get_currently_selected()
+            self.test_type = eval(table_name).data[currently_selected.row][2]
+
+            # Select All of Same Type
+            for i in range(len(eval(table_name).data)):
+                if eval(table_name).data[i][2] == self.test_type:
+                    eval(table_name).data[i][0] = True
+            eval(table_name).redraw()
+
+        def view_data_all(self):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: View characterization data.
+            #
+            #------------------------------------------------------------------
+
+            # Delete the option menu
+            if hasattr(self, 'optmenu1_viz'):
+                self.optmenu1_viz.destroy()
+            if hasattr(self, 'optmenu2_viz'):
+                self.optmenu2_viz.destroy()
+            if hasattr(self, 'optmenu3_viz'):
+                self.optmenu3_viz.destroy()
+            if hasattr(self, 'pred_label'):
+                self.pred_label.destroy()
+            if hasattr(self, 'raw_label'):
+                self.raw_label.destroy()
+            if hasattr(self, 'btn_plot'):
+                self.btn_plot.destroy()
+            if hasattr(self, 'canvas'):
+                self.toolbar.destroy()
+                self.canvas.get_tk_widget().destroy()
+                del self.canvas
+            if hasattr(self, 'canvas2'):
+                self.toolbar2.destroy()
+                self.canvas2.get_tk_widget().destroy()
+                del self.canvas2
+
+
+            # Get List of all tests
+            tests_all = []
+            row_char = {}
+            for i in range(len(self.sheet_char_viz.data)):
+                if self.sheet_char_viz.data[i][0] == True:
+                    tests_all.append(self.sheet_char_viz.data[i][1])
+                    row_char[self.sheet_char_viz.data[i][1]] = i
+
+            row_ver = {}
+            for i in range(len(self.sheet_ver_viz.data)):
+                if self.sheet_ver_viz.data[i][0] == True:
+                    tests_all.append(self.sheet_ver_viz.data[i][1])
+                    row_ver[self.sheet_ver_viz.data[i][1]] = i
+
+            if len(tests_all) > 0:
+                # Create a model prediction if it doesn't exist
+                for test in tests_all:
+                    self.test_name = test
+                    if test not in list(self.Compare['Prediction'].keys()):
+                        self.Compare['Prediction'][self.test_name] = None
+                    if self.Compare['Prediction'][self.test_name] is None:
+                        self.run_compare_anly([self.test_name])
+
+                        if self.test_name in row_char.keys():
+                            self.sheet_char_viz.set_cell_data(row_char[self.test_name], -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
+                            self.sheet_char_viz.redraw()
+
+                        if self.test_name in row_ver.keys():
+                            self.sheet_ver_viz.set_cell_data(row_ver[self.test_name], -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
+                            self.sheet_ver_viz.redraw()
+
+                # Remove Highlights from all tables and add the selected row
+                for i in range(len(self.sheet_char_viz.data)):
+                    self.sheet_char_viz.highlight_rows(i,'white','black')
+                for i in range(len(self.sheet_ver_viz.data)):
+                    self.sheet_ver_viz.highlight_rows(i,'white','black')
+
+                # -- Get list of options
+                data = self.Compare['Data'][self.test_name]
+                self.plot_opts_all = None
+
+                # -- Get list of options
+                for test in tests_all:
+
+                    self.plot_opts = []
+
+                    # -- Stress vs Strain
+                    for keys in data['Stress'].keys():
+                        for keye in data['Strain'].keys():
+                            self.plot_opts.append('Stress-' + str(keys) + ' vs Strain-' + str(keye))
+
+                    # -- Strain vs Time
+                    for keye in data['Strain'].keys():
+                        self.plot_opts.append('Strain-' + str(keye) + ' vs Time')
+
+                    # -- Stress vs Time
+                    for keys in data['Stress'].keys():
+                        self.plot_opts.append('Stress-' + str(keys) + ' vs Time')
+
+                        if self.plot_opts_all is None:
+                            self.plot_opts_all = self.plot_opts
+                        else:
+                            self.plot_opts_all = list(set(self.plot_opts_all) & set(self.plot_opts))
+
+                self.plot_opts = self.plot_opts_all
+
+                # Find first stress and first strain
+                idx1 = 0
+                idx2 = 1
+                for i in range(len(self.plot_opts)):
+                    if 'Strain' in self.plot_opts[i] and 'Stress' in self.plot_opts[i] :
+                        idx1 = i
+                        idx2 = i
+                        break
+                
+
+                # Create the X Option Menu
+                self.optmenu3_viz = ttk.Combobox(
+                                            window,
+                                            values=self.plot_opts,
+                                            style="Modern.TCombobox",
+                                            state="readonly"
+                                            )
+                self.optmenu3_viz.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Visualization']['Combo3'][0], 
+                                    rely = self.Placement['Visualization']['Combo3'][1]
+                                    )
+                self.optmenu3_viz.set(self.plot_opts[idx1])
+                self.tab_att_list.append('self.optmenu3_viz')
+
+                # Create the Experiment Label
+                self.raw_label = ttk.Label(
+                                    window, 
+                                    text="Experiments", 
+                                    style = "Modern1.TLabel"
+                                    )
+                self.raw_label.place(
+                                    anchor = 'n', 
+                                    relx = self.Placement['Visualization']['Label4'][0], 
+                                    rely = self.Placement['Visualization']['Label4'][1]
+                                    )
+                self.tab_att_list.append('self.raw_label')
+                
+                # Create the Predictions Label
+                self.pred_label = ttk.Label(
+                                    window, 
+                                    text="Predictions", 
+                                    style = "Modern1.TLabel"
+                                    )
+                self.pred_label.place(
+                                    anchor = 'n', 
+                                    relx = self.Placement['Visualization']['Label5'][0], 
+                                    rely = self.Placement['Visualization']['Label5'][1]
+                                    )
+                self.tab_att_list.append('self.pred_label')
+
+
+
+                # Create the plot button
+                self.btn_plot = ttk.Button(
+                                        window, 
+                                        text = "Plot", 
+                                        command = self.plotter_viz_all,
+                                        style = "Modern2.TButton",
+                                        width = self.Placement['Visualization']['Button1'][2]
+                                        )
+                self.btn_plot.place(
+                                    anchor = 'n', 
+                                    relx = self.Placement['Visualization']['Button1'][0], 
+                                    rely = self.Placement['Visualization']['Button1'][1]
+                                    )
+                self.tab_att_list.append('self.btn_plot')
+
+                # Call the plotting function
+                self.tests_all = tests_all
+                self.plotter_viz_all()
+
+        
+        
         # Destroy existing widgets
         if hasattr(self,'sheet_char_viz'):
             self.sheet_char_viz.destroy()
@@ -180,7 +451,7 @@ def CreateVisualizationTab(self,window,frmt):
         # Create the label
         self.char_label = ttk.Label(
                                     window, 
-                                    text="Characterization Set:", 
+                                    text="Characterization Set:  Global Error = " + f"{self.Compare['Global Error']:.3e}", 
                                     style = "Modern1.TLabel"
                                     )
         self.char_label.place(
@@ -195,7 +466,7 @@ def CreateVisualizationTab(self,window,frmt):
         tests = list(self.Compare['Characterization'].keys())
 
         # Set the column names
-        Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Weight','Error']
+        Cols = [' ', 'Name', 'Type', 'Weight','Error']
 
         # Create the sheet
         self.sheet_char_viz = tksheet.Sheet(
@@ -223,7 +494,11 @@ def CreateVisualizationTab(self,window,frmt):
 
         # Enable Bindings
         self.sheet_char_viz.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
-        self.sheet_char_viz.popup_menu_add_command('View Data', lambda : view_data(self,'char'), table_menu = True, index_menu = True, header_menu = True)   
+        self.sheet_char_viz.extra_bindings([("cell_select", lambda event: deselect_sheet(event, self, 'sheet_char_viz'))])
+        self.sheet_char_viz.popup_menu_add_command('View Data', lambda : view_data(self,'char'), table_menu = True, index_menu = True, header_menu = True)  
+        self.sheet_char_viz.popup_menu_add_command('Select All', lambda : select_all(self,'char'), table_menu = True, index_menu = True, header_menu = True) 
+        self.sheet_char_viz.popup_menu_add_command('Select All of Same Type', lambda : select_all_type(self,'char'), table_menu = True, index_menu = True, header_menu = True) 
+        self.sheet_char_viz.popup_menu_add_command('View Selected Data', lambda : view_data_all(self), table_menu = True, index_menu = True, header_menu = True)   
         
         # Set Column Widths
         self.sheet_char_viz.column_width(column = 0, width = self.Placement['Visualization']['Sheet1'][5], redraw = True)
@@ -231,30 +506,15 @@ def CreateVisualizationTab(self,window,frmt):
         self.sheet_char_viz.column_width(column = 2, width = self.Placement['Visualization']['Sheet1'][7], redraw = True)
         self.sheet_char_viz.column_width(column = 3, width = self.Placement['Visualization']['Sheet1'][8], redraw = True)
         self.sheet_char_viz.column_width(column = 4, width = self.Placement['Visualization']['Sheet1'][9], redraw = True)
-        self.sheet_char_viz.column_width(column = 5, width = self.Placement['Visualization']['Sheet1'][10], redraw = True)
-        self.sheet_char_viz.column_width(column = 6, width = self.Placement['Visualization']['Sheet1'][11], redraw = True)
-        self.sheet_char_viz.column_width(column = 7, width = self.Placement['Visualization']['Sheet1'][12], redraw = True)
-        self.sheet_char_viz.column_width(column = 8, width = self.Placement['Visualization']['Sheet1'][13], redraw = True)
+        self.sheet_char_viz.checkbox("A",checked=False)
         self.sheet_char_viz.table_align(align = 'c',redraw=True)
 
         # Populate Data
         for i in range(len(tests)):
-            self.sheet_char_viz.set_cell_data(i,0, tests[i])
-            self.sheet_char_viz.set_cell_data(i,1, self.Compare['Data'][tests[i]]['Test Type'])
-            self.sheet_char_viz.set_cell_data(i,2, self.Compare['Data'][tests[i]]['Temperature'][0])
-            ldir = ''
-            ldir_list = []
-            for j in range(len(self.Compare['Data'][tests[i]]['Loading Direction'])):
-                if self.Compare['Data'][tests[i]]['Loading Direction'][j] not in ldir_list:
-                    ldir_list.append(self.Compare['Data'][tests[i]]['Loading Direction'][j])
-            for j in range(len(ldir_list)):
-                ldir = ldir + str(ldir_list[j]) + ', '
-            self.sheet_char_viz.set_cell_data(i,3, ldir[:len(ldir)-2])
-            self.sheet_char_viz.set_cell_data(i,4,self.Compare['Data'][tests[i]]['Control'][0])
-            self.sheet_char_viz.set_cell_data(i,5,str(self.Compare['Data'][tests[i]]['Load Rate'][0][0]) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
-            self.sheet_char_viz.set_cell_data(i,6,self.Compare['Data'][tests[i]]['Angle'])
-            self.sheet_char_viz.set_cell_data(i,7,self.Compare['Data'][tests[i]]['RelWeight'])
-            self.sheet_char_viz.set_cell_data(i,8,round(self.Compare['Prediction'][tests[i]]['Error'],3))
+            self.sheet_char_viz.set_cell_data(i,1, tests[i])
+            self.sheet_char_viz.set_cell_data(i,2, self.Compare['Data'][tests[i]]['Test Type'])
+            self.sheet_char_viz.set_cell_data(i,3,self.Compare['Data'][tests[i]]['RelWeight'])
+            self.sheet_char_viz.set_cell_data(i,4,round(self.Compare['Prediction'][tests[i]]['Error'],3))
 
         # Delete existing widgets
         if hasattr(self,'sheet_ver_viz'):
@@ -285,7 +545,7 @@ def CreateVisualizationTab(self,window,frmt):
                     tests_ver.append(test)
 
         # Set the column names
-        Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Error']
+        Cols = [' ', 'Name', 'Type', 'Error']
         
         # Create the sheet
         self.sheet_ver_viz = tksheet.Sheet(
@@ -313,41 +573,35 @@ def CreateVisualizationTab(self,window,frmt):
 
         # Enable Bindings
         self.sheet_ver_viz.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
-        self.sheet_ver_viz.popup_menu_add_command('View Data', lambda : view_data(self,'ver'), table_menu = True, index_menu = True, header_menu = True)   
+        self.sheet_ver_viz.extra_bindings([("cell_select", lambda event: deselect_sheet(event, self, 'sheet_ver_viz'))])
+        self.sheet_ver_viz.popup_menu_add_command('Evaluate All', lambda : eval_all(self), table_menu = True, index_menu = True, header_menu = True)
+        self.sheet_ver_viz.popup_menu_add_command('View Data', lambda : view_data(self,'ver'), table_menu = True, index_menu = True, header_menu = True)
+        self.sheet_ver_viz.popup_menu_add_command('Select All', lambda : select_all(self,'ver'), table_menu = True, index_menu = True, header_menu = True)   
+        self.sheet_ver_viz.popup_menu_add_command('Select All of Same Type', lambda : select_all_type(self,'ver'), table_menu = True, index_menu = True, header_menu = True)   
+        self.sheet_ver_viz.popup_menu_add_command('View Selected Data', lambda : view_data_all(self), table_menu = True, index_menu = True, header_menu = True)   
         
         # Set Column Widths
         self.sheet_ver_viz.column_width(column = 0, width = self.Placement['Visualization']['Sheet2'][5], redraw = True)
         self.sheet_ver_viz.column_width(column = 1, width = self.Placement['Visualization']['Sheet2'][6], redraw = True)
         self.sheet_ver_viz.column_width(column = 2, width = self.Placement['Visualization']['Sheet2'][7], redraw = True)
-        self.sheet_ver_viz.column_width(column = 3, width = self.Placement['Visualization']['Sheet2'][8], redraw = True)
-        self.sheet_ver_viz.column_width(column = 4, width = self.Placement['Visualization']['Sheet2'][9], redraw = True)
-        self.sheet_ver_viz.column_width(column = 5, width = self.Placement['Visualization']['Sheet2'][10], redraw = True)
-        self.sheet_ver_viz.column_width(column = 6, width = self.Placement['Visualization']['Sheet2'][11], redraw = True)
-        self.sheet_ver_viz.column_width(column = 7, width = self.Placement['Visualization']['Sheet2'][12], redraw = True)
+        self.sheet_ver_viz.column_width(column = 3, width = self.Placement['Visualization']['Sheet2'][7], redraw = True)
+        self.sheet_ver_viz.checkbox("A",checked=False)
         self.sheet_ver_viz.table_align(align = 'c',redraw=True)
 
         # Populate Data
         for i in range(len(tests_ver)):
-            self.sheet_ver_viz.set_cell_data(i,0, tests_ver[i])
-            self.sheet_ver_viz.set_cell_data(i,1, self.Compare['Data'][tests_ver[i]]['Test Type'])
-            self.sheet_ver_viz.set_cell_data(i,2, self.Compare['Data'][tests_ver[i]]['Temperature'][0])
-            ldir = ''
-            ldir_list = []
-            for j in range(len(self.Compare['Data'][tests_ver[i]]['Loading Direction'])):
-                if self.Compare['Data'][tests_ver[i]]['Loading Direction'][j] not in ldir_list:
-                    ldir_list.append(self.Compare['Data'][tests_ver[i]]['Loading Direction'][j])
-            for j in range(len(ldir_list)):
-                ldir = ldir + str(ldir_list[j]) + ', '
-            self.sheet_ver_viz.set_cell_data(i,3, ldir[:len(ldir)-2])
-            self.sheet_ver_viz.set_cell_data(i,4,self.Compare['Data'][tests_ver[i]]['Control'][0])
-            self.sheet_ver_viz.set_cell_data(i,5,str(self.Compare['Data'][tests_ver[i]]['Load Rate'][0][0]) + ' ' + self.Compare['Data'][tests_ver[i]]['Load Rate'][0][1] )
-            self.sheet_ver_viz.set_cell_data(i,6,self.Compare['Data'][tests_ver[i]]['Angle'])
+            self.sheet_ver_viz.set_cell_data(i,1, tests_ver[i])
+            self.sheet_ver_viz.set_cell_data(i,2, self.Compare['Data'][tests_ver[i]]['Test Type'])
             if tests_ver[i] in list(self.Compare['Prediction'].keys()):
                 if self.Compare['Prediction'][tests_ver[i]] is not None:
-                    self.sheet_ver_viz.set_cell_data(i,7,round(self.Compare['Prediction'][tests_ver[i]]['Error'],3))
+                    self.sheet_ver_viz.set_cell_data(i,3,round(self.Compare['Prediction'][tests_ver[i]]['Error'],3))
 
     # Check that tests exist in the characterization set
     try:
+        # Get Global Error
+        glob_err = self.Compare['Global Error']
+
+        # Check fo characterization data
         if 'Characterization' in list(self.Compare.keys()):
             if len(list(self.Compare['Characterization'].keys())) > 0:
                 update_table()

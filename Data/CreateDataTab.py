@@ -8,6 +8,7 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def CreateDataTab(self,window,frmt):
     # Import Modules
+    import math
     import pandas as pd
     import tkinter as tk
     from tkinter import messagebox
@@ -24,6 +25,19 @@ def CreateDataTab(self,window,frmt):
     fontname = frmt[1]
     fsize_s = frmt[2]
 
+    # Function to deselect sheet
+    def deselect_sheet(event,self,tag):
+        if tag == 'stage_table':
+            try:
+                self.sheet_db.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_db':
+            try:
+                self.stage_table.deselect("all", redraw=True)
+            except:
+                pass
+
     # Delete existing widgets
     if hasattr(self,"tab_att_list"):
         # Delete tab attributes
@@ -35,6 +49,12 @@ def CreateDataTab(self,window,frmt):
             self.canvas.get_tk_widget().destroy()
             del self.canvas
 
+        # Delete the canvas
+        if hasattr(self, 'canvas2'):
+            self.toolbar2.destroy()
+            self.canvas2.get_tk_widget().destroy()
+            del self.canvas2
+
     # Preallocate the att list
     self.att_list = []
     self.loc_att_list = []
@@ -42,6 +62,11 @@ def CreateDataTab(self,window,frmt):
 
     # Initialize button press
     self.clicked = 0
+
+    def round_sig(x, sig=3):
+        if x == 0:
+            return 0
+        return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
 
     def upload_from_excel():
         #--------------------------------------------------------------------------
@@ -138,6 +163,7 @@ def CreateDataTab(self,window,frmt):
                 self.plot_label.destroy()
             if hasattr(self, 'stage_table'):
                 self.stage_table.destroy()
+
             
             # Get the selected row and name
             currently_selected = self.sheet_db.get_currently_selected()
@@ -274,15 +300,16 @@ def CreateDataTab(self,window,frmt):
 
             # Enable Bindings
             self.stage_table.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
+            self.stage_table.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'stage_table'))])
 
             # Set stage table cell values
             for i in range(len(self.Compare['Data'][self.test_name]['Stage Type'])):
                 self.stage_table.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
                 self.stage_table.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Loading Direction'][i])
                 self.stage_table.set_cell_data(i,2,self.Compare['Data'][self.test_name]['Control'][i])
-                self.stage_table.set_cell_data(i,3,str(self.Compare['Data'][self.test_name]['Load Rate'][i][0]) 
+                self.stage_table.set_cell_data(i,3,str(round_sig(self.Compare['Data'][self.test_name]['Load Rate'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Load Rate'][i][1])
-                self.stage_table.set_cell_data(i,4,str(round(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
+                self.stage_table.set_cell_data(i,4,str(round_sig(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Target'][i][1])
                 self.stage_table.set_cell_data(i,5,self.Compare['Data'][self.test_name]['Time'][self.Compare['Data'][self.test_name]['Stage Index'][i]])
             self.stage_table.redraw()
@@ -438,6 +465,7 @@ def CreateDataTab(self,window,frmt):
 
         # Enanble bindings
         self.sheet_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
+        self.sheet_db.extra_bindings([("cell_select", lambda event: deselect_sheet(event, self, 'sheet_db'))])
         self.sheet_db.popup_menu_add_command('Select/Unselect All', lambda : select_all(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_db.popup_menu_add_command('View All Selected Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
@@ -457,7 +485,7 @@ def CreateDataTab(self,window,frmt):
                 ldir = ldir + str(ldir_list[j]) + ', '
             self.sheet_db.set_cell_data(i,4, ldir[:len(ldir)-2])
             self.sheet_db.set_cell_data(i,5,self.Compare['Data'][tests[i]]['Control'][0])
-            self.sheet_db.set_cell_data(i,6,str(self.Compare['Data'][tests[i]]['Load Rate'][0][0]) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
+            self.sheet_db.set_cell_data(i,6,str(round_sig(self.Compare['Data'][tests[i]]['Load Rate'][0][0],2)) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
             self.sheet_db.set_cell_data(i,7,self.Compare['Data'][tests[i]]['Angle'])
 
         # Check if test is in the characterization set

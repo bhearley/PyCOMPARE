@@ -49,6 +49,11 @@ def CreateModelTab(self,window):
         self.canvas.get_tk_widget().destroy()
         del self.canvas
 
+    if hasattr(self, 'canvas2'):
+        self.toolbar2.destroy()
+        self.canvas2.get_tk_widget().destroy()
+        del self.canvas2
+
     # Preallocate the att list and other variables
     self.att_list = []
     self.loc_att_list = []
@@ -336,13 +341,13 @@ def CreateModelTab(self,window):
                     except:
                         pass
 
-            # Enable bindings
             self.sheet1.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
             self.sheet1.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet1'))])
+            
 
             # Set Column Widths
             self.sheet1.column_width(column = 0, width = self.Placement['Optimization']['Sheet1'][5], redraw = True)
@@ -400,7 +405,7 @@ def CreateModelTab(self,window):
                                 if j == 6:
                                     if self.optimize == 1:
                                         try:
-                                            if float(self.sheet1_data[i][6]) > float(self.sheet1_data[i][2]) and float(self.sheet1_data[i][6]) < float(self.sheet1_data[i][4]):
+                                            if float(self.sheet1_data[i][6]) > 1.01*float(self.sheet1_data[i][2]) and float(self.sheet1_data[i][6]) < 0.99*float(self.sheet1_data[i][4]):
                                                 self.sheet1.highlight((rown,6),fg = 'green', bg = 'white')
                                             else:
                                                 self.sheet1.highlight((rown,6),fg = 'red', bg = 'white')
@@ -577,7 +582,6 @@ def CreateModelTab(self,window):
                     except:
                         pass
 
-            # Enable Bindings
             self.sheet2.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
             self.sheet2.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet2.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
@@ -642,7 +646,7 @@ def CreateModelTab(self,window):
                                 if j == 6:
                                     if self.optimize == 1:
                                         try:
-                                            if float(self.sheet2_data[i][6]) > float(self.sheet2_data[i][2]) and float(self.sheet2_data[i][6]) < float(self.sheet2_data[i][4]):
+                                            if float(self.sheet2_data[i][6]) > 1.01*float(self.sheet2_data[i][2]) and float(self.sheet2_data[i][6]) < 0.99*float(self.sheet2_data[i][4]):
                                                 self.sheet2.highlight((rown,6),fg = 'green', bg = 'white')
                                             else:
                                                 self.sheet2.highlight((rown,6),fg = 'red', bg = 'white')
@@ -777,7 +781,7 @@ def CreateModelTab(self,window):
                                 relx = self.Placement['Optimization']['Combo4'][0], 
                                 rely = self.Placement['Optimization']['Combo4'][1]
                                 )
-            self.optmenu5.set(ve_opt)
+            self.optmenu5.set(vp_opt)
             self.optmenu5.bind("<<ComboboxSelected>>",  VP_param)
             self.tab_att_list.append('self.optmenu5')
 
@@ -789,6 +793,8 @@ def CreateModelTab(self,window):
         def update_value(value):
             formatted_value = f"Bounds: ± {str(int(float(value)))}%"  # Format to integer decimal places with %
             self.desc6.config(text=formatted_value)
+
+            self.slider_val = value
 
         # -- Create the label
         self.desc6 = ttk.Label(window, 
@@ -819,6 +825,8 @@ def CreateModelTab(self,window):
                         rely = self.Placement['Optimization']['Slider1'][1]
                         )
         self.tab_att_list.append('self.slider1')
+        if hasattr(self,"slider_val"):
+            self.slider1.set(self.slider_val)
 
 
         # Create the Load from Excel button
@@ -866,6 +874,82 @@ def CreateModelTab(self,window):
                             )
         self.tab_att_list.append('self.btn_opt')
 
+        # Create Replace Values
+        def reset_guess(self):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Reset the initial guess with the last compare run
+            #
+            #------------------------------------------------------------------
+
+            # Check that values exist
+            flag = 0
+            # -- Check Viscoelastic
+            for i in range(len(self.sheet1.data)):
+                try:
+                    val = float(self.sheet1.data[i][-1])
+                except:
+                    flag = 1
+
+            # -- Check Viscoplastic
+            for i in range(len(self.sheet2.data)):
+                try:
+                    val = float(self.sheet2.data[i][-1])
+                except:
+                    flag = 1
+
+            if flag == 1:
+                messagebox.showerror(message ='No COMPARE result found.')
+                return
+            
+            # Get list of bound percentages
+            # -- Viscoelastic
+            ve_bnds = []
+            for i in range(len(self.sheet1.data)):
+                lp = (float(self.sheet1.data[i][2]) - float(self.sheet1.data[i][3]))/(-float(self.sheet1.data[i][3]))
+                up = (float(self.sheet1.data[i][4]) - float(self.sheet1.data[i][3]))/(float(self.sheet1.data[i][3]))
+                ve_bnds.append([lp, up])
+
+            # -- Viscoplastic
+            vp_bnds = []
+            for i in range(len(self.sheet2.data)):
+                lp = (float(self.sheet2.data[i][2]) - float(self.sheet2.data[i][3]))/(-float(self.sheet2.data[i][3]))
+                up = (float(self.sheet2.data[i][4]) - float(self.sheet2.data[i][3]))/(float(self.sheet2.data[i][3]))
+                vp_bnds.append([lp, up])
+
+            # Reset Values
+            # -- Viscoelastic
+            for i in range(len(self.sheet1.data)):
+                self.sheet1.data[i][3] = float(self.sheet1.data[i][-1])
+                self.sheet1.data[i][2] = float(self.sheet1.data[i][-1]) - float(self.sheet1.data[i][-1])*ve_bnds[i][0]
+                self.sheet1.data[i][4] = float(self.sheet1.data[i][-1]) + float(self.sheet1.data[i][-1])*ve_bnds[i][1]
+                self.sheet1.data[i][-1] = ''
+
+            # -- Viscoplastic
+            for i in range(len(self.sheet2.data)):
+                self.sheet2.data[i][3] = float(self.sheet2.data[i][-1])
+                self.sheet2.data[i][2] = float(self.sheet2.data[i][-1]) - float(self.sheet2.data[i][-1])*vp_bnds[i][0]
+                self.sheet2.data[i][4] = float(self.sheet2.data[i][-1]) + float(self.sheet2.data[i][-1])*vp_bnds[i][1]
+                self.sheet2.data[i][-1] = ''
+
+            # Redraw sheets
+            self.sheet1.redraw() 
+            self.sheet2.redraw() 
+
+        self.btn_reset = ttk.Button(
+                                window, 
+                                text = "Reset Guess", 
+                                command = lambda: reset_guess(self), 
+                                style = "Modern3.TButton",
+                                width = self.Placement['Optimization']['Button4'][2]
+                                )
+        self.btn_reset.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button4'][0], 
+                            rely = self.Placement['Optimization']['Button4'][1]
+                            )
+        self.tab_att_list.append('self.btn_reset')
+
         
         def save_model_local():
             #------------------------------------------------------------------
@@ -881,7 +965,7 @@ def CreateModelTab(self,window):
                 nflag = 1
 
             # Reset the Model
-            self.Compare['Model'] = {}
+            #self.Compare['Model'] = {}
 
             # Update Model Data
             UpdateModelData(None, self, 3, 'Model')
@@ -923,8 +1007,8 @@ def CreateModelTab(self,window):
                                     )
         self.btn_savemod.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button4'][0], 
-                            rely = self.Placement['Optimization']['Button4'][1]
+                            relx = self.Placement['Optimization']['Button5'][0], 
+                            rely = self.Placement['Optimization']['Button5'][1]
                             )
         self.tab_att_list.append('self.btn_savemod')
 
@@ -997,12 +1081,12 @@ def CreateModelTab(self,window):
                                     text = "Model Notes", 
                                     command = add_note, 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button5'][2]
+                                    width = self.Placement['Optimization']['Button6'][2]
                                     )
         self.btn_addnote.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button5'][0], 
-                            rely = self.Placement['Optimization']['Button5'][1]
+                            relx = self.Placement['Optimization']['Button6'][0], 
+                            rely = self.Placement['Optimization']['Button6'][1]
                             )
         self.tab_att_list.append('self.btn_addnote')
 

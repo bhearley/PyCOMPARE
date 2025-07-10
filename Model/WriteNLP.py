@@ -20,7 +20,7 @@ def WriteNLP(temp_dir, mode):
     file.write("NPRINT = 4\n")
     file.write("IMERIT = 0\n")
     file.write("ILQL   = 1\n")
-    file.write("ACCUR  = 1.0e-3\n")
+    file.write("ACCUR  = 1.0e-6\n")
     file.write("IFINIT = 0\n")
     file.write("NMAXFU = 10\n")
     if mode == 'Opt':

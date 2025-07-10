@@ -16,9 +16,18 @@ def CreateCharacterizationTab(self,window,frmt):
     # Import Functions
     from General.DeleteWidgets import DeleteTab
 
-    #Unpack Formatting
-    fontname = frmt[1]
-    fsize_s = frmt[2]
+    # Function to deselect sheet
+    def deselect_sheet(event,self,tag):
+        if tag == 'stage_table':
+            try:
+                self.sheet_char.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_char':
+            try:
+                self.stage_table.deselect("all", redraw=True)
+            except:
+                pass
 
     # Delete existing widgets
     if hasattr(self,"tab_att_list"):
@@ -28,6 +37,11 @@ def CreateCharacterizationTab(self,window,frmt):
             self.toolbar.destroy()
             self.canvas.get_tk_widget().destroy()
             del self.canvas
+
+        if hasattr(self, 'canvas2'):
+            self.toolbar2.destroy()
+            self.canvas2.get_tk_widget().destroy()
+            del self.canvas2
 
     # Preallocate the att list
     self.att_list = []
@@ -204,6 +218,7 @@ def CreateCharacterizationTab(self,window,frmt):
 
             # Enable Bindings
             self.stage_table.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
+            self.stage_table.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'stage_table'))])
 
             # Set stage table cell values
             for i in range(len(self.Compare['Data'][self.test_name]['Stage Type'])):
@@ -361,6 +376,7 @@ def CreateCharacterizationTab(self,window,frmt):
 
         # Enable bindings
         self.sheet_char.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
+        self.sheet_char.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'sheet_char'))])
         self.sheet_char.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_char.popup_menu_add_command('View All Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_char.popup_menu_add_command('Delete From Set', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)   

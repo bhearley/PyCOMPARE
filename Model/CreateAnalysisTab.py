@@ -47,6 +47,11 @@ def CreateAnalysisTab(self,window):
         self.canvas.get_tk_widget().destroy()
         del self.canvas
 
+    if hasattr(self, 'canvas2'):
+        self.toolbar2.destroy()
+        self.canvas2.get_tk_widget().destroy()
+        del self.canvas2
+
     # Preallocate the att list
     self.att_list = []
     self.loc_att_list = []
