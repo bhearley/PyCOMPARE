@@ -731,9 +731,10 @@ def CreateAnalysisTab(self,window):
                 self.note_click = 1
 
                 # Create the window
-                root = tk.Tk() 
+                root = tk.Toplevel(window) 
                 root.geometry("600x400")
                 root.title("Enter Model Notes") 
+                root.grab_set()
                 
                 # Create the label
                 ttk.Label(

@@ -6,28 +6,15 @@
 #          for characterization and edit the reduce data
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateCharacterizationTab(self,window,frmt):
+def CreateCharacterizationTab(self,window):
     # Import Modules
-    import tkinter as tk
+    import math
     from tkinter import messagebox
     from tkinter import ttk
     import tksheet
 
     # Import Functions
     from General.DeleteWidgets import DeleteTab
-
-    # Function to deselect sheet
-    def deselect_sheet(event,self,tag):
-        if tag == 'stage_table':
-            try:
-                self.sheet_char.deselect("all", redraw=True)
-            except:
-                pass
-        if tag == 'sheet_char':
-            try:
-                self.stage_table.deselect("all", redraw=True)
-            except:
-                pass
 
     # Delete existing widgets
     if hasattr(self,"tab_att_list"):
@@ -50,6 +37,35 @@ def CreateCharacterizationTab(self,window,frmt):
 
     # Initialize button press
     self.clicked = 0
+
+    def round_sig(x, sig=3):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Format number with defined significant figures
+        #
+        #--------------------------------------------------------------------------
+
+        if x == 0:
+            return 0
+        return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
+
+    def deselect_sheet(event,self,tag):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect one tksheet when selecting another
+        #
+        #--------------------------------------------------------------------------
+
+        if tag == 'stage_table':
+            try:
+                self.sheet_char.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_char':
+            try:
+                self.stage_table.deselect("all", redraw=True)
+            except:
+                pass
 
     def update_table():
         #--------------------------------------------------------------------------
@@ -196,7 +212,6 @@ def CreateCharacterizationTab(self,window,frmt):
                                             show_y_scrollbar = True,
                                             font = ("Segoe UI",self.Placement['Characterization']['Sheet1'][4],"normal"),
                                             header_font = ("Segoe UI",self.Placement['Characterization']['Sheet1'][4],"bold"),
-                                            #table_bg = 'red' # For checking formatting only
                                             )
             self.stage_table.place(
                                 anchor = 'nw', 
@@ -219,15 +234,16 @@ def CreateCharacterizationTab(self,window,frmt):
             # Enable Bindings
             self.stage_table.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
             self.stage_table.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'stage_table'))])
+            
 
             # Set stage table cell values
             for i in range(len(self.Compare['Data'][self.test_name]['Stage Type'])):
                 self.stage_table.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
                 self.stage_table.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Loading Direction'][i])
                 self.stage_table.set_cell_data(i,2,self.Compare['Data'][self.test_name]['Control'][i])
-                self.stage_table.set_cell_data(i,3,str(self.Compare['Data'][self.test_name]['Load Rate'][i][0]) 
+                self.stage_table.set_cell_data(i,3,str(round_sig(self.Compare['Data'][self.test_name]['Load Rate'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Load Rate'][i][1])
-                self.stage_table.set_cell_data(i,4,str(round(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
+                self.stage_table.set_cell_data(i,4,str(round_sig(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Target'][i][1])
                 self.stage_table.set_cell_data(i,5,self.Compare['Data'][self.test_name]['Time'][self.Compare['Data'][self.test_name]['Stage Divisions'][i]])
                 if self.Compare['Data'][self.test_name]['Reduced Data']['Time'] is not None:
@@ -351,7 +367,6 @@ def CreateCharacterizationTab(self,window,frmt):
                                         show_y_scrollbar = True,
                                         font = ('Segoe UI',self.Placement['Characterization']['Sheet2'][4],"normal"),
                                         header_font = ('Segoe UI',self.Placement['Characterization']['Sheet2'][4],"bold"),
-                                        #table_bg = 'blue' # For formatting purposes only
                                         )
         self.sheet_char.place(
                             anchor = 'nw', 
@@ -376,7 +391,7 @@ def CreateCharacterizationTab(self,window,frmt):
 
         # Enable bindings
         self.sheet_char.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
-        self.sheet_char.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'sheet_char'))])
+        #self.sheet_char.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'sheet_char'))])
         self.sheet_char.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_char.popup_menu_add_command('View All Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
         self.sheet_char.popup_menu_add_command('Delete From Set', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)   
@@ -395,7 +410,7 @@ def CreateCharacterizationTab(self,window,frmt):
                 ldir = ldir + str(ldir_list[j]) + ', '
             self.sheet_char.set_cell_data(i,3, ldir[:len(ldir)-2])
             self.sheet_char.set_cell_data(i,4,self.Compare['Data'][tests[i]]['Control'][0])
-            self.sheet_char.set_cell_data(i,5,str(self.Compare['Data'][tests[i]]['Load Rate'][0][0]) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
+            self.sheet_char.set_cell_data(i,5,str(round_sig(self.Compare['Data'][tests[i]]['Load Rate'][0][0],2)) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
             self.sheet_char.set_cell_data(i,6,self.Compare['Data'][tests[i]]['Angle'])
             self.sheet_char.set_cell_data(i,7,self.Compare['Data'][tests[i]]['RelWeight'])
 

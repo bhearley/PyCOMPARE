@@ -92,6 +92,7 @@ def Placements(self, res):
         Placement['Optimization']['Button4'] = [startx + delx*3, 0.8825, btnw]
         Placement['Optimization']['Button5'] = [startx + delx*4, 0.8825, btnw]
         Placement['Optimization']['Button6'] = [0.0125, 0.28, 12]
+        Placement['Optimization']['Button7'] = [startx + delx*5, 0.8825, btnw]
         Placement['Optimization']['Label6'] = [0.055, 0.205]
         Placement['Optimization']['Combo5'] = [0.16, 0.205]
 

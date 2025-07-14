@@ -11,6 +11,7 @@
 
 # Import Modules
 import copy
+from GRCMI import UnitConversion
 import json
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -52,23 +53,7 @@ from Model.ReadModel import *
 from Model.UpdateModelData import *
 from Model.WriteNLP import *
 from Model.WriteSIM import *
-from UnitConversion.UnitConversion import *
 from Visualization.CreateVisualizationTab import *
-
-# Set Directories
-home = os.getcwd()
-
-# GUI Formatting
-bg_color = 'white'          #background color
-fontname = 'calibri'        #font name
-fsize_s = 16                #small font fize
-fsize_l = 18                #large font size
-fsize_t = 24                #title font size
-frmt = [bg_color, fontname,fsize_s,fsize_l,fsize_t]    # Pack Formatting into list
-
-# Define Images
-title_img = os.path.join(home,'GUI','TitleHeader.png') # Set the title image path
-logo_img = os.path.join(home,'GUI','NasaLogo.png')     # Set the logo image path
 
 #Create the GUI
 class PY_COMPARE:
@@ -81,7 +66,10 @@ class PY_COMPARE:
         #--------------------------------------------------------------------------
 
         # Set global variales
-        global window, frmt
+        global window
+
+        # Set Directories
+        self.home = os.getcwd()
 
         #Create Background Window
         win_size = '1536x960'
@@ -97,30 +85,30 @@ class PY_COMPARE:
         # Get Styles
         GetStyles(self)
 
-        #Add the Title
-        img = Image.open(title_img)
+        # Add the Title
+        img = Image.open(os.path.join(self.home,'GUI','TitleHeader.png'))
         scale = self.Placement['HomePage']['Title'][2]
         img = img.resize((int(img.width*scale), int(img.height*scale)))
         self.img_hdr = ImageTk.PhotoImage(img)
-        self.panel_hdr = tk.Label(window, image = self.img_hdr, bg = bg_color)
+        self.panel_hdr = tk.Label(window, image = self.img_hdr, bg = 'white')
         self.panel_hdr.place(
                             anchor = 'n', 
                             relx = self.Placement['HomePage']['Title'][0], 
                             rely = self.Placement['HomePage']['Title'][1]
                             )
 
-        #Add the NASA Logo
-        img = Image.open(logo_img)
+        # Add the NASA Logo
+        img = Image.open(os.path.join(self.home,'GUI','NasaLogo.png'))
         scale = self.Placement['HomePage']['Logo'][2]
         img = img.resize((int(img.width*scale), int(img.height*scale)))
         self.img_nasa = ImageTk.PhotoImage(img)
-        self.panel_nasa = tk.Label(window, image = self.img_nasa, bg = bg_color)
+        self.panel_nasa = tk.Label(window, image = self.img_nasa, bg = 'white')
         self.panel_nasa.place(
                             anchor = 'e', 
                             relx = self.Placement['HomePage']['Logo'][0], 
                             rely = self.Placement['HomePage']['Logo'][1]
                             )
-
+        
         # Build the home page
         BuildHomePage(self, window)
 
@@ -128,15 +116,15 @@ class PY_COMPARE:
         def on_closing(self):
             #----------------------------------------------------------------------
             #
-            #   PURPOSE: Set exit protocol for the GUI.
+            #   PURPOSE: Set exit protocol for the main prgoram.
             #
             #----------------------------------------------------------------------
 
             # Check if project file exists
             if hasattr(self,'proj_file'):
 
-                # Prompt usert o save
-                if messagebox.askyesno("Quit", "Do you want to save before exiting?"):
+                # Prompt user to save
+                if messagebox.askyesno(title = "Quit", message = "Do you want to save before exiting?"):
 
                     # Get the project file
                     file = self.proj_file
@@ -147,7 +135,7 @@ class PY_COMPARE:
                     # Get the Data
                     data = self.Compare
 
-                    # Write data to file
+                    # Write data to project file
                     with open(file, 'wb') as file:
                         pickle.dump(data, file)
 
@@ -187,10 +175,10 @@ class PY_COMPARE:
             self.Compare = {}
 
             # Initialize the Settings Path Dependencies
-            model_library = os.path.join(home,'Model','AvailableModels.xlsx')
-            import_template = os.path.join(home,'Templates','ImportTemplate.xlsx')
-            export_template = os.path.join(home,'Templates','ExportTemplate.xlsx')
-            compare_path = os.path.join(home,'compnasardamage.exe')
+            model_library = os.path.join(self.home,'Model','AvailableModels.xlsx')
+            import_template = os.path.join(self.home,'Templates','ImportTemplate.xlsx')
+            export_template = os.path.join(self.home,'Templates','ExportTemplate.xlsx')
+            compare_path = os.path.join(self.home,'compnasardamage.exe')
             self.Compare['Paths'] = {'Model Library':model_library,
                                      'Import Template':import_template,
                                      'Export Template':export_template,
@@ -200,7 +188,7 @@ class PY_COMPARE:
             DeletePages(self)
 
             # Build the General Page
-            BuildGeneralPage(self, window, frmt)
+            BuildGeneralPage(self, window)
 
     def load_project(self):
         #--------------------------------------------------------------------------
@@ -214,11 +202,12 @@ class PY_COMPARE:
 
         # Initialize the data structure and build the home page
         if self.proj_file != None:
+
             # Delete the Home Page
             DeletePages(self)
 
             # Build the General Page
-            BuildGeneralPage(self, window, frmt)
+            BuildGeneralPage(self, window)
 
     def save(self):
         #--------------------------------------------------------------------------
@@ -263,7 +252,7 @@ class PY_COMPARE:
         DeleteLocal(self)
 
         # Create the database tab
-        CreateDataTab(self,window,frmt)
+        CreateDataTab(self,window)
 
     def char_tab(self):
         #--------------------------------------------------------------------------
@@ -280,7 +269,7 @@ class PY_COMPARE:
             self.Compare['Characterization'] = {}
 
         # Create the characterization tab
-        CreateCharacterizationTab(self,window,frmt)
+        CreateCharacterizationTab(self,window)
 
     def cell_select_char(self, response):
         #--------------------------------------------------------------------------
@@ -537,6 +526,7 @@ class PY_COMPARE:
         # Enable Data Reduction on the Characterization Table
         if hasattr(self,'sheet_char'):
             if self.sheet_char.winfo_exists():
+                
                 def ReduceData():
                     #--------------------------------------------------------------
                     #
@@ -572,11 +562,12 @@ class PY_COMPARE:
                     # Create the Segmentation Control Panel
                     if flag == 1:
                         self.window = 1
-                        root = tk.Tk()
+                        root = tk.Toplevel(window)
                         root.geometry("300x600")
                         root.configure(bg='white')
-                        root.title("Segmentation Control Panel")
+                        root.title("Segmentation Control")
                         root.resizable(False, False)
+                        root.grab_set()
 
                         # Create a sheet with number of stages
                         Cols = ['Stage', 'Points']
@@ -680,6 +671,7 @@ class PY_COMPARE:
                 # Create button to reduce data
                 if hasattr(self, 'btn_loc3'):
                     self.btn_loc3.destroy()
+
                 self.btn_loc3 = ttk.Button(
                                         window, 
                                         text = "Reduce Data", 
@@ -1203,6 +1195,7 @@ class PY_COMPARE:
                 ylab = 'Stress [MPa]'
 
         if len(disp_tests) > 0:
+
             # Format the plot
             xlab_frmt = ScalarFormatter() 
             ylab_frmt = ScalarFormatter()
@@ -1225,8 +1218,8 @@ class PY_COMPARE:
             self.toolbar.update()
 
             # Format Toolbar
-            self.toolbar.config(bg=bg_color)
-            self.toolbar._message_label.config(background=bg_color)
+            self.toolbar.config(bg='white')
+            self.toolbar._message_label.config(background='white')
             self.toolbar.place(
                             anchor = 'n', 
                             relx = self.Placement['Data']['Toolbar1'][0], 
@@ -1312,8 +1305,6 @@ class PY_COMPARE:
                 self.sheet_tag = tag
                 eval(table_name).enable_bindings(("edit_cell"))
                 eval(table_name).extra_bindings([("edit_cell", self.save_model)])
-                
-                eval(table_name).bind("<<SheetCellEdited>>", self.on_cell_edited)
 
                 # Check bounds
                 tags = ['sheet1', 'sheet2']
@@ -1338,9 +1329,6 @@ class PY_COMPARE:
                             except:
                                 pass
             eval(table_name).redraw()
-
-    def on_cell_edited(evet):
-        print("Cell was edited")
 
     def save_model(self, response):
         #--------------------------------------------------------------------------
@@ -1400,7 +1388,6 @@ class PY_COMPARE:
                 self.sheet2.set_cell_data(currently_selected.row,self.sheet2.visible_columns[1]-1,'')
             except:
                 pass
-
 
     def cell_select_anly(self, response, tag):
         #--------------------------------------------------------------------------
@@ -1528,10 +1515,12 @@ class PY_COMPARE:
             self.models = list(self.Compare['Model Library'].keys())
 
             if len(self.models) > 0:
+
                 # Create a window to view the model libary
-                root = tk.Tk()
+                root = tk.Toplevel(window)
                 root.config(width=900, height=700)
                 root.title("Model Libary")
+                root.grab_set()
 
                 def on_closing_ML(self):
                     #--------------------------------------------------------------
@@ -1842,71 +1831,132 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
-        # Update the model
-        UpdateModelData(None, self, 3, 'Model')
+        # Run Compare
+        def run_cmd_opt(callback, temp_dir):
 
-        # Set error checking flag
-        flag = 0
+            # Update the model
+            UpdateModelData(None, self, 3, 'Model')
 
-        # Check all elastic inital guesses and bounds are populated
-        if hasattr(self,'sheet1'):
-            for i in range(len(self.sheet1.data)):
-                try:
-                    float(self.sheet1.data[i][2])
-                    float(self.sheet1.data[i][3])
-                    float(self.sheet1.data[i][4])
-                except:
-                    flag = 1
-                    msg = 'Invalid values for the elastic parameter initial guess and/or bounds.'
+            # Set error checking flag
+            self.flag = 0
 
-        # Check all elastic bounds are valid
-        if hasattr(self,'sheet1'):
-            if flag == 0:
+            # Check all elastic inital guesses and bounds are populated
+            if hasattr(self,'sheet1'):
                 for i in range(len(self.sheet1.data)):
-                    if float(self.sheet1.data[i][2]) > float(self.sheet1.data[i][3]):
-                        flag = 1
-                        msg = 'Invalid values for elastic parameter bounds.'
-                    if float(self.sheet1.data[i][4]) < float(self.sheet1.data[i][3]):
-                        flag = 1
-                        msg = 'Invalid values for elastic parameter bounds.'
+                    try:
+                        float(self.sheet1.data[i][2])
+                        float(self.sheet1.data[i][3])
+                        float(self.sheet1.data[i][4])
+                    except:
+                        self.flag = 1
+                        self.msg = 'Invalid values for the elastic parameter initial guess and/or bounds.'
 
-        # Check all plastic inital guesses and bounds are populated
-        if hasattr(self,'sheet2'):
-            for i in range(len(self.sheet2.data)):
-                try:
-                    float(self.sheet2.data[i][2])
-                    float(self.sheet2.data[i][3])
-                    float(self.sheet2.data[i][4])
-                except:
-                    flag = 1
-                    msg = 'Invalid values for the plastic parameter initial guess and/or bounds.'
+            # Check all elastic bounds are valid
+            if hasattr(self,'sheet1'):
+                if self.flag == 0:
+                    for i in range(len(self.sheet1.data)):
+                        if float(self.sheet1.data[i][2]) > float(self.sheet1.data[i][3]):
+                            self.flag = 1
+                            self.msg = 'Invalid values for elastic parameter bounds.'
+                        if float(self.sheet1.data[i][4]) < float(self.sheet1.data[i][3]):
+                            self.flag = 1
+                            self.msg = 'Invalid values for elastic parameter bounds.'
 
-        # Check all elastic bounds are valid
-        if hasattr(self,'sheet2'):
-            if flag == 0:
+            # Check all plastic inital guesses and bounds are populated
+            if hasattr(self,'sheet2'):
                 for i in range(len(self.sheet2.data)):
-                    if float(self.sheet2.data[i][2]) > float(self.sheet2.data[i][3]):
-                        flag = 1
-                        msg = 'Invalid values for plastic parameter bounds.'
-                    if float(self.sheet2.data[i][4]) < float(self.sheet2.data[i][3]):
-                        flag = 1
-                        msg = 'Invalid values for plastic parameter bounds.'
+                    try:
+                        float(self.sheet2.data[i][2])
+                        float(self.sheet2.data[i][3])
+                        float(self.sheet2.data[i][4])
+                    except:
+                        self.flag = 1
+                        self.msg = 'Invalid values for the plastic parameter initial guess and/or bounds.'
 
-        # Set the parameters
-        self.Compare['Model']['Reversible Model Name'] = self.optmenu2.get()
-        self.Compare['Model']['Irreversible Model Name'] = self.optmenu3.get()
-        self.Compare['Model']['M'] = self.optmenu4.get()
-        self.Compare['Model']['N'] = self.optmenu5.get()
-        self.Compare['Model']['VE_Param'] = self.sheet1.data
-        self.Compare['Model']['VP_Param'] = self.sheet2.data
+            # Check all elastic bounds are valid
+            if hasattr(self,'sheet2'):
+                if self.flag == 0:
+                    for i in range(len(self.sheet2.data)):
+                        if float(self.sheet2.data[i][2]) > float(self.sheet2.data[i][3]):
+                            self.flag = 1
+                            self.msg = 'Invalid values for plastic parameter bounds.'
+                        if float(self.sheet2.data[i][4]) < float(self.sheet2.data[i][3]):
+                            self.flag = 1
+                            self.msg = 'Invalid values for plastic parameter bounds.'
 
-        # Run Optimization
-        if flag == 0:
-            self.run_compare_opt()
+            # Set the parameters
+            self.Compare['Model']['Reversible Model Name'] = self.optmenu2.get()
+            self.Compare['Model']['Irreversible Model Name'] = self.optmenu3.get()
+            self.Compare['Model']['M'] = self.optmenu4.get()
+            self.Compare['Model']['N'] = self.optmenu5.get()
+            self.Compare['Model']['VE_Param'] = self.sheet1.data
+            self.Compare['Model']['VP_Param'] = self.sheet2.data
+
+            # Run Optimization
+            if self.flag == 0:
+                self.run_compare_opt()
+                
+            # Notify when done
+            callback()
+        
+        # Function to display progress bar while running
+        def run_compare_start(self):
+
+            # Create the window
+            loading = tk.Toplevel(window)
+            loading.title("Running Compare")
+            loading.geometry("300x100")
+            loading.resizable(False, False)
+            loading.configure(bg='white')
+            loading.grab_set()  
+
+            # Function for progress bar Exit Protocol
+            def on_closing_saving(self):
+
+                # Don't allow exit while saving
+                return
+            
+            # Create the window exit protocal
+            loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
+
+            # Create the loading label
+            ttk.Label(
+                    loading, 
+                    text="Running COMPARE - Please Wait", 
+                    style = "Modern2.TLabel"
+                    ).pack(pady=10)
+
+            # Create the progress bar
+            pb = ttk.Progressbar(
+                                loading, 
+                                mode='indeterminate',
+                                style = "Modern.Horizontal.TProgressbar"
+                                )
+            pb.pack(fill='x', padx=20, pady=10)
+            pb.start(10)
+
+            # Function to close window when task is completed
+            def on_task_done():
+
+                # Stop Progress bar
+                pb.stop()
+
+                # Destroy Window
+                loading.destroy()
+
+            # Begin save on background thread
+            threading.Thread(target=run_cmd_opt, args=(on_task_done,self), daemon=True).start()
+
+            # Wait until loading window is closed
+            window.wait_window(loading)
+
+        run_compare_start(self)
+
+        if self.flag == 0:
+            messagebox.showinfo(message=self.msg)
         else:
-            messagebox.showinfo(message=msg)
-
-                    
+            messagebox.showerror(message=self.msg)
+                                
     def run_compare_opt(self):
         #--------------------------------------------------------------------------
         #
@@ -1935,7 +1985,8 @@ class PY_COMPARE:
             shutil.copy(self.Compare['Paths']['Compare Executable'], temp_dir)
 
         except:
-            messagebox.showerror(message = 'Unable to clear TEMP directory - clear manually.')
+            self.msg = 'Unable to clear TEMP directory - clear manually.'
+            return
 
         try:
             # Determine Model Type
@@ -1946,7 +1997,8 @@ class PY_COMPARE:
                     mod, Param, Param_U, Param_N = WriteDSG_GVIPS_OPT_IN(self, temp_dir)
 
         except:
-            messagebox.showerror(message = 'Error writing DSG file.')
+            self.msg = 'Error writing DSG file.'
+            return
 
         try:
             # Write the Simulation files
@@ -1957,80 +2009,22 @@ class PY_COMPARE:
                 ct = ct + 1
 
         except:
-            messagebox.showerror(message = 'Error Writing SIM files.')
+            self.msg = 'Error Writing SIM files.'
+            return
 
         try:
             # Write the NLP files
             WriteNLP(temp_dir, 'Opt')
 
         except:
-            messagebox.showerror(message = 'Error Writing NLP file.')
+            self.msg = 'Error Writing NLP file.'
 
         try:
-            # Run Compare
-            def run_cmd_opt(callback, temp_dir):
-
-                command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
-                os.system(command)
-            
-                # Notify when done
-                callback()
-            
-            # Function to display progress bar while running
-            def run_compare_opt(self):
-
-                # Create the window
-                loading = tk.Toplevel(window)
-                loading.title("Running Compare")
-                loading.geometry("300x100")
-                loading.resizable(False, False)
-                loading.configure(bg='white')
-                loading.grab_set()  
-
-                # Function for progress bar Exit Protocol
-                def on_closing_saving(self):
-
-                    # Don't allow exit while saving
-                    return
-                
-                # Create the window exit protocal
-                loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
-
-                # Create the loading label
-                ttk.Label(
-                        loading, 
-                        text="Running COMPARE - Please Wait", 
-                        style = "Modern2.TLabel"
-                        ).pack(pady=10)
-
-                # Create the progress bar
-                pb = ttk.Progressbar(
-                                    loading, 
-                                    mode='indeterminate',
-                                    style = "Modern.Horizontal.TProgressbar"
-                                    )
-                pb.pack(fill='x', padx=20, pady=10)
-                pb.start(10)
-
-                # Function to close window when task is completed
-                def on_task_done():
-
-                    # Stop Progress bar
-                    pb.stop()
-
-                    # Destroy Window
-                    loading.destroy()
-
-                # Begin save on background thread
-                threading.Thread(target=run_cmd_opt, args=(on_task_done,temp_dir), daemon=True).start()
-
-                # Wait until loading window is closed
-                window.wait_window(loading)
-
-            # Start Optmization
-            run_compare_opt(self)
+            command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
+            os.system(command)
         except:
-            messagebox.showerror(message = 'Error running COMPARE.')
+            self.msg = 'Error running COMPARE.'
+            return
 
         try:
             # Read Values
@@ -2048,17 +2042,15 @@ class PY_COMPARE:
                 for i in range(self.sheet1.visible_rows[1]):
                     val = float(Vals[Param_N[Param.index(VE[i][0])]-1])
                     try:
-                        val = UnitConversion(Param_U[Param.index(VE[i][0])], val, VE[i][1], os.path.join(os.getcwd()))
+                        val = UnitConversion(Param_U[Param.index(VE[i][0])], val, VE[i][1])
                     except:
                         pass
-                    self.sheet1.set_cell_data(i,6,'{:0.4e}'.format(val))
+                    self.sheet1.set_cell_data(i,6,'{:0.4e}'.format(val), redraw = False)
                     if val >= 0.99*float(VE[i][4]) or val <= 1.01*float(VE[i][2]):
                         clr = 'red'
                     else:
                         clr = 'green'
-                    self.sheet1.highlight((i,6),fg= clr, bg = 'white')
-
-                self.sheet1.redraw()
+                    self.sheet1.highlight((i,6),fg= clr, bg = 'white', redraw = False)
 
             #Update the Viscoplastic parameters
             if hasattr(self,'sheet2'):
@@ -2066,21 +2058,23 @@ class PY_COMPARE:
                 for i in range(self.sheet2.visible_rows[1]):
                     val = float(Vals[Param_N[Param.index(VP[i][0])]-1])
                     try:
-                        val = UnitConversion(Param_U[Param.index(VP[i][0])], val, VP[i][1], os.path.join(os.getcwd()))
+                        val = UnitConversion(Param_U[Param.index(VP[i][0])], val, VP[i][1])
                     except:
                         pass
-                    self.sheet2.set_cell_data(i,6,'{:0.4e}'.format(val))
+                    self.sheet2.set_cell_data(i,6,'{:0.4e}'.format(val), redraw = False)
                     if val >= 0.99*float(VP[i][4]) or val <= 1.01*float(VP[i][2]):
                         clr = 'red'
                     else:
                         clr = 'green'
-                    self.sheet2.highlight((i,6),fg= clr, bg = 'white')
+                    self.sheet2.highlight((i,6),fg= clr, bg = 'white', redraw = False)
 
-                self.sheet2.redraw()
+            # Redraw the sheet
+            self.sheet1.redraw()
+            self.sheet2.redraw()
 
             # Check that a name exists
             if 'Model ID' not in self.Compare.keys():
-               self.Compare['Model ID'] = None 
+                self.Compare['Model ID'] = None 
             if self.Compare['Model ID'] == None:
                 # Set the type
                 self.Compare['Model']['Compare Type'] = 'Optimize' 
@@ -2179,10 +2173,21 @@ class PY_COMPARE:
                 # Update ct
                 ct = ct + 1
 
-            messagebox.showinfo(message = 'Optimization Complete!')
-        except:
-            messagebox.showerror(message = 'Error reading output data from COMPARE.')
+            # Write all data to log
+            self.update_log()
 
+            self.msg = 'Optimization Complete!'
+        except:
+            self.msg = 'Error reading output data from COMPARE.'
+            return
+
+        if self.msg == 'Optimization Complete!':
+            self.flag = 0
+        else:
+            self.flag = 1
+
+        return 
+    
     def analyze(self):
         #--------------------------------------------------------------------------
         #
@@ -2190,38 +2195,103 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
-        # Set error checking flag
-        flag = 0
+        # Run Compare
+        def run_cmd_anly(callback, temp_dir):
 
-        # Check all elastic values are populated
-        if hasattr(self,'sheet1_anly'):
-            for i in range(len(self.sheet1_anly.data)):
-                try:
-                    float(self.sheet1_anly.data[i][3])
-                except:
-                    flag = 1
-                    msg = 'Invalid values for the elastic parameters.'
+            # Set error checking flag
+            self.flag = 0
 
-        # Check all plastic values are populated
-        if hasattr(self,'sheet2_anly'):
-            for i in range(len(self.sheet2_anly.data)):
-                try:
-                    float(self.sheet2_anly.data[i][3])
-                except:
-                    flag = 1
-                    msg = 'Invalid values for the plastic parameters.'
+            # Check all elastic values are populated
+            if hasattr(self,'sheet1_anly'):
+                for i in range(len(self.sheet1_anly.data)):
+                    try:
+                        float(self.sheet1_anly.data[i][3])
+                    except:
+                        self.flag = 1
+                        self.msg = 'Invalid values for the elastic parameters.'
 
+            # Check all plastic values are populated
+            if hasattr(self,'sheet2_anly'):
+                for i in range(len(self.sheet2_anly.data)):
+                    try:
+                        float(self.sheet2_anly.data[i][3])
+                    except:
+                        self.flag = 1
+                        self.msg = 'Invalid values for the plastic parameters.'
 
-        if flag == 0:
-            if len(list(self.Compare['Characterization'].keys())) > 0:
-                tests = list(self.Compare['Characterization'].keys())
-                self.run_compare_anly(tests)
-            else:
-                messagebox.showeror(message='No tests have been added to the Characterization set.')
+            if self.flag == 0:
+                if len(list(self.Compare['Characterization'].keys())) > 0:
+                    tests = list(self.Compare['Characterization'].keys())
+                    self.run_compare_anly(tests)
+                else:
+                    messagebox.showeror(message='No tests have been added to the Characterization set.')
+
+            # Run Optimization
+            if self.flag == 0:
+                self.run_compare_anly()
+                
+            # Notify when done
+            callback()
+        
+        # Function to display progress bar while running
+        def run_compare_start(self):
+
+            # Create the window
+            loading = tk.Toplevel(window)
+            loading.title("Running Compare")
+            loading.geometry("300x100")
+            loading.resizable(False, False)
+            loading.configure(bg='white')
+            loading.grab_set()  
+
+            # Function for progress bar Exit Protocol
+            def on_closing_saving(self):
+
+                # Don't allow exit while saving
+                return
+            
+            # Create the window exit protocal
+            loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
+
+            # Create the loading label
+            ttk.Label(
+                    loading, 
+                    text="Running COMPARE - Please Wait", 
+                    style = "Modern2.TLabel"
+                    ).pack(pady=10)
+
+            # Create the progress bar
+            pb = ttk.Progressbar(
+                                loading, 
+                                mode='indeterminate',
+                                style = "Modern.Horizontal.TProgressbar"
+                                )
+            pb.pack(fill='x', padx=20, pady=10)
+            pb.start(10)
+
+            # Function to close window when task is completed
+            def on_task_done():
+
+                # Stop Progress bar
+                pb.stop()
+
+                # Destroy Window
+                loading.destroy()
+
+            # Begin save on background thread
+            threading.Thread(target=run_cmd_anly, args=(on_task_done,self), daemon=True).start()
+
+            # Wait until loading window is closed
+            window.wait_window(loading)
+
+        run_compare_start(self)
+
+        if self.flag == 0:
+            messagebox.showinfo(message=self.msg)
         else:
-            messagebox.showinfo(message=msg)
+            messagebox.showerror(message=self.msg)
 
-    def run_compare_anly(self, tests, flag = 0):
+    def run_compare_anly(self, tests):
         #--------------------------------------------------------------------------
         #
         #   PURPOSE: Run COMPARE Analysis.
@@ -2258,7 +2328,7 @@ class PY_COMPARE:
                                                                 data['VP_Param'][i][6],
                                                                 ])
         except:
-            messagebox.showerror(message='Unable to set Analysis model parameters. Ensure a model has been loaded.')
+            self.msg='Unable to set Analysis model parameters. Ensure a model has been loaded.'
         try:
             # Create and clear the Temp Directory
             temp_dir = os.path.join(os.getcwd(),'Temp')
@@ -2280,7 +2350,7 @@ class PY_COMPARE:
             shutil.copy(self.Compare['Paths']['Compare Executable'], temp_dir)
 
         except:
-            messagebox.showerror(message = 'Unable to clear TEMP directory - clear manually.')
+            self.msg = 'Unable to clear TEMP directory - clear manually.'
 
         try:
             # Determine Model Type
@@ -2290,7 +2360,7 @@ class PY_COMPARE:
                     # Write the DGS file
                     mod, Param, Param_U, Param_N = WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests)
         except:
-            messagebox.showerror(message = 'Error writing DSG file.')
+            self.msg = 'Error writing DSG file.'
 
         try:
             # Write the Simulation files
@@ -2301,80 +2371,19 @@ class PY_COMPARE:
                 ct = ct + 1
 
         except:
-            messagebox.showerror(message = 'Error writing SIM files.')
+            self.msg = 'Error writing SIM files.'
 
         try:
             # Write the NLP files
             WriteNLP(temp_dir, 'Analy')
         except:
-            messagebox.showerror(message = 'Error writing NLP file.')
+            self.msg = 'Error writing NLP file.'
 
         try:
-            # Run Compare
-            def run_cmd_analy(callback, temp_dir):
-
-                command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
-                os.system(command)
-            
-                # Notify when done
-                callback()
-            
-            # Function to display progress bar while running
-            def run_compare_analy(self):
-
-                # Create the window
-                loading = tk.Toplevel(window)
-                loading.title("Running Compare")
-                loading.geometry("300x100")
-                loading.resizable(False, False)
-                loading.configure(bg='white')
-                loading.grab_set()  
-
-                # Function for progress bar Exit Protocol
-                def on_closing_saving(self):
-
-                    # Don't allow exit while saving
-                    return
-                
-                # Create the window exit protocal
-                loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
-
-                # Create the loading label
-                ttk.Label(
-                        loading, 
-                        text="Running COMPARE - Please Wait", 
-                        style = "Modern2.TLabel"
-                        ).pack(pady=10)
-
-                # Create the progress bar
-                pb = ttk.Progressbar(
-                                    loading, 
-                                    mode='indeterminate',
-                                    style = "Modern.Horizontal.TProgressbar"
-                                    )
-                pb.pack(fill='x', padx=20, pady=10)
-                pb.start(10)
-
-                # Function to close window when task is completed
-                def on_task_done():
-
-                    # Stop Progress bar
-                    pb.stop()
-
-                    # Destroy Window
-                    loading.destroy()
-
-                # Begin save on background thread
-                threading.Thread(target=run_cmd_analy, args=(on_task_done,temp_dir), daemon=True).start()
-
-                # Wait until loading window is closed
-                window.wait_window(loading)
-
-            # Start Optmization
-            run_compare_analy(self)
-
+            command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
+            os.system(command)
         except:
-            messagebox.showerror(message = 'Error running COMPARE.')
+            self.msg = 'Error running COMPARE.'
 
         try:
             # Set model status to 1
@@ -2441,11 +2450,152 @@ class PY_COMPARE:
                 self.Compare['Prediction'][test]['Error'] = err
                 ct = ct+1
 
-            if flag == 0:
-                messagebox.showinfo(message = 'Analysis Complete!')
+            self.msg = 'Analysis Complete!'
         except:
-            messagebox.showerror(message = 'Error reading output data from COMPARE.')
+            self.msg = 'Error reading output data from COMPARE.'
 
+        if self.msg == 'Analysis Complete!':
+            self.flag = 0
+        else:
+            self.flag = 1
+
+        return 
+    
+    def update_log(self):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Update the log after a successful run
+        #
+        #--------------------------------------------------------------------------
+
+        # Add spaces
+        self.log.append(' ')
+        self.log.append(' ')
+        self.log.append('-- NEW RUN --')
+
+        # Write Tests
+        self.log.append(' ')
+        self.log.append('TESTS:')
+        test_data = [['NAME', 'TYPE', 'TEMP (°C)', 'DIREC', 'CONTROL', 'ANGLE (°)', 'WEIGHT' ]]
+        for test in self.Compare['Characterization'].keys():
+            test_data.append([test, 
+                              self.Compare['Characterization'][test]['Test Type'],
+                              UnitConversion(self.Compare['Characterization'][test]['Temperature'][1], self.Compare['Characterization'][test]['Temperature'][0], '°C'),
+                              str(self.Compare['Characterization'][test]['Loading Direction'][0]),
+                              self.Compare['Characterization'][test]['Control'][0],
+                              self.Compare['Characterization'][test]['Angle'],
+                              self.Compare['Characterization'][test]['RelWeight'],
+                              ])
+        # Column formatters matching your types
+        formatter_header = "{:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}"
+        formatter_data   = "{:<10} {:<10} {:<10.2f} {:<10} {:<10} {:<10.2f} {:<10.4f}"
+
+        # Write to file
+        for row in test_data:
+            if row[0] == 'NAME':  # Header row
+                line = formatter_header.format(*row)
+            else:
+                line = formatter_data.format(
+                    row[0], row[1],
+                    float(row[2]), row[3], row[4],
+                    float(row[5]), float(row[6])
+                )
+            self.log.append(line)
+
+        # Write Model Information
+        self.log.append(' ')
+        self.log.append('MODEL INFORMATION:')
+        self.log.append('Model Name: ' + self.Compare['Model']['Model Name'])
+        self.log.append('Reversible Model Name: ' + self.Compare['Model']['Reversible Model Name'])
+        self.log.append('Irreversible Model Name: ' + self.Compare['Model']['Irreversible Model Name'])
+        self.log.append('Viscoelastic Mechanisms: ' + self.Compare['Model']['M'])
+        self.log.append('Viscoplastic Mechanisms: ' + self.Compare['Model']['N'])
+        self.log.append(' ')
+
+        # Parameter information
+        param = [['PARAM','UNIT','LB','INIT','UB']]
+        for i in range(len(self.Compare['Model']['VE_Param'])):
+            param.append(self.Compare['Model']['VE_Param'][i])
+        for i in range(len(self.Compare['Model']['VP_Param'])):
+            param.append(self.Compare['Model']['VP_Param'][i])
+
+        formatter_header = "{:<10} {:<10} {:<10} {:<10} {:<10}"
+        formatter_data   = "{:<10} {:<10} {:<10.4f} {:<10.4f} {:<10.4f}"
+
+        # Write to file
+        for row in param:
+            if row[0] == 'PARAM':  # Header row
+                line = formatter_header.format(*row)
+            else:
+                line = formatter_data.format(
+                    row[0], row[1],
+                    float(row[2]), float(row[3]), float(row[4]),
+                )
+            self.log.append(line)
+
+        # Optimization Results
+        self.log.append(' ')
+        self.log.append('OPTIMIZATION RESULTS:')
+
+        param = [['PARAM','UNIT','VALUE']]
+        for i in range(len(self.Compare['Model']['VE_Param'])):
+            param.append(self.Compare['Model']['VE_Param'][i])
+        for i in range(len(self.Compare['Model']['VP_Param'])):
+            param.append(self.Compare['Model']['VP_Param'][i])
+
+        formatter_header = "{:<10} {:<10} {:<10}"
+        formatter_data   = "{:<10} {:<10} {:<10.4f}"
+
+        # Write to file
+        for row in param:
+            if row[0] == 'PARAM':  # Header row
+                line = formatter_header.format(*row)
+            else:
+                line = formatter_data.format(
+                    row[0], row[1],
+                    float(row[6]),
+                )
+            self.log.append(line)
+
+        # Test and Global Error
+        self.log.append(' ')
+        self.log.append('ERROR:')
+        self.log.append('Global Error = ' + str(self.Compare['Global Error']))
+        self.log.append(' ')
+
+        # Write Tests
+        self.log.append('TESTS:')
+        test_data = [['NAME', 'TYPE', 'WEIGHT', 'ERROR' ]]
+        for test in self.Compare['Characterization'].keys():
+            test_data.append([test, 
+                              self.Compare['Characterization'][test]['Test Type'],
+                              self.Compare['Characterization'][test]['RelWeight'],
+                              self.Compare['Prediction'][test]['Error'],
+                              ])
+        # Column formatters matching your types
+        formatter_header = "{:<10} {:<10} {:<10} {:<10}"
+        formatter_data   = "{:<10} {:<10} {:<10.4f} {:<10.4f}"
+
+        # Write to file
+        for row in test_data:
+            if row[0] == 'NAME':  # Header row
+                line = formatter_header.format(*row)
+            else:
+                line = formatter_data.format(
+                    row[0], row[1],
+                    float(row[2]), float(row[3]), 
+                )
+            self.log.append(line)
+
+        # Write Data
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            for line in self.log:
+                f.write(line + "\n")
+
+        f.close()
+
+        self.log = []
+    
     #------------------------------------------------------------------------------------------------------------------------------------------
     #
     #   VISUALIZATION PAGE
@@ -2465,7 +2615,7 @@ class PY_COMPARE:
         DeleteLocal(self)
 
         # Create the visualizaton tab
-        CreateVisualizationTab(self,window,frmt)
+        CreateVisualizationTab(self,window)
 
     def plotter_viz(self):
         #--------------------------------------------------------------------------
@@ -2567,8 +2717,8 @@ class PY_COMPARE:
         self.toolbar.update()
 
         # Format Toolbar
-        self.toolbar.config(bg=bg_color)
-        self.toolbar._message_label.config(background=bg_color)
+        self.toolbar.config(bg='white')
+        self.toolbar._message_label.config(background='white')
         self.toolbar.place(
                         anchor = 'n', 
                         relx = self.Placement['Visualization']['Toolbar1'][0], 
@@ -2666,8 +2816,8 @@ class PY_COMPARE:
         self.toolbar2.update()
 
         # Format Toolbar
-        self.toolbar2.config(bg=bg_color)
-        self.toolbar2._message_label.config(background=bg_color)
+        self.toolbar2.config(bg='white')
+        self.toolbar2._message_label.config(background='white')
         self.toolbar2.place(
                         anchor = 'n', 
                         relx = self.Placement['Visualization']['Toolbar2'][0], 
@@ -2781,8 +2931,8 @@ class PY_COMPARE:
         self.toolbar.update()
 
         # Format Toolbar
-        self.toolbar.config(bg=bg_color)
-        self.toolbar._message_label.config(background=bg_color)
+        self.toolbar.config(bg='white')
+        self.toolbar._message_label.config(background='white')
         self.toolbar.place(
                         anchor = 'n', 
                         relx = self.Placement['Visualization']['Toolbar1'][0], 
@@ -2880,8 +3030,8 @@ class PY_COMPARE:
         self.toolbar2.update()
 
         # Format Toolbar
-        self.toolbar2.config(bg=bg_color)
-        self.toolbar2._message_label.config(background=bg_color)
+        self.toolbar2.config(bg='white')
+        self.toolbar2._message_label.config(background='white')
         self.toolbar2.place(
                         anchor = 'n', 
                         relx = self.Placement['Visualization']['Toolbar2'][0], 
@@ -3150,9 +3300,11 @@ class PY_COMPARE:
                 self.settings_window = 1
 
                 # Create the window
-                root = tk.Tk()
+                root = tk.Toplevel(window)
                 root.config(width=900, height=700)
                 root.title("Path Dependencies")
+                root.configure(bg='white')
+                root.grab_set()
 
                 # Reset Window
                 def reset_window():
@@ -3170,7 +3322,7 @@ class PY_COMPARE:
                     # Destory attributes
                     for att in atts:
                         try:
-                            eval(atts).destroy()
+                            eval(att).destroy()
                         except:
                             pass
 
@@ -3218,7 +3370,6 @@ class PY_COMPARE:
                                             rely = 0.15
                                             )
 
-                    
                     # -- Model Library
                     def set_mod_path(self):
                         #----------------------------------------------------------

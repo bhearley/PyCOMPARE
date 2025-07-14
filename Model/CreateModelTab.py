@@ -348,7 +348,6 @@ def CreateModelTab(self,window):
             self.sheet1.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet1'))])
             
-
             # Set Column Widths
             self.sheet1.column_width(column = 0, width = self.Placement['Optimization']['Sheet1'][5], redraw = True)
             self.sheet1.column_width(column = 1, width = self.Placement['Optimization']['Sheet1'][6], redraw = True)
@@ -475,7 +474,6 @@ def CreateModelTab(self,window):
                 self.sheet2.destroy()
                 del self.sheet2
                 
-
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
                 # Set the reversible model type
@@ -789,9 +787,14 @@ def CreateModelTab(self,window):
             VP_param(vp_opt)
 
         # Create the bounds slider
-        # -- Format slider text
         def update_value(value):
-            formatted_value = f"Bounds: ± {str(int(float(value)))}%"  # Format to integer decimal places with %
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Format the slider value and save to memory.
+            #
+            #------------------------------------------------------------------
+
+            formatted_value = f"Bounds: ± {str(int(float(value)))}%" 
             self.desc6.config(text=formatted_value)
 
             self.slider_val = value
@@ -827,7 +830,6 @@ def CreateModelTab(self,window):
         self.tab_att_list.append('self.slider1')
         if hasattr(self,"slider_val"):
             self.slider1.set(self.slider_val)
-
 
         # Create the Load from Excel button
         self.btn_load_db = ttk.Button(
@@ -950,7 +952,6 @@ def CreateModelTab(self,window):
                             )
         self.tab_att_list.append('self.btn_reset')
 
-        
         def save_model_local():
             #------------------------------------------------------------------
             #
@@ -963,9 +964,6 @@ def CreateModelTab(self,window):
             if 'Note' in self.Compare['Model'].keys():
                 note =  self.Compare['Model']['Note']
                 nflag = 1
-
-            # Reset the Model
-            #self.Compare['Model'] = {}
 
             # Update Model Data
             UpdateModelData(None, self, 3, 'Model')
@@ -1003,7 +1001,7 @@ def CreateModelTab(self,window):
                                     text = "Save Model", 
                                     command = save_model_local, 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button4'][2]
+                                    width = self.Placement['Optimization']['Button5'][2]
                                     )
         self.btn_savemod.place(
                             anchor = 'w', 
@@ -1028,9 +1026,10 @@ def CreateModelTab(self,window):
                 self.note_click = 1
 
                 # Create the window
-                root = tk.Tk() 
+                root = tk.Toplevel(window)
                 root.geometry("600x400")
                 root.title("Enter Model Notes") 
+                root.grab_set()
                 
                 # Create the label
                 ttk.Label(
@@ -1089,6 +1088,244 @@ def CreateModelTab(self,window):
                             rely = self.Placement['Optimization']['Button6'][1]
                             )
         self.tab_att_list.append('self.btn_addnote')
+
+        # Function to view model history
+        def view_history(self):
+            #--------------------------------------------------------------
+            #
+            #   PURPOSE: View run history for this project.
+            #
+            #--------------------------------------------------------------
+
+            def view_hist_data(self):
+                #--------------------------------------------------------------
+                #
+                #   PURPOSE: Get parameters and test error for chosen run.
+                #
+                #--------------------------------------------------------------
+
+                # Delete the old tables if they exist
+                try:
+                    self.hist_param_sheet.destroy()
+                    self.hist_test_sheet.destroy()
+                except:
+                    pass
+
+                # Get currently selected row
+                currently_selected = self.run_hist_sheet.get_currently_selected()
+
+                # Highlight Row
+                for i in range(len(self.run_hist_sheet.data)):
+                    self.run_hist_sheet.highlight_rows(i,'white','black')
+                self.run_hist_sheet.highlight_rows(currently_selected.row,'lightblue1','black')
+
+                # Get parameters
+                params = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Parameters']
+                param_keys = list(params.keys())
+
+                # Create Parameter sheet
+                Cols = ['Parameter', 'Value', 'Unit']
+                self.hist_param_sheet = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(param_keys), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols,
+                                                width = 375, 
+                                                height = 250, 
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI",12,"normal"),
+                                                header_font = ("Segoe UI",12,"bold"))
+                self.hist_param_sheet.place(
+                                    anchor = 'ne', 
+                                    relx = 0.975, 
+                                    rely = 0.1
+                                    )
+
+                # Format the sheet
+                self.hist_param_sheet.change_theme("blue")
+                self.hist_param_sheet.column_width(column = 0, width = 120, redraw = True)
+                self.hist_param_sheet.column_width(column = 1, width = 100, redraw = True)
+                self.hist_param_sheet.column_width(column = 2, width = 120, redraw = True)
+                self.hist_param_sheet.table_align(align = 'c',redraw=True)
+                self.hist_param_sheet.set_index_width(0)
+
+                # Fill existing values values
+                for i, key in enumerate(param_keys):
+                    self.hist_param_sheet.set_cell_data(i,0,key)
+                    self.hist_param_sheet.set_cell_data(i,1,params[key][0])
+                    self.hist_param_sheet.set_cell_data(i,2,params[key][1]) 
+                self.hist_param_sheet.redraw()
+
+                # Get parameters
+                tests = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Test Error']
+                test_keys = list(tests.keys())
+
+                # Create Parameter sheet
+                Cols = ['Name', 'Type', 'Weight', 'Error']
+                self.hist_test_sheet = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(test_keys), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols,
+                                                width = 375, 
+                                                height = 250, 
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI",12,"normal"),
+                                                header_font = ("Segoe UI",12,"bold"))
+                self.hist_test_sheet.place(
+                                    anchor = 'ne', 
+                                    relx = 0.975, 
+                                    rely = 0.55
+                                    )
+                
+                # Format the sheet
+                self.hist_test_sheet.change_theme("blue")
+                self.hist_test_sheet.column_width(column = 0, width = 100, redraw = True)
+                self.hist_test_sheet.column_width(column = 1, width = 100, redraw = True)
+                self.hist_test_sheet.column_width(column = 2, width = 80, redraw = True)
+                self.hist_test_sheet.column_width(column = 3, width = 60, redraw = True)
+                self.hist_test_sheet.table_align(align = 'c',redraw=True)
+                self.hist_test_sheet.set_index_width(0)
+
+                # Fill existing values values
+                for i, key in enumerate(test_keys):
+                    self.hist_test_sheet.set_cell_data(i,0,key)
+                    self.hist_test_sheet.set_cell_data(i,1,tests[key][0])
+                    self.hist_test_sheet.set_cell_data(i,2,tests[key][1]) 
+                    self.hist_test_sheet.set_cell_data(i,3,tests[key][2]) 
+                self.hist_test_sheet.redraw()
+
+                # Deselect
+                self.run_hist_sheet.deselect("all", redraw=True)
+
+            # Get the log file
+            with open(self.log_file, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            lines = [line.strip() for line in lines]
+
+            # Get indices of each test run
+            test_start = []
+            for i, line in enumerate(lines):
+                if "-- NEW RUN --" in line:
+                    test_start.append(i)
+            test_start.append(len(lines))
+
+            self.run_history = {}
+            for i in range(len(test_start)-1):
+                # Initialize Data
+                self.run_history['Run #' + str(i+1)] = {}
+
+                # Get Optimization Results
+                self.run_history['Run #' + str(i+1)]['Parameters'] = {}
+                self.run_history['Run #' + str(i+1)]['Global Error'] = None
+                self.run_history['Run #' + str(i+1)]['Test Error'] = {}
+                for j in range(test_start[i], test_start[i+1]):
+                    if "OPTIMIZATION RESULTS:" in lines[j]:
+                        ct = 2
+                        while lines[j+ct] != '':
+                            line = lines[j+ct]
+                            line = line.split(' ')
+                            cline = [x for x in line if x != '']
+                            try:
+                                self.run_history['Run #' + str(i+1)]['Parameters'][cline[0]] = [float(cline[2]), cline[1]]
+                            except:
+                                self.run_history['Run #' + str(i+1)]['Parameters'][cline[0]] = [float(cline[1]), '']
+                            ct = ct + 1
+                            if j+ct == test_start[i+1]:
+                                break
+
+                    if "ERROR:" in lines[j]:
+                        self.run_history['Run #' + str(i+1)]['Global Error'] = float(lines[j+1].split('=')[1])
+                        ct = 5
+                        while lines[j+ct] != '':
+                            line = lines[j+ct]
+                            line = line.split(' ')
+                            cline = [x for x in line if x != '']
+                            self.run_history['Run #' + str(i+1)]['Test Error'][cline[0]] = [cline[1], float(cline[2]), float(cline[3])]
+
+                            ct = ct + 1
+                            if j+ct == test_start[i+1]:
+                                break
+
+            # Create the run history window
+            root = tk.Toplevel(window)
+            root.title("Run History")
+            root.geometry("800x600")
+            root.resizable(False, False)
+            root.configure(bg='white')
+            root.grab_set()
+
+            # Create the label
+            ttk.Label(
+                        root, 
+                        text="Run History", 
+                        anchor=tk.CENTER,       
+                        style = "Modern1.TLabel"                   
+                        ).place(
+                                anchor='n', 
+                                relx = 0.5, 
+                                rely = 0.02
+                                )
+            
+            # Create the sheet
+            Cols = ['Run', 'No. of Tests', 'Global Error']
+            self.run_hist_sheet = tksheet.Sheet(
+                                            root, 
+                                            total_rows = len(self.run_history.keys()), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            width = 355, 
+                                            height = 550, 
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",12,"normal"),
+                                            header_font = ("Segoe UI",12,"bold"))
+            self.run_hist_sheet.place(
+                                anchor = 'nw', 
+                                relx = 0.025, 
+                                rely = 0.1
+                                )
+
+            # Format the sheet
+            self.run_hist_sheet.change_theme("blue")
+            self.run_hist_sheet.column_width(column = 0, width = 120, redraw = True)
+            self.run_hist_sheet.column_width(column = 1, width = 100, redraw = True)
+            self.run_hist_sheet.column_width(column = 2, width = 100, redraw = True)
+            self.run_hist_sheet.table_align(align = 'c',redraw=True)
+            self.run_hist_sheet.set_index_width(0)
+
+            # Enable Bindings
+            self.run_hist_sheet.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys","rc_popup_menu")
+            self.run_hist_sheet.popup_menu_add_command('View Data', lambda : view_hist_data(self), table_menu = True, index_menu = True, header_menu = True)
+
+            
+            # Fill existing values values
+            key_list = list(self.run_history.keys())
+            key_list.reverse()
+            for i, key in enumerate(key_list):
+                j = list(self.run_history.keys()).index(key)
+                self.run_hist_sheet.set_cell_data(i,0,list(self.run_history.keys())[j])
+                self.run_hist_sheet.set_cell_data(i,1,len(self.run_history[list(self.run_history.keys())[j]]['Test Error'].keys()))
+                self.run_hist_sheet.set_cell_data(i,2,self.run_history[list(self.run_history.keys())[j]]['Global Error']) 
+            self.run_hist_sheet.redraw()
+
+
+        # Create button to view model history
+        self.btn_view_hist = ttk.Button(
+                                    window, 
+                                    text = "Run History", 
+                                    command = lambda : view_history(self), 
+                                    style = "Modern3.TButton",
+                                    width = self.Placement['Optimization']['Button7'][2]
+                                    )
+        self.btn_view_hist.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['Button7'][0], 
+                            rely = self.Placement['Optimization']['Button7'][1]
+                            )
+        self.tab_att_list.append('self.btn_view_hist')
 
         # Update Model Data
         UpdateModelData(None, self, 3, 'Model')

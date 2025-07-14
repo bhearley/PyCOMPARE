@@ -6,11 +6,10 @@
 #          a configured database or through the excel import tool
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateDataTab(self,window,frmt):
+def CreateDataTab(self,window):
     # Import Modules
     import math
     import pandas as pd
-    import tkinter as tk
     from tkinter import messagebox
     from tkinter.filedialog import askopenfilenames
     from tkinter import ttk
@@ -20,23 +19,6 @@ def CreateDataTab(self,window,frmt):
     from Data.FunctionalDataSampling import FunctionalDataSampling
     from Data.ReadExcelInput import ReadExcelInput
     from General.DeleteWidgets import DeleteTab
-
-    # Unpack Formatting
-    fontname = frmt[1]
-    fsize_s = frmt[2]
-
-    # Function to deselect sheet
-    def deselect_sheet(event,self,tag):
-        if tag == 'stage_table':
-            try:
-                self.sheet_db.deselect("all", redraw=True)
-            except:
-                pass
-        if tag == 'sheet_db':
-            try:
-                self.stage_table.deselect("all", redraw=True)
-            except:
-                pass
 
     # Delete existing widgets
     if hasattr(self,"tab_att_list"):
@@ -64,9 +46,33 @@ def CreateDataTab(self,window,frmt):
     self.clicked = 0
 
     def round_sig(x, sig=3):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Format number with defined significant figures
+        #
+        #--------------------------------------------------------------------------
+
         if x == 0:
             return 0
         return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
+    
+    def deselect_sheet(event,self,tag):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect one tksheet when selecting another
+        #
+        #--------------------------------------------------------------------------
+
+        if tag == 'stage_table':
+            try:
+                self.sheet_db.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_db':
+            try:
+                self.stage_table.deselect("all", redraw=True)
+            except:
+                pass
 
     def upload_from_excel():
         #--------------------------------------------------------------------------
@@ -164,7 +170,6 @@ def CreateDataTab(self,window,frmt):
             if hasattr(self, 'stage_table'):
                 self.stage_table.destroy()
 
-            
             # Get the selected row and name
             currently_selected = self.sheet_db.get_currently_selected()
             self.test_name = self.sheet_db.data[currently_selected.row][1]
@@ -278,7 +283,6 @@ def CreateDataTab(self,window,frmt):
                                             show_y_scrollbar = True,
                                             font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"normal"),
                                             header_font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"bold"),
-                                            #table_bg = 'red' # For checking formatting only
                                             )
             self.stage_table.place(
                                 anchor = 'nw', 
@@ -440,7 +444,6 @@ def CreateDataTab(self,window,frmt):
                                     show_y_scrollbar = True,
                                     font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"normal"),
                                     header_font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"bold"),
-                                    #table_bg = 'blue' # For checking formatting only
                                     )
         self.sheet_db.place(
                             anchor = 'nw', 
@@ -495,21 +498,6 @@ def CreateDataTab(self,window,frmt):
                 if tests[i] in char_tests:
                     self.sheet_db.set_cell_data(i,0, True)
 
-    # Create the upload from excel button
-    self.btn_loc2 = ttk.Button(
-                            window, 
-                            text = "Upload from Excel", 
-                            command = upload_from_excel,
-                            style = "Modern3.TButton" ,
-                            width = self.Placement['Data']['Button2'][2]
-                            )
-    self.btn_loc2.place(
-                        anchor = 'w', 
-                        relx = self.Placement['Data']['Button2'][0], 
-                        rely = self.Placement['Data']['Button2'][1]
-                        )
-    self.loc_att_list.append('self.btn_loc2')
-
     def add_selected():
         #--------------------------------------------------------------------------
         #
@@ -562,6 +550,21 @@ def CreateDataTab(self,window,frmt):
             # Show error message that no tests were added
             messagebox.showerror(message = 'No tests have been added to the database.')
                      
+    # Create the upload from excel button
+    self.btn_up_exc = ttk.Button(
+                            window, 
+                            text = "Upload from Excel", 
+                            command = upload_from_excel,
+                            style = "Modern3.TButton" ,
+                            width = self.Placement['Data']['Button2'][2]
+                            )
+    self.btn_up_exc.place(
+                        anchor = 'w', 
+                        relx = self.Placement['Data']['Button2'][0], 
+                        rely = self.Placement['Data']['Button2'][1]
+                        )
+    self.loc_att_list.append('self.btn_up_exc')
+    
     # Create button to add data to characterization set
     self.btn_add_to_char = ttk.Button(
                                     window, 

@@ -6,23 +6,35 @@
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def BuildGeneralPage(self,window,frmt):
+def BuildGeneralPage(self,window):
     # Import Modules
-    import tkinter as tk
+    import os
     from tkinter import ttk
 
-    # Unpack Formatting
-    fontname = frmt[1]
-    fsize_s = frmt[2]
+    # Try to create the log directory
+    try:
+        os.mkdir(os.path.join(os.getcwd(),"Logs"))
+    except:
+        pass
+
+    # Set the log file name
+    self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
+
+    # Create the file if it doesn't exist
+    if os.path.exists(self.log_file) == False:
+        self.log = ['-- LOG FILE STARTED --']
+
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            for line in self.log:
+                f.write(line + "\n")
+        f.close()
+
+    # Reset Log
+    self.log = []
 
     # Preallocate the att list
     self.att_list = []
     self.loc_att_list = []
-
-    # Set formating variables
-    self.startx = 0.0125
-    self.delx = 0.140
-    starty = 0.13
 
     # Create the Database Tab
     self.btn_db = ttk.Button(

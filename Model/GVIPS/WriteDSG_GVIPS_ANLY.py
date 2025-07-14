@@ -29,7 +29,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     import os
 
     # Import functions
-    from UnitConversion.UnitConversion import UnitConversion
+    from GRCMI import UnitConversion
 
     # Set the model number
     mod = 10
@@ -59,16 +59,18 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
 
     # Write the Parameter Values
     file.write("INIT:\n")
+
     # -- Get the list of viscoelastic parameters
     VE = []
     for i in range(len(self.Compare['Analysis']['VE_Param'])):
         VE.append(self.Compare['Analysis']['VE_Param'][i][0])
 
     line = ' '
+
     # -- Write E
     val = float(self.Compare['Analysis']['VE_Param'][VE.index('E')][2])
     unit = self.Compare['Analysis']['VE_Param'][VE.index('E')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('E')
     Param_V.append(val)
@@ -89,7 +91,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     for i in range(int(self.Compare['Analysis']['M'])):
         val = float(self.Compare['Analysis']['VE_Param'][VE.index('M' + str(i+1))][2])
         unit = self.Compare['Analysis']['VE_Param'][VE.index('M' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('M' + str(i+1))
         Param_V.append(val)
@@ -101,7 +103,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     for i in range(int(self.Compare['Analysis']['M'])):
         val = float(self.Compare['Analysis']['VE_Param'][VE.index('ρ' + str(i+1))][2])
         unit = self.Compare['Analysis']['VE_Param'][VE.index('ρ' + str(i+1))][1]
-        val = UnitConversion(unit, val, 's', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 's')
         line = line + ' ' + str(val)
         Param.append('ρ' + str(i+1))
         Param_V.append(val)
@@ -117,7 +119,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     # -- Write κ
     val = float(self.Compare['Analysis']['VP_Param'][VP.index('κ')][2])
     unit = self.Compare['Analysis']['VP_Param'][VP.index('κ')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('κ')
     Param_V.append(val)
@@ -129,7 +131,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     for i in range(int(self.Compare['Analysis']['N'])):
         val = float(self.Compare['Analysis']['VP_Param'][VP.index('k' + str(i+1))][2])
         unit = self.Compare['Analysis']['VP_Param'][VP.index('k' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('k' + str(i+1))
         Param_V.append(val)
@@ -149,7 +151,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     # -- Write μ
     val = float(self.Compare['Analysis']['VP_Param'][VP.index('μ')][2])
     unit = self.Compare['Analysis']['VP_Param'][VP.index('μ')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('μ')
     Param_V.append(val)
@@ -181,7 +183,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     for i in range(int(self.Compare['Analysis']['N'])):
         val = float(self.Compare['Analysis']['VP_Param'][VP.index('R' + str(i+1))][2])
         unit = self.Compare['Analysis']['VP_Param'][VP.index('R' + str(i+1))][1]
-        val = UnitConversion(unit, val, '1/s', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, '1/s')
         line = line + ' ' + str(val)
         Param.append('R' + str(i+1))
         Param_V.append(val)
@@ -193,7 +195,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     for i in range(int(self.Compare['Analysis']['N'])):
         val = float(self.Compare['Analysis']['VP_Param'][VP.index('H' + str(i+1))][2])
         unit = self.Compare['Analysis']['VP_Param'][VP.index('H' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('H' + str(i+1))
         Param_V.append(val)
@@ -228,7 +230,6 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
         Param_N.append(PN)
         PN = PN+1
         
-
     # -- Write Viscoelastic Damage Parameters
     line = line + ' ' + str(1) + ' ' + str(1e21) + ' ' + str(1e21) + ' ' + str(1)
     Param_V.append(1)
@@ -248,7 +249,6 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     Param_N.append(PN)
     PN = PN+1
     
-
     # -- Write Zeta and Psi
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
     Param_V.append(1e-14)
@@ -260,7 +260,6 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     Param_N.append(PN)
     PN = PN+1
     
-
     # -- Write Cutoff strength and stiffness
     line = line + ' ' + str(1e21) + ' ' + str(1e21)
     Param_V.append(1e21)

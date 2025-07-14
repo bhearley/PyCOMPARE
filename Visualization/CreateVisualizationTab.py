@@ -6,9 +6,9 @@
 #          and analyze/visualize tests held out for verification.
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateVisualizationTab(self,window,frmt):
+def CreateVisualizationTab(self,window):
     # Import Modules
-
+    import threading
     import tkinter as tk
     from tkinter import messagebox
     from tkinter import ttk
@@ -16,19 +16,6 @@ def CreateVisualizationTab(self,window,frmt):
 
     # Import Functions
     from General.DeleteWidgets import DeleteTab
-
-    # Function to deselect sheet
-    def deselect_sheet(event,self,tag):
-        if tag == 'sheet_char_viz':
-            try:
-                self.sheet_ver_viz.deselect("all", redraw=True)
-            except:
-                pass
-        if tag == 'sheet_ver_viz':
-            try:
-                self.sheet_char_viz.deselect("all", redraw=True)
-            except:
-                pass
 
     # Delete all tab attributes
     if hasattr(self,"tab_att_list"):
@@ -49,6 +36,24 @@ def CreateVisualizationTab(self,window,frmt):
     self.att_list = []
     self.loc_att_list = []
     self.tab_att_list = []
+
+        # Function to deselect sheet
+    def deselect_sheet(event,self,tag):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect one tksheet when selecting another
+        #
+        #--------------------------------------------------------------------------
+        if tag == 'sheet_char_viz':
+            try:
+                self.sheet_ver_viz.deselect("all", redraw=True)
+            except:
+                pass
+        if tag == 'sheet_ver_viz':
+            try:
+                self.sheet_char_viz.deselect("all", redraw=True)
+            except:
+                pass
 
     def update_table():
         #----------------------------------------------------------------------
@@ -172,7 +177,6 @@ def CreateVisualizationTab(self,window,frmt):
             self.optmenu1_viz.set(self.plot_opts[idx1])
             self.tab_att_list.append('self.optmenu1_viz')
 
-
             # Create the Y Option Menu
             self.optmenu2_viz = ttk.Combobox(
                                         window,
@@ -214,20 +218,79 @@ def CreateVisualizationTab(self,window,frmt):
             #
             #------------------------------------------------------------------
 
-            # Get All Tests
-            test_names = []
-            for i in range(len(self.sheet_ver_viz.data)):
-                test_names.append(self.sheet_ver_viz.data[i][1])
+            # Run Compare
+            def run_cmd_anly_ver(callback, temp_dir):
 
-            for i in range(len(test_names)):
-                self.test_name = test_names[i]
-                           
-                # Create a model prediction if it doesn't exist
-                if self.test_name not in list(self.Compare['Prediction'].keys()):
-                    self.Compare['Prediction'][self.test_name] = None
-                if self.Compare['Prediction'][self.test_name] is None:
-                    self.run_compare_anly([self.test_name], 1)
-                    self.sheet_ver_viz.set_cell_data(i, -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
+                # Get All Tests
+                test_names = []
+                for i in range(len(self.sheet_ver_viz.data)):
+                    test_names.append(self.sheet_ver_viz.data[i][1])
+
+                for i in range(len(test_names)):
+                    self.test_name = test_names[i]
+                            
+                    # Create a model prediction if it doesn't exist
+                    if self.test_name not in list(self.Compare['Prediction'].keys()):
+                        self.Compare['Prediction'][self.test_name] = None
+                    if self.Compare['Prediction'][self.test_name] is None:
+                        self.run_compare_anly([self.test_name])
+                        self.sheet_ver_viz.set_cell_data(i, -1, round(self.Compare['Prediction'][self.test_name]['Error'],3))
+                    
+                # Notify when done
+                callback()
+            
+            # Function to display progress bar while running
+            def run_compare_start(self):
+
+                # Create the window
+                loading = tk.Toplevel(window)
+                loading.title("Running Compare")
+                loading.geometry("300x100")
+                loading.resizable(False, False)
+                loading.configure(bg='white')
+                loading.grab_set()  
+
+                # Function for progress bar Exit Protocol
+                def on_closing_saving(self):
+
+                    # Don't allow exit while saving
+                    return
+                
+                # Create the window exit protocal
+                loading.protocol("WM_DELETE_WINDOW", lambda:on_closing_saving(self))
+
+                # Create the loading label
+                ttk.Label(
+                        loading, 
+                        text="Running COMPARE - Please Wait", 
+                        style = "Modern2.TLabel"
+                        ).pack(pady=10)
+
+                # Create the progress bar
+                pb = ttk.Progressbar(
+                                    loading, 
+                                    mode='indeterminate',
+                                    style = "Modern.Horizontal.TProgressbar"
+                                    )
+                pb.pack(fill='x', padx=20, pady=10)
+                pb.start(10)
+
+                # Function to close window when task is completed
+                def on_task_done():
+
+                    # Stop Progress bar
+                    pb.stop()
+
+                    # Destroy Window
+                    loading.destroy()
+
+                # Begin save on background thread
+                threading.Thread(target=run_cmd_anly_ver, args=(on_task_done,self), daemon=True).start()
+
+                # Wait until loading window is closed
+                window.wait_window(loading)
+
+            run_compare_start(self)
         
         def select_all(self, tag):
             #------------------------------------------------------------------
@@ -301,7 +364,6 @@ def CreateVisualizationTab(self,window,frmt):
                 self.canvas2.get_tk_widget().destroy()
                 del self.canvas2
 
-
             # Get List of all tests
             tests_all = []
             row_char = {}
@@ -370,13 +432,15 @@ def CreateVisualizationTab(self,window,frmt):
 
                 # Find first stress and first strain
                 idx1 = 0
-                idx2 = 1
                 for i in range(len(self.plot_opts)):
                     if 'Strain' in self.plot_opts[i] and 'Stress' in self.plot_opts[i] :
-                        idx1 = i
-                        idx2 = i
-                        break
-                
+                        var = self.plot_opts[i].split(' vs ')
+                        dir1 = var[0].split('-')[1].strip()
+                        dir2 = var[1].split('-')[1].strip()
+
+                        if dir1 == dir2:
+                            idx1 = i
+                            break
 
                 # Create the X Option Menu
                 self.optmenu3_viz = ttk.Combobox(
@@ -440,8 +504,6 @@ def CreateVisualizationTab(self,window,frmt):
                 self.tests_all = tests_all
                 self.plotter_viz_all()
 
-        
-        
         # Destroy existing widgets
         if hasattr(self,'sheet_char_viz'):
             self.sheet_char_viz.destroy()

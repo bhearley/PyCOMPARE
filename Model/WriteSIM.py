@@ -34,8 +34,12 @@ def WriteSIM(self, TestData, temp_dir, ct_file, mod, Param):
     FCON = []
     for i in range(len(TestData['Control_All'])):
         if TestData['Control_All'][i] == 'Strain':
-            ECON.append('1')
-            FCON.append('0')
+            if TestData['Control'][-1] == "Strain":
+                ECON.append('1')
+                FCON.append('0')
+            else:
+                ECON.append('0')
+                FCON.append('1')
         else:
             ECON.append('0')
             FCON.append('1')
@@ -65,7 +69,7 @@ def WriteSIM(self, TestData, temp_dir, ct_file, mod, Param):
     if TestData['Control_All'][0] == 'Free':
         array = np.zeros(shape=(npts,))
     else:
-        array = TestData['Reduced Data'][TestData['Control_All'][0]][11]
+        array = TestData['Reduced Data'][TestData['Control'][-1]][11]
     ct = 0
     while ct < npts:
         ctr = 0
@@ -84,7 +88,7 @@ def WriteSIM(self, TestData, temp_dir, ct_file, mod, Param):
     if TestData['Control_All'][1] == 'Free':
         array = np.zeros(shape=(npts,))
     else:
-        array = TestData['Reduced Data'][TestData['Control_All'][1]][22]
+        array = TestData['Reduced Data'][TestData['Control'][-1]][22]
     ct = 0
     while ct < npts:
         ctr = 0
@@ -103,7 +107,7 @@ def WriteSIM(self, TestData, temp_dir, ct_file, mod, Param):
     if TestData['Control_All'][2] == 'Free':
         array = np.zeros(shape=(npts,))
     else:
-        array = TestData['Reduced Data'][TestData['Control_All'][2]][12]
+        array = TestData['Reduced Data'][TestData['Control'][-1]][12]
     ct = 0
     while ct < npts:
         ctr = 0

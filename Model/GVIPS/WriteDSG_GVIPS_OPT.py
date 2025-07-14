@@ -30,7 +30,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     import os
 
     # Import functions
-    from UnitConversion.UnitConversion import UnitConversion
+    from GRCMI import UnitConversion
 
     # Set the model number
     mod = 10
@@ -60,16 +60,18 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # Write the Parameter Values
     file.write("INIT:\n")
+
     # -- Get the list of viscoelastic parameters
     VE = []
     for i in range(len(self.Compare['Model']['VE_Param'])):
         VE.append(self.Compare['Model']['VE_Param'][i][0])
 
     line = ' '
+
     # -- Write E
-    val = self.Compare['Model']['VE_Param'][VE.index('E')][3]
+    val = float(self.Compare['Model']['VE_Param'][VE.index('E')][3])
     unit = self.Compare['Model']['VE_Param'][VE.index('E')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('E')
     Param_V.append(val)
@@ -78,7 +80,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     PN = PN+1
 
     # -- Write ν
-    val = self.Compare['Model']['VE_Param'][VE.index('ν')][3]
+    val = float(self.Compare['Model']['VE_Param'][VE.index('ν')][3])
     line = line + ' ' + str(val)
     Param.append('ν')
     Param_V.append(val)
@@ -88,9 +90,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write M
     for i in range(int(self.Compare['Model']['M'])):
-        val = self.Compare['Model']['VE_Param'][VE.index('M' + str(i+1))][3]
+        val = float(self.Compare['Model']['VE_Param'][VE.index('M' + str(i+1))][3])
         unit = self.Compare['Model']['VE_Param'][VE.index('M' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('M' + str(i+1))
         Param_V.append(val)
@@ -100,9 +102,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write ρ
     for i in range(int(self.Compare['Model']['M'])):
-        val = self.Compare['Model']['VE_Param'][VE.index('ρ' + str(i+1))][3]
+        val = float(self.Compare['Model']['VE_Param'][VE.index('ρ' + str(i+1))][3])
         unit = self.Compare['Model']['VE_Param'][VE.index('ρ' + str(i+1))][1]
-        val = UnitConversion(unit, val, 's', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 's')
         line = line + ' ' + str(val)
         Param.append('ρ' + str(i+1))
         Param_V.append(val)
@@ -116,9 +118,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
         VP.append(self.Compare['Model']['VP_Param'][i][0])
 
     # -- Write κ
-    val = self.Compare['Model']['VP_Param'][VP.index('κ')][3]
+    val = float(self.Compare['Model']['VP_Param'][VP.index('κ')][3])
     unit = self.Compare['Model']['VP_Param'][VP.index('κ')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('κ')
     Param_V.append(val)
@@ -128,9 +130,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write kb
     for i in range(int(self.Compare['Model']['N'])):
-        val = self.Compare['Model']['VP_Param'][VP.index('k' + str(i+1))][3]
+        val = float(self.Compare['Model']['VP_Param'][VP.index('k' + str(i+1))][3])
         unit = self.Compare['Model']['VP_Param'][VP.index('k' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('k' + str(i+1))
         Param_V.append(val)
@@ -139,7 +141,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
         PN = PN+1
 
     # -- Write n
-    val = self.Compare['Model']['VP_Param'][VP.index('n')][3]
+    val = float(self.Compare['Model']['VP_Param'][VP.index('n')][3])
     line = line + ' ' + str(val)
     Param.append('n')
     Param_V.append(val)
@@ -148,19 +150,19 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     PN = PN+1
 
     # -- Write μ
-    val = self.Compare['Model']['VP_Param'][VP.index('μ')][3]
+    val = float(self.Compare['Model']['VP_Param'][VP.index('μ')][3])
     unit = self.Compare['Model']['VP_Param'][VP.index('μ')][1]
-    val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+    val = UnitConversion(unit, val, 'MPa-s')
     line = line + ' ' + str(val)
     Param.append('μ')
     Param_V.append(val)
-    Param_U.append('MPa')
+    Param_U.append('MPa-s')
     Param_N.append(PN)
     PN = PN+1
 
     # -- Write m
     for i in range(int(self.Compare['Model']['N'])):
-        val = self.Compare['Model']['VP_Param'][VP.index('m' + str(i+1))][3]
+        val = float(self.Compare['Model']['VP_Param'][VP.index('m' + str(i+1))][3])
         line = line + ' ' + str(val)
         Param.append('m' + str(i+1))
         Param_V.append(val)
@@ -170,7 +172,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write β
     for i in range(int(self.Compare['Model']['N'])):
-        val = self.Compare['Model']['VP_Param'][VP.index('β' + str(i+1))][3]
+        val = float(self.Compare['Model']['VP_Param'][VP.index('β' + str(i+1))][3])
         line = line + ' ' + str(val)
         Param.append('β' + str(i+1))
         Param_V.append(val)
@@ -180,9 +182,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write R
     for i in range(int(self.Compare['Model']['N'])):
-        val = self.Compare['Model']['VP_Param'][VP.index('R' + str(i+1))][3]
+        val = float(self.Compare['Model']['VP_Param'][VP.index('R' + str(i+1))][3])
         unit = self.Compare['Model']['VP_Param'][VP.index('R' + str(i+1))][1]
-        val = UnitConversion(unit, val, '1/s', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, '1/s')
         line = line + ' ' + str(val)
         Param.append('R' + str(i+1))
         Param_V.append(val)
@@ -192,9 +194,9 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # -- Write H
     for i in range(int(self.Compare['Model']['N'])):
-        val = self.Compare['Model']['VP_Param'][VP.index('H' + str(i+1))][3]
+        val = float(self.Compare['Model']['VP_Param'][VP.index('H' + str(i+1))][3])
         unit = self.Compare['Model']['VP_Param'][VP.index('H' + str(i+1))][1]
-        val = UnitConversion(unit, val, 'MPa', os.path.join(os.getcwd()))
+        val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('H' + str(i+1))
         Param_V.append(val)
@@ -248,7 +250,6 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     Param_D.append('ne')
     Param_N.append(PN)
     PN = PN+1
-    
 
     # -- Write Zeta and Psi
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
@@ -261,7 +262,6 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     Param_N.append(PN)
     PN = PN+1
     
-
     # -- Write Cutoff strength and stiffness
     line = line + ' ' + str(1e21) + ' ' + str(1e21)
     Param_V.append(1e21)
@@ -298,7 +298,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
                     val = self.Compare['Model']['VE_Param'][VE.index(P)][2]
                     unit = self.Compare['Model']['VE_Param'][VE.index(P)][1]
                     try:
-                        val = UnitConversion(unit, val, Param_U[i], os.path.join(os.getcwd()))
+                        val = UnitConversion(unit, val, Param_U[i])
                     except:
                         pass
             elif P in VP:
@@ -307,7 +307,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
                     val = self.Compare['Model']['VP_Param'][VP.index(P)][2]
                     unit = self.Compare['Model']['VP_Param'][VP.index(P)][1]
                     try:
-                        val = UnitConversion(unit, val, Param_U[i], os.path.join(os.getcwd()))
+                        val = UnitConversion(unit, val, Param_U[i])
                     except:
                         pass
 
@@ -327,7 +327,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
                     val = self.Compare['Model']['VE_Param'][VE.index(P)][4]
                     unit = self.Compare['Model']['VE_Param'][VE.index(P)][1]
                     try:
-                        val = UnitConversion(unit, val, Param_U[i], os.path.join(os.getcwd()))
+                        val = UnitConversion(unit, val, Param_U[i])
                     except:
                         pass
             elif P in VP:
@@ -335,7 +335,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
                     val = self.Compare['Model']['VP_Param'][VP.index(P)][4]
                     unit = self.Compare['Model']['VP_Param'][VP.index(P)][1]
                     try:
-                        val = UnitConversion(unit, val, Param_U[i], os.path.join(os.getcwd()))
+                        val = UnitConversion(unit, val, Param_U[i])
                     except:
                         pass
 
@@ -402,6 +402,5 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
 
     # Set all Parameters
     P = Param + Param_D
-    
 
     return mod, P, Param_U, Param_N
