@@ -2174,7 +2174,7 @@ class PY_COMPARE:
                 ct = ct + 1
 
             # Write all data to log
-            self.update_log()
+            #self.update_log()
 
             self.msg = 'Optimization Complete!'
         except:
