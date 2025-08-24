@@ -19,7 +19,6 @@ def CreateModelTab(self,window):
     import tksheet
     
     # Import Functions
-    from General.DeleteWidgets import DeleteTab
     from Model.UpdateModelData import UpdateModelData
 
     # Initialize Model
@@ -31,33 +30,9 @@ def CreateModelTab(self,window):
         self.Compare['Model ID'] = None
 
     # Get available model information
-    model_info = load_workbook(self.Compare['Paths']['Model Library'], data_only=True)
+    if hasattr(self,"model_info_all") == False:
+        self.model_info_all = load_workbook(self.Compare['Paths']['Model Library'], data_only=True)
 
-    # Delete all tab attributes
-    if hasattr(self,"tab_att_list"):
-        if hasattr(self,'clicked') == False:
-            UpdateModelData(None, self, 3, 'Model')
-        else:
-            if self.clicked == 1:
-                self.clicked = 0
-            else:
-                UpdateModelData(None, self, 3, 'Model')
-        DeleteTab(self)
-
-    if hasattr(self, 'canvas'):
-        self.toolbar.destroy()
-        self.canvas.get_tk_widget().destroy()
-        del self.canvas
-
-    if hasattr(self, 'canvas2'):
-        self.toolbar2.destroy()
-        self.canvas2.get_tk_widget().destroy()
-        del self.canvas2
-
-    # Preallocate the att list and other variables
-    self.att_list = []
-    self.loc_att_list = []
-    self.tab_att_list = []
     self.optimize = 0
     self.clicked = 0
 
@@ -66,7 +41,27 @@ def CreateModelTab(self,window):
         self.Compare['Model Library'] = {}
 
     # Define Available Models
-    self.Models = model_info.sheetnames
+    self.Models = self.model_info_all.sheetnames
+
+    # Deselect Function
+    def on_click(event):
+        widget = event.widget
+
+        # If the click is *not* inside the sheet, deselect it
+        try:
+            if widget != self.sheet1_opt.MT:
+                self.sheet1_opt.deselect("all")
+        except:
+            pass
+
+        try:
+            if widget != self.sheet2_opt.MT:
+                self.sheet2_opt.deselect("all")
+        except:
+            pass
+
+
+    window.bind_all("<Button-1>", on_click, add="+")
 
     def change_model(values):
         #----------------------------------------------------------------------
@@ -76,7 +71,7 @@ def CreateModelTab(self,window):
         #----------------------------------------------------------------------
 
         # Get the model
-        value = self.optmenu1.get()
+        value = self.optmenu1_opt.get()
 
         # Clear the model information if the model type changed
         try:
@@ -91,18 +86,14 @@ def CreateModelTab(self,window):
             pass
         
         # Delete local attributes
-        DeleteTab(self)
-
-        # Clear sheets
-        if hasattr(self,'sheet1'):
-            self.sheet1.destroy()
-            del self.sheet1
-        if hasattr(self,'sheet2'):
-            self.sheet2.destroy()
-            del self.sheet2
+        for att in self.atts['Optimize']['Local']:
+            try:
+                eval(f"{att}").destroy()
+            except:
+                pass
 
         # Read the model info
-        ws = model_info[value]
+        ws = self.model_info_all[value]
         self.Compare['Model']['Model Name'] = value
         self.Compare['Model']['Model Info'] = {}
         for i in range(1,ws.max_row+1):
@@ -121,18 +112,20 @@ def CreateModelTab(self,window):
         
         if len(self.RevModels) > 0:
             # Create the label
-            self.desc2 = ttk.Label(
-                                window, 
+            self.desc2_opt = ttk.Label(
+                                self.nb_tab_tab3, 
                                 text="Reversible Model:", 
-                                anchor=tk.CENTER,       
+                                anchor=tk.NW,       
                                 style = 'Modern1.TLabel'                    
                                 )
-            self.desc2.place(
+            self.desc2_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['Label1'][0], 
-                            rely = self.Placement['Optimization']['Label1'][1]
+                            relx = self.Placement['Optimization']['LabelRev'][0], 
+                            rely = self.Placement['Optimization']['LabelRev'][1],
                             )
-            self.tab_att_list.append('self.desc2')
+            
+            if 'self.desc2_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc2_opt')    
 
             # Initialize the model
             rmod_opt = self.RevModels[0]
@@ -145,20 +138,25 @@ def CreateModelTab(self,window):
                         rmod_opt = self.Compare['Model']['Reversible Model Name']
 
             # Create the reversible model drop down   
-            self.optmenu2 = ttk.Combobox(
-                                        window,
+            self.optmenu2_opt = ttk.Combobox(
+                                        self.nb_tab_tab3,
                                         values=self.RevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu2.place(
+            self.optmenu2_opt.configure(font = self.style_man['Combo'])
+            self.optmenu2_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu2_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['Combo1'][0], 
-                                rely = self.Placement['Optimization']['Combo1'][1]
+                                relx = self.Placement['Optimization']['ComboRev'][0], 
+                                rely = self.Placement['Optimization']['ComboRev'][1],
+                                relwidth = self.Placement['Optimization']['ComboRev'][2], 
+                                relheight = self.Placement['Optimization']['ComboRev'][3]
                                 )
-            self.optmenu2.set(rmod_opt)
-            self.optmenu2.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
-            self.tab_att_list.append('self.optmenu2')
+            self.optmenu2_opt.set(rmod_opt)
+            self.optmenu2_opt.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
+            if 'self.optmenu2_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu2_opt') 
 
             # Initialize Parameter List
             self.Params_VE = self.Compare['Model']['Model Info']['Reversible Deformation Parameters'] + self.Compare['Model']['Model Info']['Reversible Damage Parameters']
@@ -169,18 +167,19 @@ def CreateModelTab(self,window):
 
         if len(self.IrrevModels) > 0:
             # Create the label
-            self.desc3 = ttk.Label(
-                                window, 
+            self.desc3_opt = ttk.Label(
+                                self.nb_tab_tab3, 
                                 text= "Irreversible Model:", 
-                                anchor=tk.CENTER,       
+                                anchor=tk.NW,       
                                 style = "Modern1.TLabel"
                                 )
-            self.desc3.place(
+            self.desc3_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['Label2'][0], 
-                            rely = self.Placement['Optimization']['Label2'][1]
+                            relx = self.Placement['Optimization']['LabelIrrev'][0], 
+                            rely = self.Placement['Optimization']['LabelIrrev'][1]
                             )
-            self.tab_att_list.append('self.desc3')
+            if 'self.desc3_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc3_opt') 
 
             # Initialize the irreversible model
             irmod_opt = self.IrrevModels[0]
@@ -193,20 +192,25 @@ def CreateModelTab(self,window):
                         irmod_opt = self.Compare['Model']['Irreversible Model Name']
 
             # Create the irreversible model drop down
-            self.optmenu3 = ttk.Combobox(
-                                        window,
+            self.optmenu3_opt = ttk.Combobox(
+                                        self.nb_tab_tab3,
                                         values=self.IrrevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu3.place(
+            self.optmenu3_opt.configure(font = self.style_man['Combo'])
+            self.optmenu3_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu3_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['Combo2'][0], 
-                                rely = self.Placement['Optimization']['Combo2'][1]
+                                relx = self.Placement['Optimization']['ComboIrrev'][0], 
+                                rely = self.Placement['Optimization']['ComboIrrev'][1],
+                                relwidth = self.Placement['Optimization']['ComboIrrev'][2], 
+                                relheight = self.Placement['Optimization']['ComboIrrev'][3]
                                 )
-            self.optmenu3.set(irmod_opt)
-            self.optmenu3.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Model'))
-            self.tab_att_list.append('self.optmenu3')
+            self.optmenu3_opt.set(irmod_opt)
+            self.optmenu3_opt.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Model'))
+            if 'self.optmenu3_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu3_opt') 
 
             # Initialize Parameter List
             self.Params_VP = self.Compare['Model']['Model Info']['Irreversible Deformation Parameters'] + self.Compare['Model']['Model Info']['Irreversible Damage Parameters']
@@ -221,18 +225,18 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             # Delete table if it exists
-            if hasattr(self,"sheet1"):
+            if hasattr(self,"sheet1_opt"):
                 if hasattr(self,"res_flag1") == True:
                     if self.res_flag1 == 0:
                         # Store data
-                        self.sheet1_data = self.sheet1.data
+                        self.sheet1_opt_data = self.sheet1_opt.data
                 else:
                     # Store data
-                    self.sheet1_data = self.sheet1.data
+                    self.sheet1_opt_data = self.sheet1_opt.data
 
                 # Delete sheet
-                self.sheet1.destroy()
-                del self.sheet1
+                self.sheet1_opt.destroy()
+                del self.sheet1_opt
 
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
@@ -240,39 +244,41 @@ def CreateModelTab(self,window):
                 if 'VE_Param' in list(self.Compare['Model'].keys()):
                     if hasattr(self,"res_flag1") == True:
                         if self.res_flag1 == 0:
-                            self.sheet1_data = self.Compare['Model']['VE_Param']
+                            self.sheet1_opt_data = self.Compare['Model']['VE_Param']
                         else:
                             self.res_flag1 = 0
                     else:
-                        self.sheet1_data = self.Compare['Model']['VE_Param']
+                        self.sheet1_opt_data = self.Compare['Model']['VE_Param']
 
-            if hasattr(self,"sheet1_data") == False:
-                self.sheet1_data = []
+            if hasattr(self,"sheet1_opt_data") == False:
+                self.sheet1_opt_data = []
 
             # Set the columns
             Cols = ['Parameter', 'Units','Lower Bound','Initial Guess','Upper Bound','Active/Passive', 'COMPARE']
 
             # Create the table
-            self.sheet1 = tksheet.Sheet(
-                                        window, 
+            self.sheet1_opt = tksheet.Sheet(
+                                        self.nb_tab_tab3, 
                                         total_rows = len(self.Params_VE), 
                                         total_columns = len(Cols), 
                                         headers = Cols,
-                                        width = self.Placement['Optimization']['Sheet1'][2], 
-                                        height = self.Placement['Optimization']['Sheet1'][3], 
                                         show_x_scrollbar = False, 
                                         show_y_scrollbar = True,
-                                        font = ("Segoe UI",self.Placement['Optimization']['Sheet1'][4],"normal"),
-                                        header_font = ("Segoe UI",self.Placement['Optimization']['Sheet1'][4],"bold")
+                                        font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
+                                        header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
                                         )
-            self.sheet1.place(
+            self.sheet1_opt.place(
                             anchor = 'n', 
                             relx = self.Placement['Optimization']['Sheet1'][0], 
-                            rely = self.Placement['Optimization']['Sheet1'][1]
+                            rely = self.Placement['Optimization']['Sheet1'][1],
+                            relwidth = self.Placement['Optimization']['Sheet1'][2], 
+                            relheight = self.Placement['Optimization']['Sheet1'][3], 
                             )
-            self.tab_att_list.append('self.sheet1')
-            self.sheet1.change_theme("blue")
-            self.sheet1.set_index_width(0)
+            if 'self.sheet1_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.sheet1_opt') 
+
+            self.sheet1_opt.change_theme("blue")
+            self.sheet1_opt.set_index_width(0)
 
             def sort_cols(self):
                 #----------------------------------------------------------------------
@@ -282,20 +288,20 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Get the currently selected element
-                currently_selected = self.sheet1.get_currently_selected()
+                currently_selected = self.sheet1_opt.get_currently_selected()
                 
                 # Get the list of values
                 sort_list = []
-                for i in range(self.sheet1.visible_rows[1]):
-                    sort_list.append(self.sheet1.data[i][currently_selected.column])
+                for i in range(self.sheet1_opt.visible_rows[1]):
+                    sort_list.append(self.sheet1_opt.data[i][currently_selected.column])
                 index_list = sorted(range(len(sort_list)), key=lambda k: sort_list[k])
                 
                 # Rewrite the table
-                temp_data = copy.deepcopy(self.sheet1.data)
-                for i in range(self.sheet1.visible_rows[1]):
-                    for j in range(self.sheet1.visible_columns[1]):
-                        self.sheet1.set_cell_data(i,j,temp_data[index_list[i]][j])
-                self.sheet1.redraw()
+                temp_data = copy.deepcopy(self.sheet1_opt.data)
+                for i in range(self.sheet1_opt.visible_rows[1]):
+                    for j in range(self.sheet1_opt.visible_columns[1]):
+                        self.sheet1_opt.set_cell_data(i,j,temp_data[index_list[i]][j])
+                self.sheet1_opt.redraw()
 
             def all_active(self):
                 #----------------------------------------------------------------------
@@ -305,8 +311,8 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Set all rows to Active
-                for i in range(len(self.sheet1.data)):
-                    self.sheet1.set_cell_data(i,5, 'Active')
+                for i in range(len(self.sheet1_opt.data)):
+                    self.sheet1_opt.set_cell_data(i,5, 'Active')
 
             def all_passive(self):
                 #----------------------------------------------------------------------
@@ -316,8 +322,8 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Set all rows to Passive
-                for i in range(len(self.sheet1.data)):
-                    self.sheet1.set_cell_data(i,5, 'Passive')
+                for i in range(len(self.sheet1_opt.data)):
+                    self.sheet1_opt.set_cell_data(i,5, 'Passive')
 
             def genbounds(self):
                 #----------------------------------------------------------------------
@@ -327,36 +333,56 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Get the bounds slider value
-                value = float(self.slider1.get())
+                value = float(self.slider1_opt.get())
+                if value == 0:
+                    value = 5
 
                 # Generate bounds
-                for i in range(len(self.sheet1.data)):
+                for i in range(len(self.sheet1_opt.data)):
                     try:
-                        val = float(self.sheet1.data[i][3])
+                        val = float(self.sheet1_opt.data[i][3])
                         lb = val-val*float(value)/100
-                        self.sheet1.set_cell_data(i,2, '{:0.4e}'.format(lb))
+                        self.sheet1_opt.set_cell_data(i,2, '{:0.4e}'.format(lb))
                         ub = val+val*float(value)/100
-                        self.sheet1.set_cell_data(i,4, '{:0.4e}'.format(ub))
-                        self.sheet1.redraw() 
+                        self.sheet1_opt.set_cell_data(i,4, '{:0.4e}'.format(ub))
+                        self.sheet1_opt.redraw() 
+
+                        # -- Check lower bound
+                        self.sheet1_opt.highlight((i,2),fg = 'black', bg = 'white')
+                        try:
+                            if float(self.sheet1_opt.data[i][2]) > float(self.sheet1_opt.data[i][3]):
+                                self.sheet1_opt.highlight((i,2),fg = 'red', bg = 'white')
+                        except:
+                            pass
+
+                        # -- Check upper bound
+                        self.sheet1_opt.highlight((i,4),fg = 'black', bg = 'white')
+                        try:
+                            if float(self.sheet1_opt.data[i][4]) < float(self.sheet1_opt.data[i][3]):
+                                self.sheet1_opt.highlight((i,4),fg = 'red', bg = 'white')
+                        except:
+                            pass
                     except:
                         pass
 
-            self.sheet1.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
-            self.sheet1.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet1.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet1.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet1.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet1.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet1'))])
+            self.sheet1_opt.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
+            self.sheet1_opt.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet1_opt.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet1_opt.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet1_opt.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet1_opt.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet1_opt'))])
             
             # Set Column Widths
-            self.sheet1.column_width(column = 0, width = self.Placement['Optimization']['Sheet1'][5], redraw = True)
-            self.sheet1.column_width(column = 1, width = self.Placement['Optimization']['Sheet1'][6], redraw = True)
-            self.sheet1.column_width(column = 2, width = self.Placement['Optimization']['Sheet1'][7], redraw = True)
-            self.sheet1.column_width(column = 3, width = self.Placement['Optimization']['Sheet1'][8], redraw = True)
-            self.sheet1.column_width(column = 4, width = self.Placement['Optimization']['Sheet1'][9], redraw = True)
-            self.sheet1.column_width(column = 5, width = self.Placement['Optimization']['Sheet1'][10], redraw = True)
-            self.sheet1.column_width(column = 6, width = self.Placement['Optimization']['Sheet1'][11], redraw = True)
-            self.sheet1.table_align(align = 'c',redraw=True)
+            window.update_idletasks()
+            total_width = self.sheet1_opt.winfo_width()
+            self.sheet1_opt.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['Sheet1'][4]), redraw = True)
+            self.sheet1_opt.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['Sheet1'][5]), redraw = True)
+            self.sheet1_opt.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['Sheet1'][6]), redraw = True)
+            self.sheet1_opt.column_width(column = 3, width = int(total_width*self.Placement['Optimization']['Sheet1'][7]), redraw = True)
+            self.sheet1_opt.column_width(column = 4, width = int(total_width*self.Placement['Optimization']['Sheet1'][8]), redraw = True)
+            self.sheet1_opt.column_width(column = 5, width = int(total_width*self.Placement['Optimization']['Sheet1'][9]), redraw = True)
+            self.sheet1_opt.column_width(column = 6, width = int(total_width*self.Placement['Optimization']['Sheet1'][10]), redraw = True)
+            self.sheet1_opt.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
             Units = {'Stress':['GPa','MPa','kPa','Pa','msi','ksi','psi'],
@@ -366,8 +392,11 @@ def CreateModelTab(self,window):
 
             # Set Rows
             for i in range(len(self.Params_VE)):
-                self.sheet1.set_cell_data(i,0, self.Params_VE[i])
-                self.sheet1.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+                try:
+                    self.sheet1_opt.set_cell_data(i,0, '{:0.4e}'.format(self.Params_VE[i]))
+                except:
+                    self.sheet1_opt.set_cell_data(i,0, self.Params_VE[i])
+                self.sheet1_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
                 if self.Params_VE_Units[i] != None:
                     for key in list(Units.keys()):
                         if self.Params_VE_Units[i] in Units[key]:
@@ -376,49 +405,52 @@ def CreateModelTab(self,window):
                     units_list = []
                 def_val = self.Params_VE_Units[i]
                     
-                self.sheet1.create_dropdown(r=i, c = 1,values=units_list)
+                self.sheet1_opt.create_dropdown(r=i, c = 1,values=units_list)
                 if def_val != None:
-                    self.sheet1.set_cell_data(i,1, def_val)
+                    self.sheet1_opt.set_cell_data(i,1, def_val)
 
             # Set Optimization Flag
             try:
-                if self.sheet1_data[0][6] != '' and self.sheet1_data[0][6] != None:
+                if self.sheet1_opt_data[0][6] != '' and self.sheet1_opt_data[0][6] != None:
                     self.optimize = 1
                     self.Compare['Model']['Status'] = 1
             except:
                 pass
 
             # Add Existing Data
-            for i in range(len(self.sheet1_data)):
+            for i in range(len(self.sheet1_opt_data)):
                 try:
                     # Find the corresponding index
                     rown = None
-                    for j in range(len(self.sheet1.data)):
-                        if self.sheet1.data[j][0] == self.sheet1_data[i][0]:
+                    for j in range(len(self.sheet1_opt.data)):
+                        if self.sheet1_opt.data[j][0] == self.sheet1_opt_data[i][0]:
                             rown = j
 
                     if rown != None:
                         for j in range(1,len(Cols)):
                             try:
-                                self.sheet1.set_cell_data(rown,j, self.sheet1_data[i][j])
+                                try:
+                                    self.sheet1_opt.set_cell_data(rown,j, '{:0.4e}'.format(self.sheet1_opt_data[i][j]))
+                                except:
+                                    self.sheet1_opt.set_cell_data(rown,j, self.sheet1_opt_data[i][j])
                                 if j == 6:
                                     if self.optimize == 1:
                                         try:
-                                            if float(self.sheet1_data[i][6]) > 1.01*float(self.sheet1_data[i][2]) and float(self.sheet1_data[i][6]) < 0.99*float(self.sheet1_data[i][4]):
-                                                self.sheet1.highlight((rown,6),fg = 'green', bg = 'white')
+                                            if float(self.sheet1_opt_data[i][6]) > 1.01*float(self.sheet1_opt_data[i][2]) and float(self.sheet1_opt_data[i][6]) < 0.99*float(self.sheet1_opt_data[i][4]):
+                                                self.sheet1_opt.highlight((rown,6),fg = 'green', bg = 'white')
                                             else:
-                                                self.sheet1.highlight((rown,6),fg = 'red', bg = 'white')
+                                                self.sheet1_opt.highlight((rown,6),fg = 'red', bg = 'white')
                                         except:
                                             pass
                                     else:
-                                        self.sheet1.set_cell_data(rown,j, '')
+                                        self.sheet1_opt.set_cell_data(rown,j, '')
                             except:
                                 pass
                 except:
                     pass
 
             # Redraw the table
-            self.sheet1.redraw()
+            self.sheet1_opt.redraw()
 
             # Update the Model Data
             UpdateModelData(None, self, 1, 'Model')
@@ -431,7 +463,7 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             # Get the value
-            value = self.optmenu4.get()
+            value = self.optmenu4_opt.get()
 
             # Initialize Parameters
             self.Params_VE = []
@@ -461,18 +493,18 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
                         
             # Delete table if it exists
-            if hasattr(self,"sheet2"):
+            if hasattr(self,"sheet2_opt"):
                 if hasattr(self,"res_flag2") == True:
                     if self.res_flag2 == 0:
                         # Store data
-                        self.sheet2_data = self.sheet2.data
+                        self.sheet2_opt_data = self.sheet2_opt.data
                 else:
                     # Store data
-                    self.sheet2_data = self.sheet2.data
+                    self.sheet2_opt_data = self.sheet2_opt.data
 
                 # Delete sheet
-                self.sheet2.destroy()
-                del self.sheet2
+                self.sheet2_opt.destroy()
+                del self.sheet2_opt
                 
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
@@ -480,39 +512,40 @@ def CreateModelTab(self,window):
                 if 'VP_Param' in list(self.Compare['Model'].keys()):
                     if hasattr(self,"res_flag2") == True:
                         if self.res_flag2 == 0:
-                            self.sheet2_data = self.Compare['Model']['VP_Param']
+                            self.sheet2_opt_data = self.Compare['Model']['VP_Param']
                         else:
                             self.res_flag2 = 0
                     else:
-                        self.sheet2_data = self.Compare['Model']['VP_Param']
+                        self.sheet2_opt_data = self.Compare['Model']['VP_Param']
 
-            if hasattr(self,"sheet2_data") == False:
-                self.sheet2_data = []
+            if hasattr(self,"sheet2_opt_data") == False:
+                self.sheet2_opt_data = []
 
             # Set the columns
             Cols = ['Parameter', 'Units','Lower Bound','Initial Guess','Upper Bound','Active/Passive','COMPARE']
 
             # Create the table
-            self.sheet2 = tksheet.Sheet(
-                                        window, 
+            self.sheet2_opt = tksheet.Sheet(
+                                        self.nb_tab_tab3, 
                                         total_rows = len(self.Params_VP), 
                                         total_columns = len(Cols), 
                                         headers = Cols,
-                                        width = self.Placement['Optimization']['Sheet2'][2], 
-                                        height = self.Placement['Optimization']['Sheet2'][3], 
                                         show_x_scrollbar = False, 
                                         show_y_scrollbar = True,
-                                        font = ("Segoe UI",self.Placement['Optimization']['Sheet2'][4],"normal"),
-                                        header_font = ("Segoe UI",self.Placement['Optimization']['Sheet2'][4],"bold")
+                                        font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
+                                        header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
                                         )
-            self.sheet2.place(
+            self.sheet2_opt.place(
                             anchor = 'n', 
                             relx = self.Placement['Optimization']['Sheet2'][0], 
-                            rely = self.Placement['Optimization']['Sheet2'][1]
+                            rely = self.Placement['Optimization']['Sheet2'][1],
+                            relwidth = self.Placement['Optimization']['Sheet2'][2], 
+                            relheight = self.Placement['Optimization']['Sheet2'][3], 
                             )
-            self.tab_att_list.append('self.sheet2')
-            self.sheet2.change_theme("blue")
-            self.sheet2.set_index_width(0)
+            if 'self.sheet2_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.sheet2_opt') 
+            self.sheet2_opt.change_theme("blue")
+            self.sheet2_opt.set_index_width(0)
 
             def sort_cols(self):
                 #----------------------------------------------------------------------
@@ -522,20 +555,20 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Get currently selected element
-                currently_selected = self.sheet2.get_currently_selected()
+                currently_selected = self.sheet2_opt.get_currently_selected()
                 
                 # Get the list of values
                 sort_list = []
-                for i in range(self.sheet2.visible_rows[1]):
-                    sort_list.append(self.sheet2.data[i][currently_selected.column])
+                for i in range(self.sheet2_opt.visible_rows[1]):
+                    sort_list.append(self.sheet2_opt.data[i][currently_selected.column])
                 index_list = sorted(range(len(sort_list)), key=lambda k: sort_list[k])
                 
                 # Rewrite the table
-                temp_data = copy.deepcopy(self.sheet2.data)
-                for i in range(self.sheet2.visible_rows[1]):
-                    for j in range(self.sheet2.visible_columns[1]):
-                        self.sheet2.set_cell_data(i,j,temp_data[index_list[i]][j])
-                self.sheet2.redraw()
+                temp_data = copy.deepcopy(self.sheet2_opt.data)
+                for i in range(self.sheet2_opt.visible_rows[1]):
+                    for j in range(self.sheet2_opt.visible_columns[1]):
+                        self.sheet2_opt.set_cell_data(i,j,temp_data[index_list[i]][j])
+                self.sheet2_opt.redraw()
         
             def all_active(self):
                 #----------------------------------------------------------------------
@@ -545,8 +578,8 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Set all parameters to Active
-                for i in range(len(self.sheet2.data)):
-                    self.sheet2.set_cell_data(i,5, 'Active')
+                for i in range(len(self.sheet2_opt.data)):
+                    self.sheet2_opt.set_cell_data(i,5, 'Active')
 
             def all_passive(self):
                 #----------------------------------------------------------------------
@@ -556,8 +589,8 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Set all parameters to Passive
-                for i in range(len(self.sheet2.data)):
-                    self.sheet2.set_cell_data(i,5, 'Passive')
+                for i in range(len(self.sheet2_opt.data)):
+                    self.sheet2_opt.set_cell_data(i,5, 'Passive')
                 
             # Auto generate bounds
             def genbounds(self):
@@ -568,34 +601,55 @@ def CreateModelTab(self,window):
                 #----------------------------------------------------------------------
 
                 # Get the bounds slider value
-                value = float(self.slider1.get())
-                for i in range(len(self.sheet2.data)):
+                value = float(self.slider1_opt.get())
+                if value == 0:
+                    value = 5
+
+                for i in range(len(self.sheet2_opt.data)):
                     try:
-                        val = float(self.sheet2.data[i][3])
+                        val = float(self.sheet2_opt.data[i][3])
                         lb = val-val*float(value)/100
-                        self.sheet2.set_cell_data(i,2, '{:0.4e}'.format(lb))
+                        self.sheet2_opt.set_cell_data(i,2, '{:0.4e}'.format(lb))
                         ub = val+val*float(value)/100
-                        self.sheet2.set_cell_data(i,4, '{:0.4e}'.format(ub))
-                        self.sheet2.redraw() 
+                        self.sheet2_opt.set_cell_data(i,4, '{:0.4e}'.format(ub))
+                        self.sheet2_opt.redraw() 
+
+                        # -- Check lower bound
+                        self.sheet2_opt.highlight((i,2),fg = 'black', bg = 'white')
+                        try:
+                            if float(self.sheet2_opt.data[i][2]) > float(self.sheet2_opt.data[i][3]):
+                                self.sheet2_opt.highlight((i,2),fg = 'red', bg = 'white')
+                        except:
+                            pass
+
+                        # -- Check upper bound
+                        self.sheet2_opt.highlight((i,4),fg = 'black', bg = 'white')
+                        try:
+                            if float(self.sheet1_opt.data[i][4]) < float(self.sheet2_opt.data[i][3]):
+                                self.sheet2_opt.highlight((i,4),fg = 'red', bg = 'white')
+                        except:
+                            pass
                     except:
                         pass
 
-            self.sheet2.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
-            self.sheet2.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet2.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet2.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet2.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet2.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet2'))])
+            self.sheet2_opt.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
+            self.sheet2_opt.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet2_opt.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet2_opt.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet2_opt.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet2_opt.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet2_opt'))])
 
             # Set Column Widths
-            self.sheet2.column_width(column = 0, width = self.Placement['Optimization']['Sheet2'][5], redraw = True)
-            self.sheet2.column_width(column = 1, width = self.Placement['Optimization']['Sheet2'][6], redraw = True)
-            self.sheet2.column_width(column = 2, width = self.Placement['Optimization']['Sheet2'][7], redraw = True)
-            self.sheet2.column_width(column = 3, width = self.Placement['Optimization']['Sheet2'][8], redraw = True)
-            self.sheet2.column_width(column = 4, width = self.Placement['Optimization']['Sheet2'][9], redraw = True)
-            self.sheet2.column_width(column = 5, width = self.Placement['Optimization']['Sheet2'][10], redraw = True)
-            self.sheet2.column_width(column = 6, width = self.Placement['Optimization']['Sheet2'][11], redraw = True)
-            self.sheet2.table_align(align = 'c',redraw=True)
+            window.update_idletasks()
+            total_width = self.sheet1_opt.winfo_width()
+            self.sheet2_opt.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['Sheet2'][4]), redraw = True)
+            self.sheet2_opt.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['Sheet2'][5]), redraw = True)
+            self.sheet2_opt.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['Sheet2'][6]), redraw = True)
+            self.sheet2_opt.column_width(column = 3, width = int(total_width*self.Placement['Optimization']['Sheet2'][7]), redraw = True)
+            self.sheet2_opt.column_width(column = 4, width = int(total_width*self.Placement['Optimization']['Sheet2'][8]), redraw = True)
+            self.sheet2_opt.column_width(column = 5, width = int(total_width*self.Placement['Optimization']['Sheet2'][9]), redraw = True)
+            self.sheet2_opt.column_width(column = 6, width = int(total_width*self.Placement['Optimization']['Sheet2'][10]), redraw = True)
+            self.sheet2_opt.table_align(align = 'c',redraw=True)
 
             # Set unit dictionary
             Units = {'Stress':['GPa','MPa','kPa','Pa','msi','ksi','psi'],
@@ -606,8 +660,11 @@ def CreateModelTab(self,window):
 
             # Set Rows
             for i in range(len(self.Params_VP)):
-                self.sheet2.set_cell_data(i,0, self.Params_VP[i])
-                self.sheet2.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+                try:
+                    self.sheet2_opt.set_cell_data(i,0, '{:0.4e}'.format(self.Params_VP[i]))
+                except:
+                    self.sheet2_opt.set_cell_data(i,0, self.Params_VP[i])
+                self.sheet2_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
                 if self.Params_VP_Units[i] != None:
                     for key in list(Units.keys()):
                         if self.Params_VP_Units[i] in Units[key]:
@@ -616,49 +673,52 @@ def CreateModelTab(self,window):
                     units_list = []
                 def_val = self.Params_VP_Units[i]
                     
-                self.sheet2.create_dropdown(r=i, c = 1,values=units_list)
+                self.sheet2_opt.create_dropdown(r=i, c = 1,values=units_list)
                 if def_val != None:
-                    self.sheet2.set_cell_data(i,1, def_val)
+                    self.sheet2_opt.set_cell_data(i,1, def_val)
 
             # Set Optimization Flag
             try:
-                if self.sheet2_data[0][6] != '' and self.sheet2_data[0][6] != None:
+                if self.sheet2_opt_data[0][6] != '' and self.sheet2_opt_data[0][6] != None:
                     self.optimize = 1
                     self.Compare['Model']['Status'] = 1
             except:
                 pass
 
             # Add Existing Data
-            for i in range(len(self.sheet2_data)):
+            for i in range(len(self.sheet2_opt_data)):
                 try:
                     # Find the corresponding index
                     rown = None
-                    for j in range(len(self.sheet2.data)):
-                        if self.sheet2.data[j][0] == self.sheet2_data[i][0]:
+                    for j in range(len(self.sheet2_opt.data)):
+                        if self.sheet2_opt.data[j][0] == self.sheet2_opt_data[i][0]:
                             rown = j
 
                     if rown != None:
                         for j in range(1,len(Cols)):
                             try:
-                                self.sheet2.set_cell_data(rown,j, self.sheet2_data[i][j])
+                                try:
+                                    self.sheet2_opt.set_cell_data(rown,j, '{:0.4e}'.format(self.sheet2_opt_data[i][j]))
+                                except:
+                                    self.sheet2_opt.set_cell_data(rown,j, self.sheet2_opt_data[i][j])
                                 if j == 6:
                                     if self.optimize == 1:
                                         try:
-                                            if float(self.sheet2_data[i][6]) > 1.01*float(self.sheet2_data[i][2]) and float(self.sheet2_data[i][6]) < 0.99*float(self.sheet2_data[i][4]):
-                                                self.sheet2.highlight((rown,6),fg = 'green', bg = 'white')
+                                            if float(self.sheet2_opt_data[i][6]) > 1.01*float(self.sheet2_opt_data[i][2]) and float(self.sheet2_opt_data[i][6]) < 0.99*float(self.sheet2_opt_data[i][4]):
+                                                self.sheet2_opt.highlight((rown,6),fg = 'green', bg = 'white')
                                             else:
-                                                self.sheet2.highlight((rown,6),fg = 'red', bg = 'white')
+                                                self.sheet2_opt.highlight((rown,6),fg = 'red', bg = 'white')
                                         except:
                                             pass
                                     else:
-                                        self.sheet2.set_cell_data(rown,j, '')
+                                        self.sheet2_opt.set_cell_data(rown,j, '')
                             except:
                                 pass
                 except:
                     pass
 
             #Redraw the table
-            self.sheet2.redraw()
+            self.sheet2_opt.redraw()
 
             # Update the Model Data
             UpdateModelData(None, self, 2, 'Model')
@@ -672,7 +732,7 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             # Get Value
-            value = self.optmenu5.get()
+            value = self.optmenu5_opt.get()
 
             # Initialize Parameters
             self.Params_VP = []
@@ -699,18 +759,19 @@ def CreateModelTab(self,window):
         self.VEMech = self.Compare['Model']['Model Info']['Reversible Mechanisms']
         if len(self.VEMech) > 0:
             # Create the label
-            self.desc4 = ttk.Label(
-                                window, 
+            self.desc4_opt = ttk.Label(
+                                self.nb_tab_tab3, 
                                 text="Viscoelastic Mechanisms (M):", 
-                                anchor=tk.CENTER,       
+                                anchor=tk.NW,       
                                 style = "Modern1.TLabel"                   
                                 )
-            self.desc4.place(
+            self.desc4_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['Label3'][0], 
-                            rely = self.Placement['Optimization']['Label3'][1]
+                            relx = self.Placement['Optimization']['LabelVE'][0], 
+                            rely = self.Placement['Optimization']['LabelVE'][1]
                             )
-            self.tab_att_list.append('self.desc4')
+            if 'self.desc4_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc4_opt') 
 
             # Initialize number of viscoelastic mechanisms
             ve_opt = self.VEMech[0]
@@ -723,20 +784,25 @@ def CreateModelTab(self,window):
                         ve_opt = int(self.Compare['Model']['M'])
 
             # Create the drop down
-            self.optmenu4 = ttk.Combobox(
-                                        window,
+            self.optmenu4_opt = ttk.Combobox(
+                                        self.nb_tab_tab3,
                                         values=self.VEMech,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu4.place(
+            self.optmenu4_opt.configure(font = self.style_man['Combo'])
+            self.optmenu4_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu4_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['Combo3'][0], 
-                                rely = self.Placement['Optimization']['Combo3'][1]
+                                relx = self.Placement['Optimization']['ComboVE'][0], 
+                                rely = self.Placement['Optimization']['ComboVE'][1], 
+                                relwidth = self.Placement['Optimization']['ComboVE'][2], 
+                                relheight = self.Placement['Optimization']['ComboVE'][3]
                                 )
-            self.optmenu4.set(ve_opt)
-            self.optmenu4.bind("<<ComboboxSelected>>",  VE_param)
-            self.tab_att_list.append('self.optmenu4')
+            self.optmenu4_opt.set(ve_opt)
+            self.optmenu4_opt.bind("<<ComboboxSelected>>",  VE_param)
+            if 'self.optmenu4_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu4_opt')
 
             # Get list of viscoelastic parameters
             VE_param(ve_opt)
@@ -745,17 +811,18 @@ def CreateModelTab(self,window):
         self.VPMech = self.Compare['Model']['Model Info']['Irreversible Mechanisms']
         if len(self.VPMech) > 0:
             # Create the label
-            self.desc5 = ttk.Label(window, 
+            self.desc5_opt = ttk.Label(self.nb_tab_tab3, 
                             text="Viscoplastic Mechanisms (N):", 
                             anchor=tk.CENTER,       
                             style = "Modern1.TLabel"                  
                             )
-            self.desc5.place(
+            self.desc5_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['Label4'][0], 
-                            rely = self.Placement['Optimization']['Label4'][1]
+                            relx = self.Placement['Optimization']['LabelVP'][0], 
+                            rely = self.Placement['Optimization']['LabelVP'][1]
                             )
-            self.tab_att_list.append('self.desc5')
+            if 'self.desc5_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc5_opt')
 
             # Initialize Viscoplastic number of mechanisms
             vp_opt = self.VPMech[0]
@@ -768,20 +835,25 @@ def CreateModelTab(self,window):
                         vp_opt = int(self.Compare['Model']['N'])
 
             # Create the drop down menu
-            self.optmenu5 = ttk.Combobox(
-                                        window,
+            self.optmenu5_opt = ttk.Combobox(
+                                        self.nb_tab_tab3,
                                         values=self.VEMech,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu5.place(
+            self.optmenu5_opt.configure(font = self.style_man['Combo'])
+            self.optmenu5_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu5_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['Combo4'][0], 
-                                rely = self.Placement['Optimization']['Combo4'][1]
+                                relx = self.Placement['Optimization']['ComboVP'][0], 
+                                rely = self.Placement['Optimization']['ComboVP'][1], 
+                                relwidth = self.Placement['Optimization']['ComboVP'][2], 
+                                relheight = self.Placement['Optimization']['ComboVP'][3]
                                 )
-            self.optmenu5.set(vp_opt)
-            self.optmenu5.bind("<<ComboboxSelected>>",  VP_param)
-            self.tab_att_list.append('self.optmenu5')
+            self.optmenu5_opt.set(vp_opt)
+            self.optmenu5_opt.bind("<<ComboboxSelected>>",  VP_param)
+            if 'self.optmenu5_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu5_opt')
 
             # Get list of viscoplastic parameters
             VP_param(vp_opt)
@@ -795,86 +867,95 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             formatted_value = f"Bounds: ± {str(int(float(value)))}%" 
-            self.desc6.config(text=formatted_value)
+            self.desc6_opt.config(text=formatted_value)
 
             self.slider_val = value
 
         # -- Create the label
-        self.desc6 = ttk.Label(window, 
+        self.desc6_opt = ttk.Label(self.nb_tab_tab3, 
                         text="Bounds: ± 5%", 
                         anchor=tk.CENTER,       
                         style = 'Modern1.TLabel'                  
                         )
-        self.desc6.place(
+        self.desc6_opt.place(
                         anchor = 'n', 
-                        relx = self.Placement['Optimization']['Label5'][0], 
-                        rely = self.Placement['Optimization']['Label5'][1]
+                        relx = self.Placement['Optimization']['LabelBnd'][0], 
+                        rely = self.Placement['Optimization']['LabelBnd'][1]
                         )
-        self.tab_att_list.append('self.desc6')
+        if 'self.desc6_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.desc6_opt')
 
         # -- Create the slider
-        self.slider1 = ttk.Scale(
-                                window, 
+        self.slider1_opt = ttk.Scale(
+                                self.nb_tab_tab3, 
                                 from_=5, 
                                 to=50, 
                                 orient='horizontal',  
-                                length=self.Placement['Optimization']['Slider1'][2],
                                 style="Modern.Horizontal.TScale", 
                                 command = update_value, 
                                 )
-        self.slider1.place(
+        self.slider1_opt.place(
                         anchor = 'n', 
                         relx = self.Placement['Optimization']['Slider1'][0], 
-                        rely = self.Placement['Optimization']['Slider1'][1]
+                        rely = self.Placement['Optimization']['Slider1'][1],
+                        relwidth= self.Placement['Optimization']['Slider1'][2],
                         )
-        self.tab_att_list.append('self.slider1')
+        if 'self.slider1_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.slider1_opt')
+
         if hasattr(self,"slider_val"):
-            self.slider1.set(self.slider_val)
+            self.slider1_opt.set(self.slider_val)
 
         # Create the Load from Excel button
-        self.btn_load_db = ttk.Button(
-                                    window, 
+        self.btn_load_opt = ttk.Button(
+                                    self.nb_tab_tab3, 
                                     text = "Load from Excel", 
                                     command = lambda:self.load_from_db('Optimize'), 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button1'][2]
                                     )
-        self.btn_load_db.place(
+        self.btn_load_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button1'][0], 
-                            rely = self.Placement['Optimization']['Button1'][1]
+                            relx = self.Placement['Optimization']['ButtonLoad'][0], 
+                            rely = self.Placement['Optimization']['ButtonLoad'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonLoad'][2], 
+                            relheight = self.Placement['Optimization']['ButtonLoad'][3]
                             )
-        self.tab_att_list.append('self.btn_load_db')
+        if 'self.btn_load_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_load_opt')
 
         # Create button to view/delete models
-        self.btn_modlib = ttk.Button(
-                                    window, 
+        self.btn_modlib_opt = ttk.Button(
+                                    self.nb_tab_tab3, 
                                     text = "Model Library", 
                                     command = lambda : self.Model_Library('Optimize'), 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button2'][2]
                                     )
-        self.btn_modlib.place(
+        self.btn_modlib_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button2'][0], 
-                            rely = self.Placement['Optimization']['Button2'][1]
+                            relx = self.Placement['Optimization']['ButtonModLib'][0], 
+                            rely = self.Placement['Optimization']['ButtonModLib'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonModLib'][2], 
+                            relheight = self.Placement['Optimization']['ButtonModLib'][3]
                             )
-        self.tab_att_list.append('self.btn_modlib')
+        if 'self.btn_modlib_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_modlib_opt')
 
         # Create the Optimize button
         self.btn_opt = ttk.Button(
-                                window, 
+                                self.nb_tab_tab3, 
                                 text = "Optimize", 
                                 command = self.optimizer, 
                                 style = "Modern3.TButton",
-                                width = self.Placement['Optimization']['Button3'][2]
                                 )
         self.btn_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button3'][0], 
-                            rely = self.Placement['Optimization']['Button3'][1]
+                            relx = self.Placement['Optimization']['ButtonOpt'][0], 
+                            rely = self.Placement['Optimization']['ButtonOpt'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonOpt'][2], 
+                            relheight = self.Placement['Optimization']['ButtonOpt'][3]
                             )
-        self.tab_att_list.append('self.btn_opt')
+        if 'self.btn_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_opt')
 
         # Create Replace Values
         def reset_guess(self):
@@ -887,16 +968,16 @@ def CreateModelTab(self,window):
             # Check that values exist
             flag = 0
             # -- Check Viscoelastic
-            for i in range(len(self.sheet1.data)):
+            for i in range(len(self.sheet1_opt.data)):
                 try:
-                    val = float(self.sheet1.data[i][-1])
+                    val = float(self.sheet1_opt.data[i][-1])
                 except:
                     flag = 1
 
             # -- Check Viscoplastic
-            for i in range(len(self.sheet2.data)):
+            for i in range(len(self.sheet2_opt.data)):
                 try:
-                    val = float(self.sheet2.data[i][-1])
+                    val = float(self.sheet2_opt.data[i][-1])
                 except:
                     flag = 1
 
@@ -907,50 +988,52 @@ def CreateModelTab(self,window):
             # Get list of bound percentages
             # -- Viscoelastic
             ve_bnds = []
-            for i in range(len(self.sheet1.data)):
-                lp = (float(self.sheet1.data[i][2]) - float(self.sheet1.data[i][3]))/(-float(self.sheet1.data[i][3]))
-                up = (float(self.sheet1.data[i][4]) - float(self.sheet1.data[i][3]))/(float(self.sheet1.data[i][3]))
+            for i in range(len(self.sheet1_opt.data)):
+                lp = (float(self.sheet1_opt.data[i][2]) - float(self.sheet1_opt.data[i][3]))/(-float(self.sheet1_opt.data[i][3]))
+                up = (float(self.sheet1_opt.data[i][4]) - float(self.sheet1_opt.data[i][3]))/(float(self.sheet1_opt.data[i][3]))
                 ve_bnds.append([lp, up])
 
             # -- Viscoplastic
             vp_bnds = []
-            for i in range(len(self.sheet2.data)):
-                lp = (float(self.sheet2.data[i][2]) - float(self.sheet2.data[i][3]))/(-float(self.sheet2.data[i][3]))
-                up = (float(self.sheet2.data[i][4]) - float(self.sheet2.data[i][3]))/(float(self.sheet2.data[i][3]))
+            for i in range(len(self.sheet2_opt.data)):
+                lp = (float(self.sheet2_opt.data[i][2]) - float(self.sheet2_opt.data[i][3]))/(-float(self.sheet2_opt.data[i][3]))
+                up = (float(self.sheet2_opt.data[i][4]) - float(self.sheet2_opt.data[i][3]))/(float(self.sheet2_opt.data[i][3]))
                 vp_bnds.append([lp, up])
 
             # Reset Values
             # -- Viscoelastic
-            for i in range(len(self.sheet1.data)):
-                self.sheet1.data[i][3] = float(self.sheet1.data[i][-1])
-                self.sheet1.data[i][2] = float(self.sheet1.data[i][-1]) - float(self.sheet1.data[i][-1])*ve_bnds[i][0]
-                self.sheet1.data[i][4] = float(self.sheet1.data[i][-1]) + float(self.sheet1.data[i][-1])*ve_bnds[i][1]
-                self.sheet1.data[i][-1] = ''
+            for i in range(len(self.sheet1_opt.data)):
+                self.sheet1_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]))
+                self.sheet1_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) - float(self.sheet1_opt.data[i][-1])*ve_bnds[i][0])
+                self.sheet1_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) + float(self.sheet1_opt.data[i][-1])*ve_bnds[i][1])
+                self.sheet1_opt.data[i][-1] = ''
 
             # -- Viscoplastic
-            for i in range(len(self.sheet2.data)):
-                self.sheet2.data[i][3] = float(self.sheet2.data[i][-1])
-                self.sheet2.data[i][2] = float(self.sheet2.data[i][-1]) - float(self.sheet2.data[i][-1])*vp_bnds[i][0]
-                self.sheet2.data[i][4] = float(self.sheet2.data[i][-1]) + float(self.sheet2.data[i][-1])*vp_bnds[i][1]
-                self.sheet2.data[i][-1] = ''
+            for i in range(len(self.sheet2_opt.data)):
+                self.sheet2_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]))
+                self.sheet2_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) - float(self.sheet2_opt.data[i][-1])*vp_bnds[i][0])
+                self.sheet2_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) + float(self.sheet2_opt.data[i][-1])*vp_bnds[i][1])
+                self.sheet2_opt.data[i][-1] = ''
 
             # Redraw sheets
-            self.sheet1.redraw() 
-            self.sheet2.redraw() 
+            self.sheet1_opt.redraw() 
+            self.sheet2_opt.redraw() 
 
-        self.btn_reset = ttk.Button(
-                                window, 
+        self.btn_reset_opt = ttk.Button(
+                                self.nb_tab_tab3, 
                                 text = "Reset Guess", 
                                 command = lambda: reset_guess(self), 
                                 style = "Modern3.TButton",
-                                width = self.Placement['Optimization']['Button4'][2]
                                 )
-        self.btn_reset.place(
+        self.btn_reset_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button4'][0], 
-                            rely = self.Placement['Optimization']['Button4'][1]
+                            relx = self.Placement['Optimization']['ButtonRes'][0], 
+                            rely = self.Placement['Optimization']['ButtonRes'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonRes'][2], 
+                            relheight = self.Placement['Optimization']['ButtonRes'][3]
                             )
-        self.tab_att_list.append('self.btn_reset')
+        if 'self.btn_reset_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_reset_opt')
 
         def save_model_local():
             #------------------------------------------------------------------
@@ -996,19 +1079,21 @@ def CreateModelTab(self,window):
             self.Compare['Model ID']= user_input
 
         # Create button to save a model
-        self.btn_savemod = ttk.Button(
-                                    window, 
+        self.btn_savemod_opt = ttk.Button(
+                                    self.nb_tab_tab3, 
                                     text = "Save Model", 
                                     command = save_model_local, 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button5'][2]
                                     )
-        self.btn_savemod.place(
+        self.btn_savemod_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button5'][0], 
-                            rely = self.Placement['Optimization']['Button5'][1]
+                            relx = self.Placement['Optimization']['ButtonSaveMod'][0], 
+                            rely = self.Placement['Optimization']['ButtonSaveMod'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonSaveMod'][2], 
+                            relheight = self.Placement['Optimization']['ButtonSaveMod'][3]
                             )
-        self.tab_att_list.append('self.btn_savemod')
+        if 'self.btn_savemod_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_savemod_opt')
 
         def add_note():
             #------------------------------------------------------------------
@@ -1027,8 +1112,9 @@ def CreateModelTab(self,window):
 
                 # Create the window
                 root = tk.Toplevel(window)
-                root.geometry("600x400")
+                root.geometry(f"{int(600*self.scale)}x{int(400*self.scale)}")
                 root.title("Enter Model Notes") 
+                root.configure(bg='white')
                 root.grab_set()
                 
                 # Create the label
@@ -1036,16 +1122,24 @@ def CreateModelTab(self,window):
                         root, 
                         text="Enter Model Notes:", 
                         style = "Modern1.TLabel"
-                        ).place(anchor='n', relx = 0.5, rely = 0.1) 
+                        ).place(anchor='n', 
+                                relx = self.Placement['Optimization']['NotesLabel'][0], 
+                                rely = self.Placement['Optimization']['NotesLabel'][1],
+                                ) 
                 
                 # Create the note area
                 text_area = scrolledtext.ScrolledText(
                                                     root, 
                                                     wrap=tk.WORD, 
-                                                    width=40, 
-                                                    height=8, 
-                                                    font=("Segoe UI", 14)) 
-                text_area.place(anchor='c', relx = 0.5, rely = 0.5)
+                                                    width=int(40*self.scale), 
+                                                    height=int(8*self.scale), 
+                                                    font=("Segoe UI", max([self.min_font, int(14*self.scale)]))) 
+                text_area.place(anchor='c', 
+                                relx = self.Placement['Optimization']['NotesArea'][0], 
+                                rely = self.Placement['Optimization']['NotesArea'][1],  
+                                relwidth = self.Placement['Optimization']['NotesArea'][2], 
+                                relheight = self.Placement['Optimization']['NotesArea'][3], 
+                                )
 
                 # Display any existing notes
                 if 'Note' in list(self.Compare['Model'].keys()):
@@ -1075,19 +1169,21 @@ def CreateModelTab(self,window):
                 root.protocol("WM_DELETE_WINDOW", lambda:on_closing_root(self))
 
         # Create button to add a note
-        self.btn_addnote = ttk.Button(
-                                    window, 
+        self.btn_addnote_opt = ttk.Button(
+                                    self.nb_tab_tab3, 
                                     text = "Model Notes", 
                                     command = add_note, 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button6'][2]
                                     )
-        self.btn_addnote.place(
+        self.btn_addnote_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button6'][0], 
-                            rely = self.Placement['Optimization']['Button6'][1]
+                            relx = self.Placement['Optimization']['ButtonNote'][0], 
+                            rely = self.Placement['Optimization']['ButtonNote'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonNote'][2], 
+                            relheight = self.Placement['Optimization']['ButtonNote'][3]
                             )
-        self.tab_att_list.append('self.btn_addnote')
+        if 'self.btn_addnote_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_addnote_opt')
 
         # Function to view model history
         def view_history(self):
@@ -1129,24 +1225,26 @@ def CreateModelTab(self,window):
                                                 root, 
                                                 total_rows = len(param_keys), 
                                                 total_columns = len(Cols), 
-                                                headers = Cols,
-                                                width = 375, 
-                                                height = 250, 
+                                                headers = Cols, 
                                                 show_x_scrollbar = False, 
                                                 show_y_scrollbar = True,
-                                                font = ("Segoe UI",12,"normal"),
-                                                header_font = ("Segoe UI",12,"bold"))
+                                                font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                                header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"))
                 self.hist_param_sheet.place(
                                     anchor = 'ne', 
-                                    relx = 0.975, 
-                                    rely = 0.1
+                                    relx = self.Placement['Optimization']['HistSheetPar'][0], 
+                                    rely = self.Placement['Optimization']['HistSheetPar'][1],
+                                    relwidth = self.Placement['Optimization']['HistSheetPar'][2], 
+                                    relheight = self.Placement['Optimization']['HistSheetPar'][3],
                                     )
 
                 # Format the sheet
                 self.hist_param_sheet.change_theme("blue")
-                self.hist_param_sheet.column_width(column = 0, width = 120, redraw = True)
-                self.hist_param_sheet.column_width(column = 1, width = 100, redraw = True)
-                self.hist_param_sheet.column_width(column = 2, width = 120, redraw = True)
+                root.update_idletasks()
+                total_width = self.hist_param_sheet.winfo_width()
+                self.hist_param_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][4]), redraw = True)
+                self.hist_param_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][5]), redraw = True)
+                self.hist_param_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][6]), redraw = True)
                 self.hist_param_sheet.table_align(align = 'c',redraw=True)
                 self.hist_param_sheet.set_index_width(0)
 
@@ -1168,24 +1266,27 @@ def CreateModelTab(self,window):
                                                 total_rows = len(test_keys), 
                                                 total_columns = len(Cols), 
                                                 headers = Cols,
-                                                width = 375, 
-                                                height = 250, 
                                                 show_x_scrollbar = False, 
                                                 show_y_scrollbar = True,
-                                                font = ("Segoe UI",12,"normal"),
-                                                header_font = ("Segoe UI",12,"bold"))
+                                                font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                                header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"),
+                                                )
                 self.hist_test_sheet.place(
                                     anchor = 'ne', 
-                                    relx = 0.975, 
-                                    rely = 0.55
+                                    relx = self.Placement['Optimization']['HistSheetTest'][0], 
+                                    rely = self.Placement['Optimization']['HistSheetTest'][1], 
+                                    relwidth = self.Placement['Optimization']['HistSheetTest'][2], 
+                                    relheight = self.Placement['Optimization']['HistSheetTest'][3], 
                                     )
                 
                 # Format the sheet
                 self.hist_test_sheet.change_theme("blue")
-                self.hist_test_sheet.column_width(column = 0, width = 100, redraw = True)
-                self.hist_test_sheet.column_width(column = 1, width = 100, redraw = True)
-                self.hist_test_sheet.column_width(column = 2, width = 80, redraw = True)
-                self.hist_test_sheet.column_width(column = 3, width = 60, redraw = True)
+                root.update_idletasks()
+                total_width = self.hist_test_sheet.winfo_width()
+                self.hist_test_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][4]), redraw = True)
+                self.hist_test_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][5]), redraw = True)
+                self.hist_test_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][6]), redraw = True)
+                self.hist_test_sheet.column_width(column = 3, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][7]), redraw = True)
                 self.hist_test_sheet.table_align(align = 'c',redraw=True)
                 self.hist_test_sheet.set_index_width(0)
 
@@ -1252,7 +1353,7 @@ def CreateModelTab(self,window):
             # Create the run history window
             root = tk.Toplevel(window)
             root.title("Run History")
-            root.geometry("800x600")
+            root.geometry(f"{int(900*self.scale)}x{int(600*self.scale)}")
             root.resizable(False, False)
             root.configure(bg='white')
             root.grab_set()
@@ -1265,8 +1366,8 @@ def CreateModelTab(self,window):
                         style = "Modern1.TLabel"                   
                         ).place(
                                 anchor='n', 
-                                relx = 0.5, 
-                                rely = 0.02
+                                relx = self.Placement['Optimization']['HistLabel'][0], 
+                                rely = self.Placement['Optimization']['HistLabel'][1]
                                 )
             
             # Create the sheet
@@ -1276,23 +1377,28 @@ def CreateModelTab(self,window):
                                             total_rows = len(self.run_history.keys()), 
                                             total_columns = len(Cols), 
                                             headers = Cols,
-                                            width = 355, 
-                                            height = 550, 
                                             show_x_scrollbar = False, 
                                             show_y_scrollbar = True,
-                                            font = ("Segoe UI",12,"normal"),
-                                            header_font = ("Segoe UI",12,"bold"))
+                                            font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                            header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"),
+            )
             self.run_hist_sheet.place(
                                 anchor = 'nw', 
-                                relx = 0.025, 
-                                rely = 0.1
+                                relx = self.Placement['Optimization']['HistSheetRun'][0], 
+                                rely = self.Placement['Optimization']['HistSheetRun'][1],
+                                relwidth = self.Placement['Optimization']['HistSheetRun'][2], 
+                                relheight = self.Placement['Optimization']['HistSheetRun'][3], 
                                 )
+            
+            
 
             # Format the sheet
             self.run_hist_sheet.change_theme("blue")
-            self.run_hist_sheet.column_width(column = 0, width = 120, redraw = True)
-            self.run_hist_sheet.column_width(column = 1, width = 100, redraw = True)
-            self.run_hist_sheet.column_width(column = 2, width = 100, redraw = True)
+            root.update_idletasks()
+            total_width = self.run_hist_sheet.winfo_width()
+            self.run_hist_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][4]), redraw = True)
+            self.run_hist_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][5]), redraw = True)
+            self.run_hist_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][6]), redraw = True)
             self.run_hist_sheet.table_align(align = 'c',redraw=True)
             self.run_hist_sheet.set_index_width(0)
 
@@ -1313,19 +1419,21 @@ def CreateModelTab(self,window):
 
 
         # Create button to view model history
-        self.btn_view_hist = ttk.Button(
-                                    window, 
+        self.btn_view_hist_opt = ttk.Button(
+                                    self.nb_tab_tab3, 
                                     text = "Run History", 
                                     command = lambda : view_history(self), 
                                     style = "Modern3.TButton",
-                                    width = self.Placement['Optimization']['Button7'][2]
                                     )
-        self.btn_view_hist.place(
+        self.btn_view_hist_opt.place(
                             anchor = 'w', 
-                            relx = self.Placement['Optimization']['Button7'][0], 
-                            rely = self.Placement['Optimization']['Button7'][1]
+                            relx = self.Placement['Optimization']['ButtonView'][0], 
+                            rely = self.Placement['Optimization']['ButtonView'][1], 
+                            relwidth = self.Placement['Optimization']['ButtonView'][2], 
+                            relheight = self.Placement['Optimization']['ButtonView'][3]
                             )
-        self.tab_att_list.append('self.btn_view_hist')
+        if 'self.btn_view_hist_opt' not in self.atts['Optimize']['Local']:
+            self.atts['Optimize']['Local'].append('self.btn_view_hist_opt')
 
         # Update Model Data
         UpdateModelData(None, self, 3, 'Model')
@@ -1337,42 +1445,50 @@ def CreateModelTab(self,window):
             update_irreversible_table(self)
 
     # Create the label for Model Type
-    self.desc1 = ttk.Label(
-                        window, 
-                        text="Select the Model:", 
-                        anchor=tk.CENTER,       
-                        style = "Modern1.TLabel"                   
+    if 'self.desc1_opt' not in self.atts['Optimize']['Permanent']:
+        self.desc1_opt = ttk.Label(
+                            self.nb_tab_tab3, 
+                            text="Select the Model:", 
+                            anchor=tk.NW,       
+                            style = "Modern1.TLabel"                   
+                            )
+        self.desc1_opt.place(
+                        anchor = 'nw', 
+                        relx = self.Placement['Optimization']['LabelSelModel'][0], 
+                        rely = self.Placement['Optimization']['LabelSelModel'][1], 
+                        relwidth = self.Placement['Optimization']['LabelSelModel'][2], 
+                        relheight = self.Placement['Optimization']['LabelSelModel'][3]
                         )
-    self.desc1.place(
-                    anchor = 'n', 
-                    relx = self.Placement['Optimization']['Label6'][0], 
-                    rely = self.Placement['Optimization']['Label6'][1]
-                    )
-    self.loc_att_list.append('self.desc1')
+        
+        self.atts['Optimize']['Permanent'].append('self.desc1_opt')
 
-    # Initialize the model option
-    mod_opt = self.Models[0]
+        # Initialize the model option
+        mod_opt = self.Models[0]
 
-    # Check if previous value exists
-    if 'Model' in list(self.Compare.keys()):
-        # Set the model name
-        if 'Model Name' in list(self.Compare['Model'].keys()):
-            if self.Compare['Model']['Model Name'] in self.Models:
-                mod_opt = self.Compare['Model']['Model Name']
+        # Check if previous value exists
+        if 'Model' in list(self.Compare.keys()):
+            # Set the model name
+            if 'Model Name' in list(self.Compare['Model'].keys()):
+                if self.Compare['Model']['Model Name'] in self.Models:
+                    mod_opt = self.Compare['Model']['Model Name']
 
-    # Create Option Menu for Model Type
-    self.optmenu1 = ttk.Combobox(
-                                window,
-                                values=self.Models,
-                                style="Modern.TCombobox",
-                                state="readonly"
-                                )
-    self.optmenu1.place(
-                        anchor='n', 
-                        relx = self.Placement['Optimization']['Combo5'][0], 
-                        rely = self.Placement['Optimization']['Combo5'][1]
-                        )
-    self.optmenu1.set(mod_opt)
-    self.optmenu1.bind("<<ComboboxSelected>>",  change_model)
-    change_model(mod_opt)
-    self.loc_att_list.append('self.optmenu1')
+        # Create Option Menu for Model Type
+        self.optmenu1_opt = ttk.Combobox(
+                                    self.nb_tab_tab3,
+                                    values=self.Models,
+                                    style="Modern.TCombobox",
+                                    state="readonly"
+                                    )
+        self.optmenu1_opt.configure(font = self.style_man['Combo'])
+        self.optmenu1_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+        self.optmenu1_opt.place(
+                            anchor='nw', 
+                            relx = self.Placement['Optimization']['ComboSelModel'][0], 
+                            rely = self.Placement['Optimization']['ComboSelModel'][1], 
+                            relwidth = self.Placement['Optimization']['ComboSelModel'][2], 
+                            relheight = self.Placement['Optimization']['ComboSelModel'][3]
+                            )
+        self.optmenu1_opt.set(mod_opt)
+        self.optmenu1_opt.bind("<<ComboboxSelected>>",  change_model)
+        change_model(mod_opt)
+        self.atts['Optimize']['Permanent'].append('self.optmenu1_opt')

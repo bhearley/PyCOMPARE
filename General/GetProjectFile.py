@@ -52,6 +52,7 @@ def LoadProject(self):
     # Import Modules
     from tkinter import filedialog
     from tkinter import messagebox
+    import os
     import pickle
 
     # Preallocate file path
@@ -79,6 +80,11 @@ def LoadProject(self):
         # Read the File
         with open(file_path, "rb") as file:
             self.Compare = pickle.load(file)
+
+        # Get the log file
+        if os.path.exists(os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")):
+            self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
+        
     except:
         # Return empty data structure
         self.Compare = {}

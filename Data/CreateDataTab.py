@@ -18,32 +18,6 @@ def CreateDataTab(self,window):
     # Import Functions
     from Data.FunctionalDataSampling import FunctionalDataSampling
     from Data.ReadExcelInput import ReadExcelInput
-    from General.DeleteWidgets import DeleteTab
-
-    # Delete existing widgets
-    if hasattr(self,"tab_att_list"):
-        # Delete tab attributes
-        DeleteTab(self)
-
-        # Delete the canvas
-        if hasattr(self, 'canvas'):
-            self.toolbar.destroy()
-            self.canvas.get_tk_widget().destroy()
-            del self.canvas
-
-        # Delete the canvas
-        if hasattr(self, 'canvas2'):
-            self.toolbar2.destroy()
-            self.canvas2.get_tk_widget().destroy()
-            del self.canvas2
-
-    # Preallocate the att list
-    self.att_list = []
-    self.loc_att_list = []
-    self.tab_att_list = []
-
-    # Initialize button press
-    self.clicked = 0
 
     def round_sig(x, sig=3):
         #--------------------------------------------------------------------------
@@ -56,23 +30,24 @@ def CreateDataTab(self,window):
             return 0
         return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
     
-    def deselect_sheet(event,self,tag):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Deselect one tksheet when selecting another
-        #
-        #--------------------------------------------------------------------------
+    # Deselect Function
+    def on_click(event):
+        widget = event.widget
 
-        if tag == 'stage_table':
-            try:
-                self.sheet_db.deselect("all", redraw=True)
-            except:
-                pass
-        if tag == 'sheet_db':
-            try:
-                self.stage_table.deselect("all", redraw=True)
-            except:
-                pass
+        # If the click is *not* inside the sheet, deselect it
+        try:
+            if widget != self.sheet_db.MT:
+                self.sheet_db.deselect("all")
+        except:
+            pass
+
+        try:
+            if widget != self.stage_table_db.MT:
+                self.stage_table_db.deselect("all")
+        except:
+            pass
+
+    window.bind_all("<Button-1>", on_click, add="+")
 
     def upload_from_excel():
         #--------------------------------------------------------------------------
@@ -136,9 +111,10 @@ def CreateDataTab(self,window):
             self.reduce_data(data['name'], data['load_dir'][0])
             
         # Update the table
-        update_table()
-
-    def update_table():
+        self.db_init = 0
+        update_table(self.db_init)
+        
+    def update_table(init_flag):
         #--------------------------------------------------------------------------
         #
         #   PURPOSE: Update the database table.
@@ -153,22 +129,18 @@ def CreateDataTab(self,window):
             #----------------------------------------------------------------------
 
             # Delete existing widgets
-            if hasattr(self, 'optmenu1_plt'):
-                self.optmenu1_plt.destroy()
-            if hasattr(self, 'optmenu2_plt'):
-                self.optmenu2_plt.destroy()
-            if hasattr(self, 'btn_plot'):
-                self.btn_plot.destroy()
-            if hasattr(self, 'canvas'):
-                self.toolbar.destroy()
-                self.canvas.get_tk_widget().destroy()
-                del self.canvas
-            if hasattr(self, 'stage_label'):
-                self.stage_label.destroy()
-            if hasattr(self, 'plot_label'):
-                self.plot_label.destroy()
-            if hasattr(self, 'stage_table'):
-                self.stage_table.destroy()
+            for att in self.atts['Database']['Local']:
+                if att == "self.sheet_db":
+                    continue
+                try:
+                    eval(f"{att}").destroy()
+                except:
+                    pass
+            try:
+                self.canvas_db.get_tk_widget().destroy()
+                del self.canvas_db
+            except:
+                pass
 
             # Get the selected row and name
             currently_selected = self.sheet_db.get_currently_selected()
@@ -202,124 +174,143 @@ def CreateDataTab(self,window):
                     break
 
             # Create the X drop down menu
-            self.optmenu1_plt = ttk.Combobox(
-                                        window,
+            self.optmenu1_plt_db = ttk.Combobox(
+                                        self.nb_tab_tab1,
                                         values=self.plot_opts,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu1_plt.place(
+            self.optmenu1_plt_db.configure(font = self.style_man['Combo'])
+            self.optmenu1_plt_db.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu1_plt_db.place(
                                     anchor='n', 
-                                    relx = self.Placement['Data']['Combo1'][0], 
-                                    rely = self.Placement['Data']['Combo1'][1]
+                                    relx = self.Placement['Data']['ComboX'][0], 
+                                    rely = self.Placement['Data']['ComboX'][1],
+                                    relwidth = self.Placement['Data']['ComboX'][2], 
+                                    relheight = self.Placement['Data']['ComboX'][3]
                                     )
-            self.optmenu1_plt.set(self.plot_opts[idx1]) 
-            self.tab_att_list.append('self.optmenu1_plt')
+            self.optmenu1_plt_db.set(self.plot_opts[idx1]) 
+            if "self.optmenu1_plt_db" not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.optmenu1_plt_db')
 
             # Create the vs Label
-            self.plot_label = ttk.Label(
-                                    window, 
+            self.plot_label_db = ttk.Label(
+                                    self.nb_tab_tab1, 
                                     text="vs",
                                     style = 'Modern1.TLabel' 
                                     )
-            self.plot_label.place(
+            self.plot_label_db.place(
                                 anchor = 'n', 
-                                relx = self.Placement['Data']['Label1'][0], 
-                                rely = self.Placement['Data']['Label1'][1]
+                                relx = self.Placement['Data']['LabelVS'][0], 
+                                rely = self.Placement['Data']['LabelVS'][1]
                                 )
-            self.tab_att_list.append('self.plot_label')
+            if 'self.plot_label_db' not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.plot_label_db')
 
             # Create the Y drop down menu
-            self.optmenu2_plt = ttk.Combobox(
-                                        window,
+            self.optmenu2_plt_db = ttk.Combobox(
+                                        self.nb_tab_tab1,
                                         values=self.plot_opts,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu2_plt.place(
+            self.optmenu2_plt_db.configure(font = self.style_man['Combo'])
+            self.optmenu2_plt_db.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu2_plt_db.place(
                                     anchor='n', 
-                                    relx = self.Placement['Data']['Combo2'][0], 
-                                    rely = self.Placement['Data']['Combo2'][1]
+                                    relx = self.Placement['Data']['ComboY'][0], 
+                                    rely = self.Placement['Data']['ComboY'][1],
+                                    relwidth = self.Placement['Data']['ComboY'][2], 
+                                    relheight = self.Placement['Data']['ComboY'][3]
                                     )
-            self.optmenu2_plt.set(self.plot_opts[idx2])
-            self.tab_att_list.append('self.optmenu2_plt')
+            self.optmenu2_plt_db.set(self.plot_opts[idx2])
+            if "self.optmenu2_plt_db" not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.optmenu2_plt_db')
 
             # Create the plot button
-            self.btn_plot = ttk.Button(
-                                window, 
+            self.btn_plot_db = ttk.Button(
+                                self.nb_tab_tab1, 
                                 text = "Plot", 
-                                command = self.plotter, 
+                                command = self.plotter_db, 
                                 style = "Modern2.TButton",
-                                width = self.Placement['Data']['Button1'][2], 
                                 )
-            self.btn_plot.place(
+            self.btn_plot_db.place(
                                 anchor = 'n', 
-                                relx = self.Placement['Data']['Button1'][0], 
-                                rely = self.Placement['Data']['Button1'][1]
+                                relx = self.Placement['Data']['ButtonPlot'][0], 
+                                rely = self.Placement['Data']['ButtonPlot'][1],
+                                relwidth = self.Placement['Data']['ButtonPlot'][2], 
+                                relheight = self.Placement['Data']['ButtonPlot'][3]
                                 )
-            self.tab_att_list.append('self.btn_plot')
+            if "self.btn_plot_db" not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.btn_plot_db')
+            
 
-            # Create the stage table
-            self.stage_label = ttk.Label(
-                                        window, 
+            # Create the stage table label
+            self.stage_label_db = ttk.Label(
+                                        self.nb_tab_tab1, 
                                         text="Stage Table:", 
                                         style = "Modern1.TLabel"
                                         )
-            self.stage_label.place(
+            self.stage_label_db.place(
                                 anchor = 'nw', 
-                                relx = self.Placement['Data']['Label2'][0], 
-                                rely = self.Placement['Data']['Label2'][1]
+                                relx = self.Placement['Data']['LabelStage'][0], 
+                                rely = self.Placement['Data']['LabelStage'][1]
                                 )
-            self.tab_att_list.append('self.stage_label')
+            if "self.stage_label_db" not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.stage_label_db')
+
+            # Create the stage table
             Cols = ['Type', 'Direction','Control','Load Rate','Target','End Time (s)']
-            self.stage_table = tksheet.Sheet(
-                                            window, 
+            self.stage_table_db = tksheet.Sheet(
+                                            self.nb_tab_tab1, 
                                             total_rows = len(self.Compare['Data'][self.test_name]['Stage Type']), 
                                             total_columns = len(Cols), 
                                             headers = Cols,
-                                            width = self.Placement['Data']['Sheet1'][2], 
-                                            height = self.Placement['Data']['Sheet1'][3], 
                                             show_x_scrollbar = False, 
                                             show_y_scrollbar = True,
-                                            font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"normal"),
-                                            header_font = ("Segoe UI",self.Placement['Data']['Sheet1'][4],"bold"),
+                                            font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
+                                            header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
                                             )
-            self.stage_table.place(
+            self.stage_table_db.place(
                                 anchor = 'nw', 
-                                relx = self.Placement['Data']['Sheet1'][0], 
-                                rely = self.Placement['Data']['Sheet1'][1]
+                                relx = self.Placement['Data']['SheetSTG'][0], 
+                                rely = self.Placement['Data']['SheetSTG'][1],
+                                relwidth = self.Placement['Data']['SheetSTG'][2], 
+                                relheight = self.Placement['Data']['SheetSTG'][3]
                                 )
-            self.tab_att_list.append('self.stage_table')
+            if "self.stage_table_db" not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.stage_table_db')
 
             # Format the sheet
-            self.stage_table.change_theme("blue")
-            self.stage_table.set_index_width(0)
-            self.stage_table.column_width(column = 0, width = self.Placement['Data']['Sheet1'][5], redraw = True)
-            self.stage_table.column_width(column = 1, width = self.Placement['Data']['Sheet1'][6], redraw = True)
-            self.stage_table.column_width(column = 2, width = self.Placement['Data']['Sheet1'][7], redraw = True)
-            self.stage_table.column_width(column = 3, width = self.Placement['Data']['Sheet1'][8], redraw = True)
-            self.stage_table.column_width(column = 4, width = self.Placement['Data']['Sheet1'][9], redraw = True)
-            self.stage_table.column_width(column = 5, width = self.Placement['Data']['Sheet1'][10], redraw = True)
-            self.stage_table.table_align(align = 'c',redraw=True)
+            self.stage_table_db.change_theme("blue")
+            self.stage_table_db.set_index_width(0)
+            window.update_idletasks()
+            total_width = self.stage_table_db.winfo_width()
+            self.stage_table_db.column_width(column = 0, width = int(total_width*self.Placement['Data']['SheetSTG'][4]), redraw = True)
+            self.stage_table_db.column_width(column = 1, width = int(total_width*self.Placement['Data']['SheetSTG'][5]), redraw = True)
+            self.stage_table_db.column_width(column = 2, width = int(total_width*self.Placement['Data']['SheetSTG'][6]), redraw = True)
+            self.stage_table_db.column_width(column = 3, width = int(total_width*self.Placement['Data']['SheetSTG'][7]), redraw = True)
+            self.stage_table_db.column_width(column = 4, width = int(total_width*self.Placement['Data']['SheetSTG'][8]), redraw = True)
+            self.stage_table_db.column_width(column = 5, width = int(total_width*self.Placement['Data']['SheetSTG'][9]), redraw = True)
+            self.stage_table_db.table_align(align = 'c',redraw=True)
 
             # Enable Bindings
-            self.stage_table.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
-            self.stage_table.extra_bindings([("cell_select", lambda event: deselect_sheet(event,self, 'stage_table'))])
+            self.stage_table_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
 
             # Set stage table cell values
             for i in range(len(self.Compare['Data'][self.test_name]['Stage Type'])):
-                self.stage_table.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
-                self.stage_table.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Loading Direction'][i])
-                self.stage_table.set_cell_data(i,2,self.Compare['Data'][self.test_name]['Control'][i])
-                self.stage_table.set_cell_data(i,3,str(round_sig(self.Compare['Data'][self.test_name]['Load Rate'][i][0],2)) 
+                self.stage_table_db.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
+                self.stage_table_db.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Loading Direction'][i])
+                self.stage_table_db.set_cell_data(i,2,self.Compare['Data'][self.test_name]['Control'][i])
+                self.stage_table_db.set_cell_data(i,3,str(round_sig(self.Compare['Data'][self.test_name]['Load Rate'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Load Rate'][i][1])
-                self.stage_table.set_cell_data(i,4,str(round_sig(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
+                self.stage_table_db.set_cell_data(i,4,str(round_sig(self.Compare['Data'][self.test_name]['Target'][i][0],2)) 
                                                + ' ' + self.Compare['Data'][self.test_name]['Target'][i][1])
-                self.stage_table.set_cell_data(i,5,self.Compare['Data'][self.test_name]['Time'][self.Compare['Data'][self.test_name]['Stage Index'][i]])
-            self.stage_table.redraw()
+                self.stage_table_db.set_cell_data(i,5,self.Compare['Data'][self.test_name]['Time'][self.Compare['Data'][self.test_name]['Stage Index'][i]])
+            self.stage_table_db.redraw()
 
             # Call the plotting function
-            self.plotter()
+            self.plotter_db()
 
         def view_all_data(self):
             #----------------------------------------------------------------------
@@ -329,44 +320,46 @@ def CreateDataTab(self,window):
             #----------------------------------------------------------------------
 
             # Delete existing widgets
-            if hasattr(self, 'optmenu1_plt'):
-                self.optmenu1_plt.destroy()
-            if hasattr(self, 'optmenu2_plt'):
-                self.optmenu2_plt.destroy()
-            if hasattr(self, 'btn_plot'):
-                self.btn_plot.destroy()
-            if hasattr(self, 'stage_table'):
-                self.stage_table.destroy()
-            if hasattr(self, 'stage_label'):
-                self.stage_label.destroy()
-            if hasattr(self, 'plot_label'):
-                self.plot_label.destroy()
-            if hasattr(self, 'canvas'):
-                self.toolbar.destroy()
-                self.canvas.get_tk_widget().destroy()
-                del self.canvas
+            for att in self.atts['Database']['Local']:
+                if att == "self.sheet_db":
+                    continue
+                try:
+                    eval(f"{att}").destroy()
+                except:
+                    pass
+
+            try:
+                self.canvas_db.get_tk_widget().destroy()
+                del self.canvas_db
+            except:
+                pass
             
             # Get list of options
             self.plot_opts = ['Tensile', 'Creep', 'Relaxation','Generic','All']
 
             # Create the plot option menu
-            self.optmenu1_plt = ttk.Combobox(
-                                        window,
+            self.optmenu1_plt_db = ttk.Combobox(
+                                        self.nb_tab_tab1,
                                         values=self.plot_opts,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu1_plt.place(
+            self.optmenu1_plt_db.configure(font = self.style_man['Combo'])
+            self.optmenu1_plt_db.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu1_plt_db.place(
                                     anchor='n', 
-                                    relx = self.Placement['Data']['Combo3'][0], 
-                                    rely = self.Placement['Data']['Combo3'][1]
+                                    relx = self.Placement['Data']['ComboPlot'][0], 
+                                    rely = self.Placement['Data']['ComboPlot'][1],
+                                    relwidth = self.Placement['Data']['ComboPlot'][2], 
+                                    relheight = self.Placement['Data']['ComboPlot'][3]
                                     )
-            self.optmenu1_plt.set(self.plot_opts[0])
-            self.optmenu1_plt.bind("<<ComboboxSelected>>",  lambda event:self.plotter_all(event, 'sheet_db'))
-            self.tab_att_list.append("self.optmenu1_plt")
+            self.optmenu1_plt_db.set(self.plot_opts[0])
+            self.optmenu1_plt_db.bind("<<ComboboxSelected>>",  lambda event:self.plotter_all_db(event))
+            if 'self.optmenu1_plt_db' not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append("self.optmenu1_plt_db")
 
             # Call the plotting function
-            self.plotter_all(self.plot_opts[0], 'sheet_db')
+            self.plotter_all_db(self.plot_opts[0])
 
         def delete_test(self):
             #----------------------------------------------------------------------
@@ -396,20 +389,25 @@ def CreateDataTab(self,window):
                 except:
                     pass
 
-                # Delete exissting widgets
-                if hasattr(self,"canvas"):
-                    self.toolbar.destroy()
-                    self.canvas.get_tk_widget().destroy()
-                    del self.canvas
-                atts = ['self.optmenu1_plt', 'self.btn_loc3', 'self.btn_loc4', 'self.btn_loc5']
+                # Delete existing widgets
+                if hasattr(self,"canvas_db"):
+                    self.toolbar_db.destroy()
+                    self.canvas_db.get_tk_widget().destroy()
+                    del self.canvas_db
+                atts = ['self.optmenu1_plt_db']
                 for widget in atts:
                     try:
                         eval(widget).destroy()
                     except:
                         pass
 
-                # Update the table                 
-                update_table()
+                # Update the flags                 
+                self.db_init = 0
+                self.char_init = 0
+                self.viz_init = 0
+
+                # Update table
+                update_table(self.db_init)
 
         def select_all(self):
             #----------------------------------------------------------------------
@@ -426,77 +424,106 @@ def CreateDataTab(self,window):
                 for i in range(len(self.sheet_db.data)):
                     self.sheet_db.set_cell_data(i,0, new_val)
 
-        # Destroy test table if it exists
-        if hasattr(self,'sheet_db'):
-            self.sheet_db.destroy()
+        if init_flag == 0:
+            # Delete existing widgets
+            for att in self.atts['Database']['Local']:
+                if att == "self.sheet_db":
+                    continue
+                try:
+                    eval(f"{att}").destroy()
+                except:
+                    pass
 
-        # Create the test table
-        tests = list(self.Compare['Data'].keys())
-        Cols = [' ','Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)']
-        self.sheet_db = tksheet.Sheet(
-                                    window, 
-                                    total_rows = len(tests), 
-                                    total_columns = len(Cols), 
-                                    headers = Cols,
-                                    width = self.Placement['Data']['Sheet2'][2], 
-                                    height = self.Placement['Data']['Sheet2'][3], 
-                                    show_x_scrollbar = False, 
-                                    show_y_scrollbar = True,
-                                    font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"normal"),
-                                    header_font = ("Segoe UI",self.Placement['Data']['Sheet2'][4],"bold"),
-                                    )
-        self.sheet_db.place(
-                            anchor = 'nw', 
-                            relx = self.Placement['Data']['Sheet2'][0], 
-                            rely = self.Placement['Data']['Sheet2'][1]
-                            )
-        self.tab_att_list.append('self.sheet_db')
+            try:
+                self.canvas_db.get_tk_widget().destroy()
+                del self.canvas_db
+            except:
+                pass
 
-        # Format the sheet
-        self.sheet_db.change_theme("blue")
-        self.sheet_db.set_index_width(0)
-        self.sheet_db.column_width(column = 0, width = self.Placement['Data']['Sheet2'][5], redraw = True)
-        self.sheet_db.column_width(column = 1, width = self.Placement['Data']['Sheet2'][6], redraw = True)
-        self.sheet_db.column_width(column = 2, width = self.Placement['Data']['Sheet2'][7], redraw = True)
-        self.sheet_db.column_width(column = 3, width = self.Placement['Data']['Sheet2'][8], redraw = True)
-        self.sheet_db.column_width(column = 4, width = self.Placement['Data']['Sheet2'][9], redraw = True)
-        self.sheet_db.column_width(column = 5, width = self.Placement['Data']['Sheet2'][10], redraw = True)
-        self.sheet_db.column_width(column = 6, width = self.Placement['Data']['Sheet2'][11], redraw = True)
-        self.sheet_db.column_width(column = 7, width = self.Placement['Data']['Sheet2'][12], redraw = True)
-        self.sheet_db.checkbox("A",checked=False)
-        self.sheet_db.table_align(align = 'c',redraw=True)
+        exist_flag = 0
+        if hasattr(self, 'sheet_db'):
+            if self.sheet_db.winfo_exists():
+                exist_flag = 1
 
-        # Enanble bindings
-        self.sheet_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
-        self.sheet_db.extra_bindings([("cell_select", lambda event: deselect_sheet(event, self, 'sheet_db'))])
-        self.sheet_db.popup_menu_add_command('Select/Unselect All', lambda : select_all(self), table_menu = True, index_menu = True, header_menu = True)
-        self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
-        self.sheet_db.popup_menu_add_command('View All Selected Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
-        self.sheet_db.popup_menu_add_command('Delete Test', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)
+        if (init_flag == 1 and exist_flag == 0) or init_flag == 0:
+            # Create the test table
+            tests = list(self.Compare['Data'].keys())
+            Cols = [' ','Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)']
+            self.sheet_db = tksheet.Sheet(
+                                        self.nb_tab_tab1, 
+                                        total_rows = len(tests), 
+                                        total_columns = len(Cols), 
+                                        headers = Cols,
+                                        show_x_scrollbar = False, 
+                                        show_y_scrollbar = True,
+                                        font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
+                                        header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
+                                        )
+            self.sheet_db.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Data']['SheetDB'][0], 
+                                rely = self.Placement['Data']['SheetDB'][1],
+                                relwidth = self.Placement['Data']['SheetDB'][2], 
+                                relheight = self.Placement['Data']['SheetDB'][3], 
+                                )
+            if 'self.sheet_db' not in self.atts['Database']['Local']:
+                self.atts['Database']['Local'].append('self.sheet_db')
 
-        # Populate test cell data
-        for i in range(len(tests)):
-            self.sheet_db.set_cell_data(i,1, tests[i])
-            self.sheet_db.set_cell_data(i,2, self.Compare['Data'][tests[i]]['Test Type'])
-            self.sheet_db.set_cell_data(i,3, self.Compare['Data'][tests[i]]['Temperature'][0])
-            ldir = ''
-            ldir_list = []
-            for j in range(len(self.Compare['Data'][tests[i]]['Loading Direction'])):
-                if self.Compare['Data'][tests[i]]['Loading Direction'][j] not in ldir_list:
-                    ldir_list.append(self.Compare['Data'][tests[i]]['Loading Direction'][j])
-            for j in range(len(ldir_list)):
-                ldir = ldir + str(ldir_list[j]) + ', '
-            self.sheet_db.set_cell_data(i,4, ldir[:len(ldir)-2])
-            self.sheet_db.set_cell_data(i,5,self.Compare['Data'][tests[i]]['Control'][0])
-            self.sheet_db.set_cell_data(i,6,str(round_sig(self.Compare['Data'][tests[i]]['Load Rate'][0][0],2)) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
-            self.sheet_db.set_cell_data(i,7,self.Compare['Data'][tests[i]]['Angle'])
+            # Format the sheet
+            self.sheet_db.change_theme("blue")
+            self.sheet_db.set_index_width(0)
+            window.update_idletasks()
+            total_width = self.sheet_db.winfo_width()
+            if int(total_width*self.Placement['Data']['SheetDB'][4]) < 21:
+                origA = self.Placement['Data']['SheetDB'][4]
+                origB = self.Placement['Data']['SheetDB'][5]
 
-        # Check if test is in the characterization set
-        if 'Characterization' in list(self.Compare.keys()):
-            char_tests = self.Compare['Characterization'].keys()
+                self.Placement['Data']['SheetDB'][4] = 21/total_width
+                self.Placement['Data']['SheetDB'][5] = origA + origB - self.Placement['Data']['SheetDB'][4]
+
+            self.sheet_db.column_width(column = 0, width = int(total_width*self.Placement['Data']['SheetDB'][4]), redraw = True)
+            self.sheet_db.column_width(column = 1, width = int(total_width*self.Placement['Data']['SheetDB'][5]), redraw = True)
+            self.sheet_db.column_width(column = 2, width = int(total_width*self.Placement['Data']['SheetDB'][6]), redraw = True)
+            self.sheet_db.column_width(column = 3, width = int(total_width*self.Placement['Data']['SheetDB'][7]), redraw = True)
+            self.sheet_db.column_width(column = 4, width = int(total_width*self.Placement['Data']['SheetDB'][8]), redraw = True)
+            self.sheet_db.column_width(column = 5, width = int(total_width*self.Placement['Data']['SheetDB'][9]), redraw = True)
+            self.sheet_db.column_width(column = 6, width = int(total_width*self.Placement['Data']['SheetDB'][10]), redraw = True)
+            self.sheet_db.column_width(column = 7, width = int(total_width*self.Placement['Data']['SheetDB'][11]), redraw = True)
+            self.sheet_db.checkbox("A",checked=False)
+            self.sheet_db.table_align(align = 'c',redraw=True)
+
+            # Enanble bindings
+            self.sheet_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
+            self.sheet_db.popup_menu_add_command('Select/Unselect All', lambda : select_all(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet_db.popup_menu_add_command('View All Selected Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet_db.popup_menu_add_command('Delete Test', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)
+
+            # Populate test cell data
             for i in range(len(tests)):
-                if tests[i] in char_tests:
-                    self.sheet_db.set_cell_data(i,0, True)
+                self.sheet_db.set_cell_data(i,1, tests[i])
+                self.sheet_db.set_cell_data(i,2, self.Compare['Data'][tests[i]]['Test Type'])
+                self.sheet_db.set_cell_data(i,3, self.Compare['Data'][tests[i]]['Temperature'][0])
+                ldir = ''
+                ldir_list = []
+                for j in range(len(self.Compare['Data'][tests[i]]['Loading Direction'])):
+                    if self.Compare['Data'][tests[i]]['Loading Direction'][j] not in ldir_list:
+                        ldir_list.append(self.Compare['Data'][tests[i]]['Loading Direction'][j])
+                for j in range(len(ldir_list)):
+                    ldir = ldir + str(ldir_list[j]) + ', '
+                self.sheet_db.set_cell_data(i,4, ldir[:len(ldir)-2])
+                self.sheet_db.set_cell_data(i,5,self.Compare['Data'][tests[i]]['Control'][0])
+                self.sheet_db.set_cell_data(i,6,str(round_sig(self.Compare['Data'][tests[i]]['Load Rate'][0][0],2)) + ' ' + self.Compare['Data'][tests[i]]['Load Rate'][0][1] )
+                self.sheet_db.set_cell_data(i,7,self.Compare['Data'][tests[i]]['Angle'])
+
+            # Check if test is in the characterization set
+            if 'Characterization' in list(self.Compare.keys()):
+                char_tests = self.Compare['Characterization'].keys()
+                for i in range(len(tests)):
+                    if tests[i] in char_tests:
+                        self.sheet_db.set_cell_data(i,0, True)
+
+        self.db_init = 1
 
     def add_selected():
         #--------------------------------------------------------------------------
@@ -546,40 +573,45 @@ def CreateDataTab(self,window):
 
                     # Show number of tests added to the user
                     messagebox.showinfo(message = 'Added ' + str(ct) + ' tests to the characterization set.')
+
+                    self.char_init = 0
+                    self.viz_init = 0
         else:
             # Show error message that no tests were added
             messagebox.showerror(message = 'No tests have been added to the database.')
                      
     # Create the upload from excel button
     self.btn_up_exc = ttk.Button(
-                            window, 
+                            self.nb_tab_tab1, 
                             text = "Upload from Excel", 
                             command = upload_from_excel,
                             style = "Modern3.TButton" ,
-                            width = self.Placement['Data']['Button2'][2]
                             )
     self.btn_up_exc.place(
                         anchor = 'w', 
-                        relx = self.Placement['Data']['Button2'][0], 
-                        rely = self.Placement['Data']['Button2'][1]
+                        relx = self.Placement['Data']['ButtonExc'][0], 
+                        rely = self.Placement['Data']['ButtonExc'][1],
+                        relwidth = self.Placement['Data']['ButtonExc'][2], 
+                        relheight = self.Placement['Data']['ButtonExc'][3]
                         )
-    self.loc_att_list.append('self.btn_up_exc')
+    self.atts['Database']['Permanent'].append('self.btn_up_exc')
     
     # Create button to add data to characterization set
     self.btn_add_to_char = ttk.Button(
-                                    window, 
+                                    self.nb_tab_tab1, 
                                     text = "Add To Characterization", 
                                     command = add_selected,
                                     style = 'Modern3.TButton', 
-                                    width = self.Placement['Data']['Button3'][2]
                                     )
     self.btn_add_to_char.place(
                             anchor = 'w', 
-                            relx = self.Placement['Data']['Button3'][0], 
-                            rely = self.Placement['Data']['Button3'][1]
+                            relx = self.Placement['Data']['ButtonAdd'][0], 
+                            rely = self.Placement['Data']['ButtonAdd'][1],
+                            relwidth = self.Placement['Data']['ButtonAdd'][2], 
+                            relheight = self.Placement['Data']['ButtonAdd'][3]
                             )
-    self.loc_att_list.append('self.btn_add_to_char')
+    self.atts['Database']['Permanent'].append('self.btn_add_to_char')
 
     # Load data
     if 'Data' in list(self.Compare.keys()):
-        update_table()
+        update_table(self.db_init)

@@ -11,6 +11,9 @@ def BuildGeneralPage(self,window):
     import os
     from tkinter import ttk
 
+    # Import Functions
+    from Data.CreateDataTab import CreateDataTab
+
     # Try to create the log directory
     try:
         os.mkdir(os.path.join(os.getcwd(),"Logs"))
@@ -18,7 +21,10 @@ def BuildGeneralPage(self,window):
         pass
 
     # Set the log file name
-    self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
+    try:
+        self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
+    except:
+        self.log_file = os.path.join(os.getcwd(),"Logs","temp.log")
 
     # Create the file if it doesn't exist
     if os.path.exists(self.log_file) == False:
@@ -32,126 +38,88 @@ def BuildGeneralPage(self,window):
     # Reset Log
     self.log = []
 
-    # Preallocate the att list
-    self.att_list = []
-    self.loc_att_list = []
+    # Create a frame for the notebook
+    if hasattr(self, 'frame_tab') == True:
+        def clear_frame(frame):
+            for widget in frame.winfo_children():
+                # If the widget is a Notebook, also destroy its tabs
+                if isinstance(widget, ttk.Notebook):
+                    for tab_id in widget.tabs():
+                        tab = widget.nametowidget(tab_id)
+                        clear_frame(tab)  # recursively clear widgets inside the tab
+                widget.destroy()
+                del widget
+        clear_frame(self.frame_tab)
 
-    # Create the Database Tab
-    self.btn_db = ttk.Button(
-                            window, 
-                            text = "Database", 
-                            command = self.data_tab,
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button1'][2]
-                            )
-    self.btn_db.place(
-                    anchor = 'w', 
-                    relx = self.Placement['General']['Button1'][0], 
-                    rely = self.Placement['General']['Button1'][1]
+    self.frame_tab = ttk.Frame(window, style = "Custom1.TFrame")
+    self.frame_tab.place( 
+                    anchor='n',
+                    relx = self.Placement['General']['FrameTab'][0], 
+                    rely = self.Placement['General']['FrameTab'][1],
+                    relwidth = self.Placement['General']['FrameTab'][2],
+                    relheight = self.Placement['General']['FrameTab'][3]   
                     )
-    self.att_list.append('self.btn_db')
 
-    # Create the Characerization Tab
-    self.btn_ch = ttk.Button(
-                            window, 
-                            text = "Characterization", 
-                            command = self.char_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button2'][2]
-                            )
-    self.btn_ch.place(
-                    anchor = 'w', 
-                    relx = self.Placement['General']['Button2'][0], 
-                    rely = self.Placement['General']['Button2'][1]
+
+    # Create a Notebook widget (the tab container)
+    self.nb_tab = ttk.Notebook(self.frame_tab, style="CustomNotebook.TNotebook")
+    self.nb_tab.place(  
+                    relx = self.Placement['General']['NBTab'][0], 
+                    rely = self.Placement['General']['NBTab'][1],
+                    relwidth = self.Placement['General']['NBTab'][2],
+                    relheight = self.Placement['General']['NBTab'][3]   
                     )
-    self.att_list.append('self.btn_ch')
+    
+    # Initialize Attributes Lists
+    self.atts = {'Database':{'Local': [],
+                            'Permanent':[]},
+                'Characterization':{'Local': [],
+                            'Permanent':[]},
+                'Optimize':{'Local': [],
+                            'Permanent':[]},
+                'Analysis':{'Local': [],
+                            'Permanent':[]},
+                'Visualization':{'Local': [],
+                            'Permanent':[]},
+                'Export':{'Local': [],
+                            'Permanent':[]},
+                'Settings':{'Local': [],
+                            'Permanent':[]},
+                            }
 
-    # Create the Optimize Model Tab
-    self.btn_mod = ttk.Button(
-                            window, 
-                            text = "Optimize Model", 
-                            command = self.model_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button3'][2]
-                            )
-    self.btn_mod.place(
-                    anchor = 'w', 
-                    relx = self.Placement['General']['Button3'][0], 
-                    rely = self.Placement['General']['Button3'][1]
-                    )
-    self.att_list.append('self.btn_mod')
+    # --- Database Tab
+    self.nb_tab_tab1 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab1, text="   Database   ")
 
-    # Create the Analyze Model Tab
-    self.btn_anly = ttk.Button(
-                            window, 
-                            text = "Analyze Model", 
-                            command = self.analyze_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button4'][2]
-                            )
-    self.btn_anly.place(
-                        anchor = 'w', 
-                        relx = self.Placement['General']['Button4'][0], 
-                        rely = self.Placement['General']['Button4'][1]
-                        )
-    self.att_list.append('self.btn_anly')
+    # --- Characterization Tab
+    self.nb_tab_tab2 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab2, text="   Characterization   ")
+    
+    # --- Optimize Tab
+    self.nb_tab_tab3 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab3, text="   Optimize Model   ")
 
-    # Create the Visualization Tab
-    self.btn_viz = ttk.Button(
-                            window, 
-                            text = "Visualization", 
-                            command = self.viz_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button5'][2]
-                            )
-    self.btn_viz.place(
-                        anchor = 'w', 
-                        relx = self.Placement['General']['Button5'][0], 
-                        rely = self.Placement['General']['Button5'][1]
-                        )
-    self.att_list.append('self.btn_viz')
+    # --- Analyze Tab
+    self.nb_tab_tab4 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab4, text="   Analyze Model   ")
 
-    # Create the Export Tab
-    self.btn_exp = ttk.Button(
-                            window, 
-                            text = "Export", 
-                            command = self.export_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button6'][2]
-                            )
-    self.btn_exp.place(
-                    anchor = 'w', 
-                    relx = self.Placement['General']['Button6'][0], 
-                    rely = self.Placement['General']['Button6'][1]
-                    )
-    self.att_list.append('self.btn_exp')
+    # --- Visualization Tab
+    self.nb_tab_tab5 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab5, text="   Visualization   ")
 
-    # Create the Settings Tab
-    self.btn_set = ttk.Button(
-                            window, 
-                            text = "Settings", 
-                            command = self.settings_tab, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button7'][2]
-                            )
-    self.btn_set.place(
-                        anchor = 'w', 
-                        relx = self.Placement['General']['Button7'][0], 
-                        rely = self.Placement['General']['Button7'][1]
-                        )
-    self.att_list.append('self.btn_set')
+    # --- Export Tab
+    self.nb_tab_tab6 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab6, text="   Export   ")
 
-    # Create the Save Button
-    self.btn_save = ttk.Button(
-                            window, 
-                            text = "Save", 
-                            command = self.save, 
-                            style = 'Modern1.TButton',
-                            width = self.Placement['General']['Button8'][2]
-                            )
-    self.btn_save.place(
-                        anchor = 'w', 
-                        relx = self.Placement['General']['Button8'][0], 
-                        rely = self.Placement['General']['Button8'][1]
-                        )
-    self.att_list.append('self.btn_save')
+    # --- Settings Tab
+    self.nb_tab_tab7 = ttk.Frame(self.nb_tab, style = "Custom1.TFrame")
+    self.nb_tab.add(self.nb_tab_tab7, text="   Settings   ")
+
+    # Bind tab change function
+    self.nb_tab.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+    # Initialize with data tab
+    self.db_init = 1
+    self.char_init = 1
+    self.viz_init = 1
+    CreateDataTab(self, window)

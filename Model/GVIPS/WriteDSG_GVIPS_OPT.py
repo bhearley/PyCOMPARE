@@ -30,7 +30,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     import os
 
     # Import functions
-    from GRCMI import UnitConversion
+    from Model.UnitConversion import UnitConversion
 
     # Set the model number
     mod = 10
