@@ -49,7 +49,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
 
     # Write the number of parameters
     file.write("NDV:\n")
-    NDV = 2 + 2*int(self.Compare['Model']['M']) + 12 + 9*int(self.Compare['Model']['N'])
+    NDV = 2 + 2*int(self.Compare['Analysis']['M']) + 12 + 9*int(self.Compare['Analysis']['N'])
     file.write(' ' + str(NDV)+ '\n')
     Param = []   # Initialize parameter list
     Param_V = [] # Initialize list of parameter values
@@ -249,7 +249,7 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     Param_N.append(PN)
     PN = PN+1
     
-    # -- Write Zeta and Psi
+    # -- Write Xi and Zeta
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
     Param_V.append(1e-14)
     Param_V.append(1e-14)

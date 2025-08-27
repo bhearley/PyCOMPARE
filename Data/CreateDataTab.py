@@ -6,7 +6,7 @@
 #          a configured database or through the excel import tool
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateDataTab(self,window):
+def CreateDataTab(self, window):
     # Import Modules
     import math
     import pandas as pd
@@ -30,8 +30,13 @@ def CreateDataTab(self,window):
             return 0
         return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
     
-    # Deselect Function
     def on_click(event):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect from sheets not currently pressed in
+        #
+        #--------------------------------------------------------------------------
+
         widget = event.widget
 
         # If the click is *not* inside the sheet, deselect it
@@ -47,6 +52,7 @@ def CreateDataTab(self,window):
         except:
             pass
 
+    # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
 
     def upload_from_excel():
@@ -424,6 +430,7 @@ def CreateDataTab(self,window):
                 for i in range(len(self.sheet_db.data)):
                     self.sheet_db.set_cell_data(i,0, new_val)
 
+        # Delete widgets if data has changed
         if init_flag == 0:
             # Delete existing widgets
             for att in self.atts['Database']['Local']:
@@ -440,11 +447,13 @@ def CreateDataTab(self,window):
             except:
                 pass
 
+        # Check if the database sheet exists
         exist_flag = 0
         if hasattr(self, 'sheet_db'):
             if self.sheet_db.winfo_exists():
                 exist_flag = 1
 
+        # Create the database sheet
         if (init_flag == 1 and exist_flag == 0) or init_flag == 0:
             # Create the test table
             tests = list(self.Compare['Data'].keys())
@@ -523,6 +532,7 @@ def CreateDataTab(self,window):
                     if tests[i] in char_tests:
                         self.sheet_db.set_cell_data(i,0, True)
 
+        # Set the initialization flag
         self.db_init = 1
 
     def add_selected():

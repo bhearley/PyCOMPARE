@@ -37,7 +37,7 @@ import tksheet
 # Import Functions
 from Gateway.BuildStartPage import *
 from Gateway.TestSelection import *
-from General.DeleteWidgets import *
+from Deprecated.DeleteWidgets import *
 from GUI.GetStyles import *
 
 

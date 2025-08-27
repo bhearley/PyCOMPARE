@@ -146,6 +146,8 @@ def CreateVisualizationTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu1_viz.configure(font = self.style_man['Combo'])
+            self.optmenu1_viz.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu1_viz.place(
                                 anchor='n', 
                                 relx = self.Placement['Visualization']['ComboX'][0], 
@@ -164,6 +166,8 @@ def CreateVisualizationTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu2_viz.configure(font = self.style_man['Combo'])
+            self.optmenu2_viz.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu2_viz.place(
                                 anchor='n', 
                                 relx = self.Placement['Visualization']['ComboY'][0], 
@@ -432,6 +436,8 @@ def CreateVisualizationTab(self,window):
                                             style="Modern.TCombobox",
                                             state="readonly"
                                             )
+                self.optmenu3_viz.configure(font = self.style_man['Combo'])
+                self.optmenu3_viz.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
                 self.optmenu3_viz.place(
                                     anchor='n', 
                                     relx = self.Placement['Visualization']['ComboPlot'][0], 
@@ -715,7 +721,7 @@ def CreateVisualizationTab(self,window):
             except:
                 pass
 
-            messagebox.showerror(message = 'The characterization data set has changed. Re-optimize the parameters.')
+            messagebox.showerror(message = 'The characterization data set has changed. Re-optimize/re-analyze the parameters.')
 
             return
 

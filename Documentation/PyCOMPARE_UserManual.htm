@@ -1,0 +1,1166 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	text-indent:.25in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Times New Roman",serif;}
+h1
+	{mso-style-link:"Heading 1 Char";
+	margin-top:.25in;
+	margin-right:0in;
+	margin-bottom:4.0pt;
+	margin-left:0in;
+	text-indent:.25in;
+	line-height:107%;
+	page-break-after:avoid;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoToc1, li.MsoToc1, div.MsoToc1
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:5.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	font-weight:bold;}
+p.MsoToc2, li.MsoToc2, div.MsoToc2
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:5.0pt;
+	margin-left:.15in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Aptos",sans-serif;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-link:"List Paragraph Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	text-indent:.25in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{mso-style-link:"List Paragraph Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	text-indent:.25in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{mso-style-link:"List Paragraph Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	text-indent:.25in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{mso-style-link:"List Paragraph Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	text-indent:.25in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoTocHeading, li.MsoTocHeading, div.MsoTocHeading
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	line-height:107%;
+	page-break-after:avoid;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-link:"Heading 1";
+	font-family:"Times New Roman",serif;
+	font-weight:bold;}
+span.ListParagraphChar
+	{mso-style-name:"List Paragraph Char";
+	mso-style-link:"List Paragraph";}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	text-indent:.25in;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#467886" vlink="#96607D" style='word-wrap:break-word'>
+
+<div class=WordSection1>
+
+<p class=MsoNormal align=center style='margin-left:.25in;text-align:center;
+text-indent:-.25in'><a name="_Hlk200622858"><b><span style='font-size:18.0pt;
+line-height:107%'>PyCOMPARE User’s Manual</span></b></a></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:2.6pt;
+margin-bottom:0in;margin-left:.5pt;text-align:center;text-indent:-.5pt;
+line-height:110%'><span style='color:black'>Brandon L. Hearley, Steven M.
+Arnold</span></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:2.7pt;
+margin-bottom:0in;margin-left:.5pt;text-align:center;text-indent:-.5pt;
+line-height:110%'><span style='color:black'>National Aeronautics and Space
+Administration </span></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:2.65pt;
+margin-bottom:0in;margin-left:.5pt;text-align:center;text-indent:-.5pt;
+line-height:110%'><span style='color:black'>Glenn Research Center </span></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:2.75pt;
+margin-bottom:0in;margin-left:.5pt;text-align:center;text-indent:-.5pt;
+line-height:110%'><span style='color:black'>Cleveland, Ohio 44135 </span></p>
+
+<p class=MsoNormal align=center style='margin-left:.25in;text-align:center;
+text-indent:-.25in'><b><span style='font-size:12.0pt;line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal align=center style='margin-left:.25in;text-align:center;
+text-indent:-.25in'><b><span style='font-size:14.0pt;line-height:107%'>Abstract</span></b></p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'><i>&nbsp;</i></p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoTocHeading align=center style='text-align:center'><a
+name="_Hlk200622879"><span style='font-size:14.0pt;line-height:107%;color:black'>Table
+of Contents</span></a></p>
+
+<p class=MsoToc1>1. Overview<w:PTab Alignment="RIGHT" RelativeTo="MARGIN"
+ Leader="DOT"></w:PTab>4 </p>
+
+<p class=MsoToc1>2. <w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>3. <span style='font-weight:normal'>Error! Reference source
+not found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>4. <span style='font-weight:normal'>Error! Reference source
+not found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>5. <span style='font-weight:normal'>Error! Reference source
+not found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>6. <span style='font-weight:normal'>Error! Reference source
+not found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>7. <span style='font-weight:normal'>Error! Reference source
+not found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span>. <span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span>. <span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span>. <span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span>. <span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span>. <span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1><span style='font-weight:normal'>Error! Reference source not
+found.</span><w:PTab Alignment="RIGHT" RelativeTo="MARGIN" Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not defined.</span></p>
+
+<p class=MsoToc1>Appendix<w:PTab Alignment="RIGHT" RelativeTo="MARGIN"
+ Leader="DOT"></w:PTab><span style='font-weight:normal'>Error! Bookmark not
+defined.</span></p>
+
+<p class=MsoToc2><span
+style='font-size:12.0pt;line-height:107%;font-family:"Times New Roman",serif'><b>Error!
+Reference source not found.</b></span><span style='font-size:12.0pt;line-height:
+107%;font-family:"Times New Roman",serif'><w:PTab Alignment="RIGHT"
+ RelativeTo="MARGIN" Leader="DOT"></w:PTab></span><span
+style='font-size:12.0pt;line-height:107%;font-family:"Times New Roman",serif'><b>Error!
+Bookmark not defined.</b></span></p>
+
+<p class=MsoToc2 style='margin-left:0in;text-indent:.15in'><span
+style='font-size:12.0pt;line-height:107%;font-family:"Times New Roman",serif'><b>Error!
+Reference source not found.</b></span><span style='font-size:12.0pt;line-height:
+107%;font-family:"Times New Roman",serif'><w:PTab Alignment="RIGHT"
+ RelativeTo="MARGIN" Leader="DOT"></w:PTab></span><span
+style='font-size:12.0pt;line-height:107%;font-family:"Times New Roman",serif'><b>Error!
+Bookmark not defined.</b></span></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:14.0pt;
+line-height:107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref200105793"><b><span
+style='font-size:12.0pt;line-height:107%'><br>
+<br>
+<br>
+<br clear=all style='page-break-before:always'>
+</span></b></a></p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'><a name="_Ref200117521"><span style='line-height:
+107%'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='line-height:107%'>Overview</span></a></h1>
+
+<span style='font-size:11.0pt;line-height:107%;font-family:"Times New Roman",serif'><br
+clear=all style='page-break-before:always'>
+</span>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Navigating the UI</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The PyCOMPARE UI features a toolbar
+for PyCOMPARE project management and a series of tabs for defining experimental
+data, optimizing or analyzing a GVIPS model, visualizing predictions, exporting
+data, and changing project settings (Figure 1). The toolbar at the top left of
+the screen contains two menus:</p>
+
+<p class=MsoNormal style='text-indent:0in'><u>File</u></p>
+
+<p class=MsoNormal style='text-indent:0in'>The file menu is used for overall
+project management. PyCOMPARE projects are saved with a *.cmprj file extension.
+Five options are available within the file menu:</p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0 width=564
+ style='width:422.75pt;margin-left:.35in;border-collapse:collapse;border:none'>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>New</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Create
+  a new PyCOMPARE project. The user is prompted to enter the name of the new
+  project. All data in the workspace will be cleared. If data is currently
+  loaded into the UI and associated with a project, the user will be prompted
+  to save to original project.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Open</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Open
+  an existing PyCOMPARE project. If data is currently loaded into the UI and
+  associated with a project, the user will be prompted to save to original
+  project.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Save</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Save
+  a PyCOMPARE project. If the project file name is not already defined, the
+  user will be prompted to name the project.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Save
+  As</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Save
+  a PyCOMPARE project to a new name. The user is prompted to enter the name of
+  the new project. All future saves will be written to the new project name.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Exit</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Exit
+  the program. The user will be prompted to save any data.</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'><u>Help</u></p>
+
+<p class=MsoNormal style='text-indent:0in'>The help menu is used to display the
+user manual. One option is available within the help menu:</p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0
+ style='margin-left:.35in;border-collapse:collapse;border:none'>
+ <tr>
+  <td width=76 valign=top style='width:56.75pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>About</b></p>
+  </td>
+  <td width=481 valign=top style='width:360.75pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Display
+  the user manual.</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'><b>&nbsp;</b></p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=40
+src="PyCOMPARE_UserManual_files/image001.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref194657897"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>1</span><span style='font-size:10.0pt;
+line-height:107%'>. PyCOMPARE Toolbar and Tabs</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:9.0pt;
+line-height:107%'>&nbsp;</span></p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Database Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Database tab allows users to
+upload experimental test data to their PyCOMPARE project (Figure
+2). Data is uploaded to the project using the “Upload from Excel” button. The
+required import excel template can be downloaded from the Settings tab. </p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=490 height=281
+src="PyCOMPARE_UserManual_files/image002.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207013819"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>2</span><span style='font-size:10.0pt;
+line-height:107%'>. Database Tab: Uploading Test Data</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>For each test uploaded to the
+project, a row is added to the database table. Selecting the checkbox in the
+first column allows a test to be added to the characterization data set, which
+is used to optimize the GVIPS parameters. All tests added to the characterization
+set must be at the same temperature. If multiple temperatures are selected, the
+user will be prompted to only select one. Tests are only added to the
+characterization set after pressing the “Add to Characterization” button. Right
+clicking on any individual row of the database table gives the user four
+options:</p>
+
+<p class=MsoNormal style='text-indent:0in'><b>Select/Unselect All</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>Select or unselect all checkboxes.</p>
+
+<p class=MsoNormal style='text-indent:0in'><b>View Data</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>View the time, strain, and stress
+curves for a selected test (Figure 3). The x and y axes quantities can be
+changed using the drop down menus and “Plot” button above the curve. The stage
+information for each stage during the test is displayed under the database
+table.</p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:9.0pt;
+line-height:107%'><img width=624 height=318
+src="PyCOMPARE_UserManual_files/image003.gif"></span></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207014559"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>3</span><span style='font-size:10.0pt;
+line-height:107%'>. Database Tab: View Data</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><b>View All Selected Data</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>View the stress vs strain curve for
+all selected tests (Figure 4). Users can view selected tests together by test
+type, or view all test types, using the drop down menu and “Plot” button above
+the curve.</p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:9.0pt;
+line-height:107%'><img width=624 height=322
+src="PyCOMPARE_UserManual_files/image004.gif"></span></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207014735"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>4</span><span style='font-size:10.0pt;
+line-height:107%'>. Database Tab: View All Selected Data</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><b>Delete Test</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>Delete a test from the database.
+This will permanently delete the test from the project.</p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Characterization Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Characterization tab allows
+users to view the experimental test data in their PyCOMPARE project used for
+characterizing the model, reducing data, and assigning weights to each test (Figure 5). </p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=480 height=202
+src="PyCOMPARE_UserManual_files/image005.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207015397"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>5</span><span style='font-size:10.0pt;
+line-height:107%'>. Characterization Tab: Viewing the Characterization Test Set</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>Each test in the characterization
+set is added to the characterization set table. Only the “Weight” column can be
+changed. Weights are assigned relatively (i.e., 2 is twice as important as 1).
+Right clicking on any individual row of the characterization set table gives
+the user three options:</p>
+
+<p class=MsoNormal style='text-indent:0in'><b>View Data</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>View the time, strain, and stress
+curves for a selected test (Figure 6). The x and y axes quantities can be
+changed using the drop down menus and “Plot” button above the curve. The stage
+information for each stage during the test is displayed under the database
+table. </p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=359
+src="PyCOMPARE_UserManual_files/image006.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207015649"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>6</span><span style='font-size:10.0pt;
+line-height:107%'>. Characterization Tab: View Data</span></p>
+
+<p class=MsoNormal align=center style='text-align:center;text-indent:0in'><span
+style='font-size:9.0pt;line-height:107%'>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>Selecting View Data also enables the
+user to set the data reduction points, displayed with red markers. Users can
+automatically set equally spaced data reductions points by pressing the “Reduce
+Data” button, which launches the Segmentation Control Panel (Figure
+7a). For each stage user enters the number of desired data reduction points.
+Pressing the “Get Data Points” button automatically generates the data
+reduction points. Tensile stage points are equally spaced in normalized stress
+vs strain space, Creep stage points are equally spaced in normalized strain vs
+time space, and Relaxation stage points are equally spaced in normalized stress
+vs time space. Data reduction points can be manually added or deleted using the
+“Add” and “Delete” buttons, respectively. After the “Add” button is pressed,
+clicking on the plot will create a green marker at the nearest real data point
+that exists (Figure 7b). Similarly, after the “Delete” button is pressed,
+clicking on the plot will create a green marker at the nearest existing data
+reduction point The point can be adjusted right and left using the arrow keys.
+After the user hits “Enter” on the keyboard, the point will either be added or
+removed from the data reduction set of points.</p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:9.0pt;
+line-height:107%'><img width=201 height=330
+src="PyCOMPARE_UserManual_files/image007.gif"></span>           <img width=361
+height=330 src="PyCOMPARE_UserManual_files/image008.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'>                            (a)                                                                                                   
+(b)</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207016304"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>7</span><span style='font-size:10.0pt;
+line-height:107%'>. Characterization Tab: (a) Segmentation Control Panel for
+Automatic Reduction and (b) Adding Data Points for Manual Reduction</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'><b>View All Selected Data</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>View the stress vs strain curve for
+all selected tests (Figure 8). Users can view selected tests together by test
+type, or view all test types, using the drop down menu and “Plot” button above
+the curve.</p>
+
+<p class=MsoNormal style='text-indent:0in'><b><span style='font-size:9.0pt;
+line-height:107%'><img width=623 height=323
+src="PyCOMPARE_UserManual_files/image009.gif"></span></b></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207015654"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>8</span><span style='font-size:10.0pt;
+line-height:107%'>. Characterization Tab: View All Data</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><b>Delete From Set</b></p>
+
+<p class=MsoNormal style='text-indent:0in'>Delete a test from the
+characterization set. This will not delete the test from the project database.</p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Optimize Model Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Optimize Model tab allows users
+to optimize a model for the material. For a given model type, the user may be
+able to select the individual reversible (viscoelastic) and irreversible
+(viscoplastic) model, as well as the number of viscoelastic and viscoplastic
+mechanisms. Table 1 gives a summary of the available models in PyCOMPARE.</p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207093627"><span
+style='font-size:10.0pt;line-height:107%'>Table </span></a><span style='font-size:10.0pt;line-height:107%'>1</span><span style='font-size:10.0pt;
+line-height:107%'>. Available Model Types in PyCOMPARE</span></p>
+
+<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Model</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Reversible
+  Models</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Viscoelastic
+  Mechanisms</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Irreversible
+  Models</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Viscoplastic
+  Mechanisms</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>GVIPS</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Isotropic</p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Anisotropic</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>E</p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><span style='font-size:11.0pt;line-height:107%;font-family:"Times New Roman",serif;position:relative;
+  top:3.0pt'><img width=8 height=19
+  src="PyCOMPARE_UserManual_files/image010.gif"></span> </p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><span
+  style='font-size:11.0pt;line-height:107%;font-family:"Times New Roman",serif;
+  position:relative;top:3.0pt'><img width=16 height=19
+  src="PyCOMPARE_UserManual_files/image011.gif"></span> </p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><span
+  style='font-size:11.0pt;line-height:107%;font-family:"Times New Roman",serif;
+  position:relative;top:3.0pt'><img width=13 height=19
+  src="PyCOMPARE_UserManual_files/image012.gif"></span> </p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Isotropic</p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Anisotropic</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>GVIPS
+  w/ Damage</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Isotropic</p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Anisotropic</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Isotropic</p>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Anisotropic</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=125 valign=top style='width:93.5pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+  <td width=125 valign=top style='width:93.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'>Based on the selection by the user
+for each field using the available drop down menus, two tables will automatically
+appear for defining the initial parameters needed by compare (Figure
+9a). Both the viscoelastic (left) and viscoplastic (right) parameter tables
+contain seven columns:</p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0 width=564
+ style='width:422.75pt;margin-left:.35in;border-collapse:collapse;border:none'>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Parameter</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  viscoelastic or viscoplastic parameter</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Units</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  units for all values in the row. User can edit via drop down menu.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Lower
+  Bound</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  lower bound for the parameter optimization.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Initial
+  Guess</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  initial guess for the parameter optimization.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Upper
+  Bound</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  upper bound for the parameter optimization.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Active/Passive</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Indicator
+  for whether the parameter is active (allowed to change during optimization)
+  or passive (remains fixed during optimization). User can edit via drop down
+  menu.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=76 valign=top style='width:56.95pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>COMPARE</b></p>
+  </td>
+  <td width=488 valign=top style='width:365.8pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  COMPARE optimized parameters.</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'>Users can directly edit the lower
+bound, initial guess, and upper bound cells in the table. Bounds can also be
+generated automatically by using the Bounds slider bar (Figure
+9a), right clicking on the table, and selection “Auto-generate bounds” (Figure
+9b). If a bound is invalid (i.e., the lower bound is greater than the initial
+guess or the upper bound is less than the initial guess) it will appear in red.
+Right clicking on a table also provides options to change all parameters to
+active or passive, or to sort alphabetically.</p>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=358
+src="PyCOMPARE_UserManual_files/image013.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'>                                                   
+(a)</p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'><img width=503 height=236
+src="PyCOMPARE_UserManual_files/image014.gif"></span></p>
+
+<p class=MsoNormal style='text-indent:0in'>                                                   
+(b)</p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207092860"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>9</span><span style='font-size:10.0pt;
+line-height:107%'>. Optimize Model Tab: (a) Defining the model and (b)
+Populating the initial conditions</span></p>
+
+<p class=MsoNormal align=center style='text-align:center;text-indent:0in'><span
+style='font-size:10.0pt;line-height:107%'>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>Once the parameters for a model have
+been initialized, they can be optimized by pressing the “Optimize” button. The
+results from COMPARE will appear in the COMPARE column. If the optimal value is
+at or near a bound (within 1%), the value will appear in red; otherwise, it
+will appear in green (Figure 10). Initial guesses and bounds should be adjusted
+and re-optimized until all values are green. To use the latest COMPARE result
+as the initial guess, press the “Reset Guess” button. The Initial Guess column
+will populate with the COMPARE column values, and bounds will be automatically
+calculated from the current Bounds slider value.</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=119
+src="PyCOMPARE_UserManual_files/image015.gif"> </p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207094073"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>10</span><span style='font-size:10.0pt;
+line-height:107%'>. Optimize Model Tab: Example COMPARE results</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'>Individual models can be saved to
+the project model library using the “Save Model” button. Notes can be added to
+a model by pressing the “Model Notes” button. Models can be loaded into COMPARE
+three ways:</p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Load from Excel</p>
+
+<p class=MsoNormal style='margin-left:.25in;text-indent:0in'>Pressing the “Load
+from Excel” button will prompt the user to select an Excel file. The user must
+supply a PyCOMPARE export file with the model information tab populated.</p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Model Library</p>
+
+<p class=MsoNormal style='margin-left:.25in;text-indent:0in'>Pressing the “Model
+Library” button will load the model library window (Figure
+11). Right clicking on any row allows the user to rename the model, delete the
+model from the library, load the model into PyCOMPARE, or view the model notes.</p>
+
+<p class=MsoNormal><img width=412 height=148
+src="PyCOMPARE_UserManual_files/image016.gif"><a name="_Ref207094348"></a></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%'>Figure </span><span style='font-size:10.0pt;line-height:107%'>11</span><span style='font-size:10.0pt;
+line-height:107%'>. Optimize Model Tab: Model Library</span></p>
+
+<p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Run History</p>
+
+<p class=MsoNormal style='margin-left:.25in;text-indent:0in'>Pressing the “Run
+History” button will load the run history window (Figure
+11). The run history table displays all runs of COMPARE stored in the
+automatically generated log files. Right clicking on any individual row allows
+users to either view the model information or load the model into PyCOMPARE. Pressing
+“View Data” generates the parameter table (top right) and characterization set
+table (bottom right)    </p>
+
+<p class=MsoNormal><img width=381 height=267
+src="PyCOMPARE_UserManual_files/image017.gif"></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%'>Figure </span><span style='font-size:10.0pt;line-height:107%'>12</span><span style='font-size:10.0pt;
+line-height:107%'>. Optimize Model Tab: Run History</span></p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Analyze Model Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Analyze Model tab allows users
+to define a model for the material without optimization (Figure
+13). It contains the same options for defining the model and number of
+mechanisms as the Optimize Model tab, and similarly contains two tables for
+viscoelastic and viscoplastic mechanisms. However, only three columns exist in
+each:</p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0 width=564
+ style='width:422.75pt;margin-left:.35in;border-collapse:collapse;border:none'>
+ <tr>
+  <td width=104 valign=top style='width:78.05pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Parameter</b></p>
+  </td>
+  <td width=460 valign=top style='width:344.7pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  viscoelastic or viscoplastic parameter</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=104 valign=top style='width:78.05pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Units</b></p>
+  </td>
+  <td width=460 valign=top style='width:344.7pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  units for all values in the row. User can edit via drop down menu.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=104 valign=top style='width:78.05pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Value</b></p>
+  </td>
+  <td width=460 valign=top style='width:344.7pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>The
+  initial guess for the parameter optimization.</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=625 height=359
+src="PyCOMPARE_UserManual_files/image018.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207094906"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>13</span><span style='font-size:10.0pt;
+line-height:107%'>. Analyze Model Tab: Defining the model</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'>Pressing the “Analyze” button evaluates all tests in the
+characterization and verification set with the prescribed parameters without
+any optimization performed by COMPARE. Models can be saved using the “Save
+Model” button, and can be loaded into the Analyze Model tab using the same
+methods prescribed in the Optimize Model tab section.</span></p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Visualization Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Visualization tab allows users
+to visualize the predictions made by COMPARE. Tests available for predictions
+are separated into the characterization set (used to optimize the model) and
+the verification set (used for blind predictions). Right clicking on any individual
+row of either the characterization or verification tables gives four options:</p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0 width=564
+ style='width:422.75pt;margin-left:.35in;border-collapse:collapse;border:none'>
+ <tr>
+  <td width=164 valign=top style='width:123.3pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>View
+  Data</b></p>
+  </td>
+  <td width=399 valign=top style='width:299.45pt;border:none;border-bottom:
+  solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>View
+  the experimental and predicted curves for the individual test (Figure
+  14a). Two plots are generated to allow side by side comparison of control and
+  response curves for the same test.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=164 valign=top style='width:123.3pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Select
+  All</b></p>
+  </td>
+  <td width=399 valign=top style='width:299.45pt;border:none;border-bottom:
+  solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Select
+  all tests in the table.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=164 valign=top style='width:123.3pt;border:none;border-bottom:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>Select
+  All of Same Type</b></p>
+  </td>
+  <td width=399 valign=top style='width:299.45pt;border:none;border-bottom:
+  solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>Select
+  all of the tests in a table that have the same type as the row selected.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=164 valign=top style='width:123.3pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>View
+  Selected Data</b></p>
+  </td>
+  <td width=399 valign=top style='width:299.45pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>View
+  the selected experimental and predicted curves (Figure
+  14b). Experimental curves are displayed on the left and predicted curves are
+  displayed on the right</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=164 valign=top style='width:123.3pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'><b>&nbsp;</b></p>
+  </td>
+  <td width=399 valign=top style='width:299.45pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;text-indent:0in;line-height:normal'>&nbsp;</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-indent:0in'>The verification table has an additional
+option to “Evaluate All”, which evaluates all tests in the verification set
+with the prescribed parameters.</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=317
+src="PyCOMPARE_UserManual_files/image019.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'>(a)</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'><img width=625 height=319
+src="PyCOMPARE_UserManual_files/image020.gif"></span></p>
+
+<p class=MsoNormal style='text-indent:0in'><span style='font-size:10.0pt;
+line-height:107%'>(b)</span></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207095565"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>14</span><span style='font-size:10.0pt;
+line-height:107%'>. Visualization Tab: (a) Viewing Individual Predictions and
+(b) Viewing Multiple Predictions</span></p>
+
+<p class=MsoNormal style='text-indent:0in'>&nbsp;</p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'><span style='font-size:11.0pt;line-height:107%'>8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span>Export
+Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Export tab allows users to
+export all project results to an Excel file (Figure
+15). The export template contains five pages:</p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'><b>Model
+Information</b></p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'>The Model
+Information page contains all information defining the model, including the
+model name, type, temperature, notes, and parameter values.</p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'><b>Test
+Information</b></p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'>The Test
+Information page contains a table of all tests in the characterization and
+verification data sets. For each test, the name, type, control mode, loading
+rate, anisotropy angle, data set (characterization or verification), weight,
+and error are given.</p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'><b>Full
+Experimental Curves</b></p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'>The Full Experimental
+Curves page contains the full experimental data for all tests in the
+characterization and verification data sets.</p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'><b>Reduced
+Experimental Curves</b></p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'>The Reduced Experimental
+Curves page contains the reduced experimental data for all tests in the
+characterization and verification data sets.</p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'><b>Predicted Curves</b></p>
+
+<p class=MsoNormal style='margin-left:.35in;text-indent:0in'>The Full Experimental
+Curves page contains the predicted simulation data for all tests in the
+characterization and verification data sets.</p>
+
+<p class=MsoNormal style='text-indent:0in'>Users can check or uncheck each of
+the pages from the export file on the Export tab.</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=212
+src="PyCOMPARE_UserManual_files/image021.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207096545"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>15</span><span style='font-size:10.0pt;
+line-height:107%'>. Export Tab: Options for Exporting Project Results</span></p>
+
+<h1 style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.25in;text-indent:-.25in'><span style='font-size:11.0pt;line-height:107%'>9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span>Settings
+Tab</h1>
+
+<p class=MsoNormal style='text-indent:0in'>The Settings tab allows users to set
+all directories necessary to run PyCOMPARE and download the template import and
+export files (Figure 16). When PyCOMPARE is installed, all directories should
+be automatically set. If an error occurs, users can reset a directory using an “Edit”
+button. For the import and export templates, users can also download a copy
+using the “Download” button.</p>
+
+<p class=MsoNormal style='text-indent:0in'><img width=624 height=315
+id="Picture 1" src="PyCOMPARE_UserManual_files/image022.gif"></p>
+
+<p class=MsoNormal style='text-indent:0in'><a name="_Ref207099993"><span
+style='font-size:10.0pt;line-height:107%'>Figure </span></a><span style='font-size:10.0pt;line-height:107%'>16</span><span style='font-size:10.0pt;
+line-height:107%'>. Settings Tab: Setting Project Directories</span></p>
+
+<p class=MsoNormal align=center style='text-align:center;text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center;text-indent:0in'>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center;text-indent:0in'>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

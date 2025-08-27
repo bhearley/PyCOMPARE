@@ -45,6 +45,12 @@ def CreateModelTab(self,window):
 
     # Deselect Function
     def on_click(event):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect from sheets not currently pressed in
+        #
+        #--------------------------------------------------------------------------
+
         widget = event.widget
 
         # If the click is *not* inside the sheet, deselect it
@@ -60,7 +66,7 @@ def CreateModelTab(self,window):
         except:
             pass
 
-
+    # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
 
     def change_model(values):
@@ -277,9 +283,11 @@ def CreateModelTab(self,window):
             if 'self.sheet1_opt' not in self.atts['Optimize']['Local']:
                 self.atts['Optimize']['Local'].append('self.sheet1_opt') 
 
+            # Format Sheet
             self.sheet1_opt.change_theme("blue")
             self.sheet1_opt.set_index_width(0)
 
+            # Set Bindings
             def sort_cols(self):
                 #----------------------------------------------------------------------
                 #
@@ -544,9 +552,12 @@ def CreateModelTab(self,window):
                             )
             if 'self.sheet2_opt' not in self.atts['Optimize']['Local']:
                 self.atts['Optimize']['Local'].append('self.sheet2_opt') 
+
+            # Format the sheet
             self.sheet2_opt.change_theme("blue")
             self.sheet2_opt.set_index_width(0)
 
+            # Set Bindings
             def sort_cols(self):
                 #----------------------------------------------------------------------
                 #
@@ -871,7 +882,7 @@ def CreateModelTab(self,window):
 
             self.slider_val = value
 
-        # -- Create the label
+        # Create the label
         self.desc6_opt = ttk.Label(self.nb_tab_tab3, 
                         text="Bounds: ± 5%", 
                         anchor=tk.CENTER,       
@@ -885,7 +896,7 @@ def CreateModelTab(self,window):
         if 'self.desc6_opt' not in self.atts['Optimize']['Local']:
             self.atts['Optimize']['Local'].append('self.desc6_opt')
 
-        # -- Create the slider
+        # Create the slider
         self.slider1_opt = ttk.Scale(
                                 self.nb_tab_tab3, 
                                 from_=5, 
@@ -1323,6 +1334,11 @@ def CreateModelTab(self,window):
                 self.run_history['Run #' + str(i+1)]['Global Error'] = None
                 self.run_history['Run #' + str(i+1)]['Test Error'] = {}
                 for j in range(test_start[i], test_start[i+1]):
+                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
+                    for key in keys:
+                        if ':' in lines[j] and key == lines[j].split(':')[0].strip():
+                            self.run_history['Run #' + str(i+1)][key.split(':')[0]] = lines[j].split(':')[1].strip()
+
                     if "OPTIMIZATION RESULTS:" in lines[j]:
                         ct = 2
                         while lines[j+ct] != '':
@@ -1349,6 +1365,96 @@ def CreateModelTab(self,window):
                             ct = ct + 1
                             if j+ct == test_start[i+1]:
                                 break
+
+
+            def load_hist_data(self):
+                #--------------------------------------------------------------
+                #
+                #   PURPOSE: Load a previous run back into PYCOMPARE
+                #
+                #--------------------------------------------------------------
+
+                # Get currently selected row
+                currently_selected = self.run_hist_sheet.get_currently_selected()
+
+                # Get the model type
+                mod_type = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Model Name']
+                try:
+                    self.optmenu1_opt.set(mod_type)
+                    change_model(mod_type)
+                except:
+                    messagebox.showerror('Unable to load model.')
+
+                # Get the reversible model
+                try:
+                    if 'Reversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        rev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Reversible Model Name']
+                        if rev_model in self.optmenu2_opt['values']:
+                            self.optmenu2_opt.set(rev_model)
+                            UpdateModelData(None, self, 1, 'Model')
+                except:
+                    pass
+
+                # Get the reversible mechanisms
+                try:
+                    if 'Viscoelastic Mechanisms' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        rev_mech = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Viscoelastic Mechanisms']
+                        if rev_mech in self.optmenu4_opt['values']:
+                            self.optmenu4_opt.set(rev_mech)
+                            VE_param(rev_mech)
+                except:
+                    pass
+
+                # Get the irreversible model
+                try:
+                    if 'Irreversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        irrev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Irreversible Model Name']
+                        if irrev_model in self.optmenu3_opt['values']:
+                            self.optmenu3_opt.set(irrev_model)
+                            UpdateModelData(None, self, 2, 'Model')
+                except:
+                    pass
+
+                # Get the irreversible mechanisms
+                try:
+                    if 'Viscoplastic Mechanisms' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        irrev_mech = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Viscoplastic Mechanisms']
+                        if irrev_mech in self.optmenu5_opt['values']:
+                            self.optmenu5_opt.set(irrev_mech)
+                            VP_param(irrev_mech)
+                except:
+                    pass
+
+                # Get parameters
+                params = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Parameters']
+                param_keys = list(params.keys())
+
+                # Write Parameters
+                for key in param_keys:
+                    for i in range(len(self.sheet1_opt.data)):
+                        if key == self.sheet1_opt.data[i][0]:
+                            self.sheet1_opt.set_cell_data(i,1,params[key][1])
+                            self.sheet1_opt.set_cell_data(i,2,'')
+                            self.sheet1_opt.set_cell_data(i,3,'{:0.4e}'.format(params[key][0]))
+                            self.sheet1_opt.set_cell_data(i,4,'')
+                            self.sheet1_opt.set_cell_data(i,5,'Active')
+                            self.sheet1_opt.set_cell_data(i,6,'')
+
+                    for i in range(len(self.sheet2_opt.data)):
+                        if key == self.sheet2_opt.data[i][0]:
+                            self.sheet2_opt.set_cell_data(i,1,params[key][1])
+                            self.sheet2_opt.set_cell_data(i,2,'')
+                            self.sheet2_opt.set_cell_data(i,3,'{:0.4e}'.format(params[key][0]))
+                            self.sheet2_opt.set_cell_data(i,4,'')
+                            self.sheet2_opt.set_cell_data(i,5,'Active')
+                            self.sheet2_opt.set_cell_data(i,6,'')
+            
+                # Recreate the Optimize Page
+                self.opt_init = 1
+                self.viz_init = 0
+                root.destroy()
+                CreateModelTab(self,window)
+
 
             # Create the run history window
             root = tk.Toplevel(window)
@@ -1405,6 +1511,7 @@ def CreateModelTab(self,window):
             # Enable Bindings
             self.run_hist_sheet.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys","rc_popup_menu")
             self.run_hist_sheet.popup_menu_add_command('View Data', lambda : view_hist_data(self), table_menu = True, index_menu = True, header_menu = True)
+            self.run_hist_sheet.popup_menu_add_command('Load Model', lambda : load_hist_data(self), table_menu = True, index_menu = True, header_menu = True)
 
             
             # Fill existing values values
@@ -1435,6 +1542,23 @@ def CreateModelTab(self,window):
         if 'self.btn_view_hist_opt' not in self.atts['Optimize']['Local']:
             self.atts['Optimize']['Local'].append('self.btn_view_hist_opt')
 
+        # Write Global Error
+        if hasattr(self,'globalerr_opt'):
+            self.globalerr_opt.destroy()
+
+        if 'Global Error' in self.Compare.keys() and self.viz_init > 0:
+            self.globalerr_opt = ttk.Label(
+                                self.nb_tab_tab3, 
+                                text=f"Global Error: {'{:0.4e}'.format(self.Compare['Global Error'])}", 
+                                anchor=tk.NW,       
+                                style = 'Modern1.TLabel'                    
+                                )
+            self.globalerr_opt.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['LabelGlobalErr'][0], 
+                            rely = self.Placement['Optimization']['LabelGlobalErr'][1],
+                            )
+
         # Update Model Data
         UpdateModelData(None, self, 3, 'Model')
 
@@ -1445,7 +1569,7 @@ def CreateModelTab(self,window):
             update_irreversible_table(self)
 
     # Create the label for Model Type
-    if 'self.desc1_opt' not in self.atts['Optimize']['Permanent']:
+    if self.opt_init == 1:
         self.desc1_opt = ttk.Label(
                             self.nb_tab_tab3, 
                             text="Select the Model:", 
@@ -1492,3 +1616,6 @@ def CreateModelTab(self,window):
         self.optmenu1_opt.bind("<<ComboboxSelected>>",  change_model)
         change_model(mod_opt)
         self.atts['Optimize']['Permanent'].append('self.optmenu1_opt')
+
+        # Set Initialization Flag
+        self.opt_int = 0

@@ -6,17 +6,12 @@
 #          for characterization and edit the reduce data
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def CreateCharacterizationTab(self,window):
+def CreateCharacterizationTab(self, window):
     # Import Modules
     import math
     from tkinter import messagebox
     from tkinter import ttk
     import tksheet
-
-    # Preallocate the att list
-    self.att_list = []
-    self.loc_att_list = []
-    self.tab_att_list = []
 
     # Initialize button press
     self.clicked = 0
@@ -32,9 +27,14 @@ def CreateCharacterizationTab(self,window):
             return 0
         return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
 
-
     # Deselect Function
     def on_click(event):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect from sheets not currently pressed in
+        #
+        #--------------------------------------------------------------------------
+
         widget = event.widget
 
         # If the click is *not* inside the sheet, deselect it
@@ -50,8 +50,8 @@ def CreateCharacterizationTab(self,window):
         except:
             pass
 
+    # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
-
 
     def update_table(init_flag):
         #--------------------------------------------------------------------------
@@ -331,7 +331,6 @@ def CreateCharacterizationTab(self,window):
                 # Update the table
                 update_table(self.char_init)
 
-
         # Create the test table label
         if hasattr(self,"char_label") == False:
             self.char_label = ttk.Label(
@@ -347,6 +346,7 @@ def CreateCharacterizationTab(self,window):
             if 'self.char_label' not in self.atts['Characterization']['Permanent']:
                 self.atts['Characterization']['Permanent'].append('self.char_label')
 
+        # Delete widgets if data has changed
         if init_flag == 0:
             # Delete existing widgets
             for att in self.atts['Characterization']['Local']:
@@ -363,9 +363,16 @@ def CreateCharacterizationTab(self,window):
             except:
                 pass
 
-        if (init_flag == 1 and hasattr(self, 'sheet_char') == False) or init_flag == 0:
+        # Check if the characterization sheet exists
+        exist_flag = 0
+        if hasattr(self, 'sheet_char'):
+            if self.sheet_char.winfo_exists():
+                exist_flag = 1
 
-            # Create the test table
+        # Create the database sheet
+        if (init_flag == 1 and exist_flag == 0) or init_flag == 0:
+
+            # Create the characterization sheet
             tests = list(self.Compare['Characterization'].keys())
             Cols = ['Name', 'Type', 'Temp (°C)', 'Direction','Control','Load Rate','Angle (°)','Weight']
             self.sheet_char = tksheet.Sheet(
@@ -428,6 +435,7 @@ def CreateCharacterizationTab(self,window):
                 self.sheet_char.set_cell_data(i,6,self.Compare['Data'][tests[i]]['Angle'])
                 self.sheet_char.set_cell_data(i,7,self.Compare['Data'][tests[i]]['RelWeight'])
 
+        # Set the initialization flag
         self.char_init = 1
 
     # Update the table if characterization data exists

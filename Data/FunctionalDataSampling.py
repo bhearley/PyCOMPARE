@@ -2,7 +2,7 @@
 #
 # FunctionalDataSampling.py
 #
-# PURPOSE: Separate the test data insto stages.
+# PURPOSE: Separate the test data into stages.
 #
 # INPUTS
 #   data      Dictionary containing test arrays (time, strain, stress)

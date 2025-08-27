@@ -1,11 +1,9 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
-# PyCOMPARE.py
+#   PyCOMPARE.py
 #   Brandon Hearley - LMS
 #   brandon.l.hearley@nasa.gov
-#   4/15/2025
-#
-# PURPOSE: Run the PyCOMPARE GUI
+#   8/25/2025
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -13,15 +11,12 @@
 import copy
 import json
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
 from matplotlib.ticker import ScalarFormatter
 import numpy as np
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Border, Side
 import os
 import pandas as pd
-from pathlib import Path
 import pickle
 from PIL import ImageTk, Image
 from scipy.interpolate import CubicSpline
@@ -34,14 +29,15 @@ from tkinter import simpledialog
 from tkinter import scrolledtext
 from tkinter import ttk 
 import tksheet
+import webbrowser
 
 # Import Functions
 from Data.CreateCharacterizationTab import *
 from Data.CreateDataTab import *
 from General.BuildGeneralPage import *
-from General.BuildHomePage import *
+from General.CreateExportTab import *
+from General.CreateSettingsTab import *
 from General.GetProjectFile import *
-from General.DeleteWidgets import *
 from GUI.Placements import *
 from GUI.GetStyles import *
 from Model.CreateAnalysisTab import*
@@ -57,7 +53,14 @@ from Visualization.CreateVisualizationTab import *
 
 #Create the GUI
 class PY_COMPARE:
-    #Initialize
+
+    #------------------------------------------------------------------------------
+    #
+    #   GENERAL FUNCTIONS
+    #   Initialize the GUI, enable saving and loading of projects
+    #
+    #------------------------------------------------------------------------------
+
     def __init__(self):
         #--------------------------------------------------------------------------
         #
@@ -90,7 +93,7 @@ class PY_COMPARE:
         # Initialize the data structure
         self.Compare = {}
 
-        # Initialize the Settings Path Dependencies
+        # Initialize the Path Dependencies
         model_library = os.path.join(self.home,'Model','AvailableModels.xlsx')
         import_template = os.path.join(self.home,'Templates','ImportTemplate.xlsx')
         export_template = os.path.join(self.home,'Templates','ExportTemplate.xlsx')
@@ -101,19 +104,24 @@ class PY_COMPARE:
                                     'Compare Executable':compare_path,}
 
         # Create Toolbar
-        self.toolbar = ttk.Frame(window, padding=2, style = 'White.TFrame')
+        self.toolbar = ttk.Frame(
+                                window, 
+                                padding=2, 
+                                style = 'White.TFrame'
+                                )
         self.toolbar.place(
-                            anchor = 'n', 
+                            anchor = 'nw', 
                             relx = self.Placement['HomePage']['Toolbar'][0], 
                             rely = self.Placement['HomePage']['Toolbar'][1],
                             relwidth = self.Placement['HomePage']['Toolbar'][2],
                             relheight = self.Placement['HomePage']['Toolbar'][3],
                             )
 
+        # Function to show the menu
         def show_menu(event, menu):
             menu.post(event.x_root, event.y_root)
 
-        # File menu
+        # Create the file menu
         self.file_menu = tk.Menu(window, tearoff=0)
         self.file_menu.add_command(label="New", command=self.new_project)
         self.file_menu.add_command(label="Open", command=self.load_project)
@@ -122,19 +130,21 @@ class PY_COMPARE:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=lambda:on_closing(self))
 
+        # Create the file menu button
         self.file_btn = ttk.Button(self.toolbar, text="File", style = "Modern5.TButton")
         self.file_btn.pack(side="left", padx=2, pady = 0)
-        self.file_btn.bind("<Button-1>", lambda e: show_menu(e, self.file_menu))  # popup menu on click
+        self.file_btn.bind("<Button-1>", lambda e: show_menu(e, self.file_menu))
 
-        # Help menu
+        # Create the help menu
         self.help_menu = tk.Menu(window, tearoff=0)
         self.help_menu.add_command(label="About", command=self.help)
 
+        # Create the help menu button
         self.help_btn = ttk.Button(self.toolbar, text="Help", style = "Modern5.TButton")
         self.help_btn.pack(side="left", padx=2, pady = 0)
         self.help_btn.bind("<Button-1>", lambda e: show_menu(e, self.help_menu))
 
-        # Add the Title
+        # Create the Title
         img = Image.open(os.path.join(self.home,'GUI','TitleHeader.png'))
         scale = self.Placement['HomePage']['Title'][4]*self.scale
         img = img.resize((int(img.width*scale), int(img.height*scale)))
@@ -148,7 +158,7 @@ class PY_COMPARE:
                             relheight = self.Placement['HomePage']['Title'][3],
                             )
 
-        # Add the NASA Logo
+        # Create the NASA Logo
         img = Image.open(os.path.join(self.home,'GUI','NasaLogo.png'))
         scale = self.Placement['HomePage']['Logo'][4]*self.scale
         img = img.resize((int(img.width*scale), int(img.height*scale)))
@@ -162,7 +172,7 @@ class PY_COMPARE:
                             relheight = self.Placement['HomePage']['Logo'][3],
                             )
         
-        # Build the home page
+        # Build the general page
         BuildGeneralPage(self, window)
 
         # Ask for save when closing
@@ -173,27 +183,26 @@ class PY_COMPARE:
             #
             #----------------------------------------------------------------------
 
-            # Check if project file exists
-            if hasattr(self,'proj_file') and self.proj_file is not None:
+            # Prompt user to save
+            if messagebox.askyesno(title = "Quit", message = "Do you want to save before exiting?"):
 
-                # Prompt user to save
-                if messagebox.askyesno(title = "Quit", message = "Do you want to save before exiting?"):
+                # Check if project file exists
+                if hasattr(self,'proj_file') == False or self.proj_file is None:
 
-                    # Get the project file
-                    file = self.proj_file
+                    CreateNewProject(self)
+                
+                # Update the model info
+                UpdateModelData(None, self, 3, 'Model')
 
-                    # Update the model info
-                    UpdateModelData(None, self, 3, 'Model')
+                # Get the Data
+                data = self.Compare
 
-                    # Get the Data
-                    data = self.Compare
+                # Write data to project file
+                with open(self.proj_file, 'wb') as file:
+                    pickle.dump(data, file)
 
-                    # Write data to project file
-                    with open(file, 'wb') as file:
-                        pickle.dump(data, file)
-
-                    # Display save message to user
-                    messagebox.showinfo(title = 'Save', message = 'Project Saved!')
+                # Display save message to user
+                messagebox.showinfo(title = 'Save', message = 'Project Saved!')
 
             # Destory the window
             window.destroy()
@@ -203,13 +212,6 @@ class PY_COMPARE:
 
         #Main Loop
         window.mainloop()
-
-    #------------------------------------------------------------------------------------------------------------------------------------------
-    #
-    #   START PAGE
-    #   The start page allows users to define a new project file or load a previous project file
-    #
-    #------------------------------------------------------------------------------------------------------------------------------------------
 
     def new_project(self):
         #--------------------------------------------------------------------------
@@ -224,9 +226,6 @@ class PY_COMPARE:
             # Prompt user to save
             if messagebox.askyesno(title = "Quit", message = "Do you want to save the project first?"):
 
-                # Get the project file
-                file = self.proj_file
-
                 # Update the model info
                 UpdateModelData(None, self, 3, 'Model')
 
@@ -234,12 +233,11 @@ class PY_COMPARE:
                 data = self.Compare
 
                 # Write data to project file
-                with open(file, 'wb') as file:
+                with open(self.proj_file, 'wb') as file:
                     pickle.dump(data, file)
 
                 # Display save message to user
                 messagebox.showinfo(title = 'Save', message = 'Project Saved!')
-
 
         # Create new project file
         CreateNewProject(self)
@@ -292,7 +290,6 @@ class PY_COMPARE:
 
             # Create new project file
             CreateNewProject(self)
-
 
         if self.proj_file is not None:
             # Update the model info
@@ -356,22 +353,25 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
-        temp = 1
+        # Path to your HTML file
+        file_path = os.path.join(os.getcwd(),'Documentation','PyCOMPARE_UserManual.htm')
 
-    #------------------------------------------------------------------------------------------------------------------------------------------
-    #
-    #   DATA PAGES
-    #   Functions for the Database and Characterization Pages
-    #   The Database page allows users to upload test data to their project database
-    #   The Characterization page allows users to view data used for characterization and edit data reduction
-    #
-    #------------------------------------------------------------------------------------------------------------------------------------------
+        # Open in default browser
+        webbrowser.open(f"file://{file_path}")
 
     def on_tab_changed(self, event):
-        notebook = event.widget  # the Notebook
-        tab_id = notebook.select()   # current tab ID (widget path)
-        tab_index = notebook.index(tab_id)  # numeric index (0,1,2,…)
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Load each tab to the notebook
+        #
+        #--------------------------------------------------------------------------
 
+        # get the notebook and selected tab
+        notebook = event.widget  
+        tab_id = notebook.select()   
+        tab_index = notebook.index(tab_id)  
+
+        # Load the corresponding page
         if tab_index == 0:
             CreateDataTab(self, window)
         elif tab_index == 1:
@@ -382,119 +382,17 @@ class PY_COMPARE:
             CreateAnalysisTab(self,window)
         elif tab_index == 4:
             CreateVisualizationTab(self,window)
+        elif tab_index == 5:
+            CreateExportTab(self,window)
+        elif tab_index == 6:
+            CreateSettingsTab(self)
 
-
-    
-    def data_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the Database Page.
-        #
-        #--------------------------------------------------------------------------
-
-        # Delete any local attributes
-        DeleteLocal(self)
-
-        # Create the database tab
-        CreateDataTab(self,window)
-
-    def char_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the Characterization Page.
-        #
-        #--------------------------------------------------------------------------
-
-        # Delete any local attributes
-        DeleteLocal(self)
-
-        # Preallocate characterization
-        if 'Characterization' not in list(self.Compare.keys()):
-            self.Compare['Characterization'] = {}
-
-        # Create the characterization tab
-        CreateCharacterizationTab(self,window)
-
-    def cell_select_char(self, response):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create Custom Column Disablement for Characterization Test Set
-        #
-        #--------------------------------------------------------------------------
-
-        # Define locked columns (all but weight)
-        locked_cols = [0,1,2,3,4,5,6]
-
-        # Enable/Disable user ability to edit cells
-        if response.selected.column != None:
-            if response.selected.column in locked_cols:
-                self.sheet_char.disable_bindings(("edit_cell"))
-            else:
-                self.sheet_char.enable_bindings(("edit_cell"))
-                self.sheet_char.extra_bindings([("edit_cell", self.save_weight)])
-            self.sheet_char.redraw()
-
-    def save_weight(self, response):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Save the test weights
-        #
-        #--------------------------------------------------------------------------
-        
-        # Get Characterization Table Data
-        data = self.sheet_char.data
-
-        # Get all weights
-        weights = []
-        for i in range(len(data)):
-            try:
-                weights.append(float(data[i][7]))
-            except: 
-                weights.append(0)
-
-        # Write relative weights
-        for i in range(len(data)):
-            test_name = data[i][0]
-            self.Compare['Characterization'][test_name]['RelWeight'] = weights[i]
-
-    def cell_select_stage(self, response):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create Custom Column Disablement for Stage Table 
-        #            (Data Reduction Window) 
-        #
-        #--------------------------------------------------------------------------
-
-        # Get locked columns
-        locked_cols = [0]
-
-        # Enable/Disable user ability to edit cells
-        if response.selected.column != None:
-            if response.selected.column in locked_cols:
-                self.stage_pts_sheet.disable_bindings(("edit_cell"))
-            else:
-                self.stage_pts_sheet.enable_bindings(("edit_cell"))
-                self.stage_pts_sheet.extra_bindings([("edit_cell", self.edit_stage_pts)])
-            self.stage_pts_sheet.redraw()
-
-    def edit_stage_pts(self, response):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Edit the Stage Table (Characterization Tab) with the new 
-        #            reduced number of data points 
-        #
-        #--------------------------------------------------------------------------
-
-        # Get the selected row and column
-        c = response.selected.column
-        r = response.selected.row
-
-        # Set the number of division points
-        try:
-            int(self.stage_pts_sheet.data[r][c])
-        except:
-            self.stage_pts_sheet.set_cell_data(r,c,10)
-            self.stage_pts_sheet.redraw()
+    #------------------------------------------------------------------------------
+    #
+    #   DATABASE FUNCTIONS
+    #   Functions for the Database Tab
+    #
+    #------------------------------------------------------------------------------    
 
     def plotter_db(self):
         #--------------------------------------------------------------------------
@@ -725,6 +623,94 @@ class PY_COMPARE:
                 self.atts['Database']['Local'].append("self.canvas_db")
                 self.atts['Database']['Local'].append("self.toolbar_db")
 
+    #------------------------------------------------------------------------------
+    #
+    #   CHARACTERIZATION FUNCTIONS
+    #   Functions for the Characterization Tab
+    #
+    #------------------------------------------------------------------------------
+    
+    def cell_select_char(self, response):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Create Custom Column Disablement for Characterization Test Set
+        #
+        #--------------------------------------------------------------------------
+
+        # Define locked columns (all but weight)
+        locked_cols = [0,1,2,3,4,5,6]
+
+        # Enable/Disable user ability to edit cells
+        if response.selected.column != None:
+            if response.selected.column in locked_cols:
+                self.sheet_char.disable_bindings(("edit_cell"))
+            else:
+                self.sheet_char.enable_bindings(("edit_cell"))
+                self.sheet_char.extra_bindings([("edit_cell", self.save_weight)])
+            self.sheet_char.redraw()
+
+    def save_weight(self, response):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Save the test weights
+        #
+        #--------------------------------------------------------------------------
+        
+        # Get Characterization Table Data
+        data = self.sheet_char.data
+
+        # Get all weights
+        weights = []
+        for i in range(len(data)):
+            try:
+                weights.append(float(data[i][7]))
+            except: 
+                weights.append(0)
+
+        # Write relative weights
+        for i in range(len(data)):
+            test_name = data[i][0]
+            self.Compare['Characterization'][test_name]['RelWeight'] = weights[i]
+
+    def cell_select_stage(self, response):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Create Custom Column Disablement for Stage Table 
+        #            (Data Reduction Window) 
+        #
+        #--------------------------------------------------------------------------
+
+        # Get locked columns
+        locked_cols = [0]
+
+        # Enable/Disable user ability to edit cells
+        if response.selected.column != None:
+            if response.selected.column in locked_cols:
+                self.stage_pts_sheet.disable_bindings(("edit_cell"))
+            else:
+                self.stage_pts_sheet.enable_bindings(("edit_cell"))
+                self.stage_pts_sheet.extra_bindings([("edit_cell", self.edit_stage_pts)])
+            self.stage_pts_sheet.redraw()
+
+    def edit_stage_pts(self, response):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Edit the Stage Table (Characterization Tab) with the new 
+        #            reduced number of data points 
+        #
+        #--------------------------------------------------------------------------
+
+        # Get the selected row and column
+        c = response.selected.column
+        r = response.selected.row
+
+        # Set the number of division points
+        try:
+            int(self.stage_pts_sheet.data[r][c])
+        except:
+            self.stage_pts_sheet.set_cell_data(r,c,10)
+            self.stage_pts_sheet.redraw()
+
     def plotter_char(self):
         #--------------------------------------------------------------------------
         #
@@ -810,6 +796,9 @@ class PY_COMPARE:
                     self.clicked = 1
                     self.plot1.figure.canvas.mpl_connect('button_press_event', self.add_point)
 
+                # Reset the vizualization flag
+                self.viz_init = 0
+
             # Create Add Point Button
             if hasattr(self, 'btn_add_pt'):
                 self.btn_add_pt.destroy()
@@ -842,6 +831,9 @@ class PY_COMPARE:
                 if self.clicked == 0:
                     self.clicked = 1
                     self.plot1.figure.canvas.mpl_connect('button_press_event', self.del_point)
+
+                # Reset the vizualization flag
+                self.viz_init = 0
 
             # Create Delete Point Button
             if hasattr(self, 'btn_del_pt'):
@@ -949,7 +941,7 @@ class PY_COMPARE:
             if flag == 1:
                 self.window = 1
                 root = tk.Toplevel(window)
-                root.geometry(f"{int(300*self.scale)}x{int(600*self.scale)}")
+                root.geometry(f"{int(400*self.scale)}x{int(600*self.scale)}")
                 root.configure(bg='white')
                 root.title("Segmentation Control")
                 root.resizable(False, False)
@@ -1022,11 +1014,14 @@ class PY_COMPARE:
 
                     # Update the data points
                     for i in range(len(self.Compare['Data'][self.test_name]['Stage Divisions'])):
-                        self.stage_table.set_cell_data(i, 6, self.Compare['Data'][self.test_name]['Stage Divisions'][i])
-                    self.stage_table.redraw()
+                        self.stage_table_char.set_cell_data(i, 6, self.Compare['Data'][self.test_name]['Stage Divisions'][i])
+                    self.stage_table_char.redraw()
 
                     # Recall the plotting function
                     self.plotter_char()
+
+                    # Reset the vizualization flag
+                    self.viz_init = 0
                         
                 # Create button to get the reduced data points
                 self.btn_get_red = ttk.Button(
@@ -1385,7 +1380,7 @@ class PY_COMPARE:
 
             # Get the selected point
             self.x = event.xdata
-            self.y= event.ydata
+            self.y = event.ydata
 
             # Plot the closest point
             mind = 10e3
@@ -1396,12 +1391,16 @@ class PY_COMPARE:
             x_max = max(self.xdata)
             x_range = x_max - x_min if x_max != x_min else 1  # avoid division by zero
 
-            # normalize x and y once
+            y_min = min(self.ydata)
+            y_max = max(self.ydata)
+            y_range = y_max - y_min if y_max != y_min else 1  # avoid division by zero
+
+            # normalize x and y 
             xdata_n = [(x - x_min) / x_range for x in self.xdata]
-            ydata_n = [(y - x_min) / x_range for y in self.ydata]  # you used x_min/x_max for y too
+            ydata_n = [(y - y_min) / y_range for y in self.ydata]  # you used x_min/x_max for y too
 
             xpt_n = (self.x - x_min) / x_range
-            ypt_n = (self.y - x_min) / x_range
+            ypt_n = (self.y - y_min) / y_range
 
             mindidx = None
             mind = float("inf")
@@ -1566,7 +1565,7 @@ class PY_COMPARE:
                 new_time.append(self.Compare['Data'][self.test_name]['Reduced Data']['Time'][i])
                 i = i+1
 
-                if i == len(self.Compare['Data'][self.test_name]['Reduced Data']['Time'][i]):
+                if i == len(self.Compare['Data'][self.test_name]['Reduced Data']['Time']):
                     break
             idx_insert = i
             new_time.append(time)
@@ -1646,40 +1645,12 @@ class PY_COMPARE:
         # Replot data
         self.plotter_char()
 
-    #------------------------------------------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
     #
-    #   MODEL PAGES
-    #   Model-Optimize and Model-Analysis Pages
-    #   The Model-Optimize page allows users to define a model and run the COMPARE enginer for parameter optimization.
-    #   The Model-Analysis page allows users to manually define parameters and run evaluation
+    #   OPTIMIZATION/ANALYSIS FUNCTIONS
+    #   Functions for the Optimization and Analysis Tabs
     #
-    #------------------------------------------------------------------------------------------------------------------------------------------
-
-    def model_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the Optimize Model Page.
-        #
-        #--------------------------------------------------------------------------
-
-        # Delete any local attributes
-        DeleteLocal(self)
-
-        # Create the Optimize Model page
-        CreateModelTab(self,window)
-
-    def analyze_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the Analyze Model Page.
-        #
-        #--------------------------------------------------------------------------
-
-        # Delete any local attributes
-        DeleteLocal(self)
-
-        # Create the Analyze Model page
-        CreateAnalysisTab(self,window)
+    #------------------------------------------------------------------------------
 
     def cell_select_opt(self, response, tag):
         #--------------------------------------------------------------------------
@@ -1770,6 +1741,13 @@ class PY_COMPARE:
 
             # Reset Optimization
             self.optimize = 0
+            self.viz_init = 0
+
+            # Destroy the global error label
+            try:
+                self.globalerr_opt.destroy()
+            except:
+                pass
 
         # Reset Parameter Values in the selected row
         # -- Viscoelastic Parameters
@@ -1807,7 +1785,7 @@ class PY_COMPARE:
                         self.sheet2_opt.set_cell_data(currently_selected.row, currently_selected.column, '')
             except:
                 pass
-
+    
     def cell_select_anly(self, response, tag):
         #--------------------------------------------------------------------------
         #
@@ -1835,12 +1813,28 @@ class PY_COMPARE:
         locked_cols = [0]
 
         # Enable/Disable user ability to edit cells
+        def format_analy(event, self, table_name):
+            #----------------------------------------------------------------------
+            #
+            #   PURPOSE: Format the analysis table
+            #
+            #----------------------------------------------------------------------
+
+            try:
+                eval(table_name).set_cell_data(event.row, event.column, '{:0.4e}'.format(float(eval(table_name).data[event.row][event.column])))
+            except:
+                pass
+
+
         if response.selected.column != None:
             if response.selected.column in locked_cols:
                 eval(table_name).disable_bindings(("edit_cell"))
             else:
                 eval(table_name).enable_bindings(("edit_cell"))
+                eval(table_name).extra_bindings([("edit_cell", lambda event: format_analy(event, self, table_name))])
             eval(table_name).redraw()
+
+        
 
     def load_from_db(self, tag):
         #--------------------------------------------------------------------------
@@ -1900,7 +1894,6 @@ class PY_COMPARE:
                 self.res_flag2 = 1
                 
                 # Recreate the Optimize Page
-                DeleteLocal(self)
                 CreateModelTab(self,window)
 
             else:
@@ -1914,7 +1907,6 @@ class PY_COMPARE:
                 self.res_flag2 = 1
 
                 # Recreate teh Analysis Page
-                DeleteLocal(self)
                 CreateAnalysisTab(self,window)
         else:
             messagebox.showerror(message=msg)
@@ -2088,7 +2080,8 @@ class PY_COMPARE:
                                                                             ])
                         
                         # Recreate the Optimize Page
-                        DeleteLocal(self)
+                        self.opt_init = 1
+                        self.viz_init = 0
                         CreateModelTab(self,window)
 
                     # Populate the Analysis Page
@@ -2114,7 +2107,8 @@ class PY_COMPARE:
                                                                             ])
 
                         # Recreate Analysis Page
-                        DeleteLocal(self)
+                        self.analy_init = 1
+                        self.viz_init = 0
                         CreateAnalysisTab(self,window)
 
                 def view_notes(self):
@@ -2244,6 +2238,7 @@ class PY_COMPARE:
                     except:
                         self.flag = 1
                         self.msg = 'Invalid values for the elastic parameter initial guess and/or bounds.'
+                        callback()
 
             # Check all elastic bounds are valid
             if hasattr(self,'sheet1_opt'):
@@ -2252,9 +2247,12 @@ class PY_COMPARE:
                         if float(self.sheet1_opt.data[i][2]) > float(self.sheet1_opt.data[i][3]):
                             self.flag = 1
                             self.msg = 'Invalid values for elastic parameter bounds.'
+                            callback()
+
                         if float(self.sheet1_opt.data[i][4]) < float(self.sheet1_opt.data[i][3]):
                             self.flag = 1
                             self.msg = 'Invalid values for elastic parameter bounds.'
+                            callback()
 
             # Check all plastic inital guesses and bounds are populated
             if hasattr(self,'sheet2_opt'):
@@ -2266,6 +2264,7 @@ class PY_COMPARE:
                     except:
                         self.flag = 1
                         self.msg = 'Invalid values for the plastic parameter initial guess and/or bounds.'
+                        callback()
 
             # Check all elastic bounds are valid
             if hasattr(self,'sheet2_opt'):
@@ -2274,9 +2273,12 @@ class PY_COMPARE:
                         if float(self.sheet2_opt.data[i][2]) > float(self.sheet2_opt.data[i][3]):
                             self.flag = 1
                             self.msg = 'Invalid values for plastic parameter bounds.'
+                            callback()
+
                         if float(self.sheet2_opt.data[i][4]) < float(self.sheet2_opt.data[i][3]):
                             self.flag = 1
                             self.msg = 'Invalid values for plastic parameter bounds.'
+                            callback()
 
             # Set the parameters
             self.Compare['Model']['Reversible Model Name'] = self.optmenu2_opt.get()
@@ -2332,16 +2334,20 @@ class PY_COMPARE:
             # Function to close window when task is completed
             def on_task_done():
 
-                # Stop Progress bar
-                pb.stop()
+                try:
+                    # Stop Progress bar
+                    pb.stop()
 
-                # Destroy Window
-                loading.destroy()
+                    # Destroy Window
+                    loading.destroy()
+                except:
+                    pass
 
             # Begin save on background thread
             threading.Thread(target=run_cmd_opt, args=(on_task_done,self), daemon=True).start()
 
             # Wait until loading window is closed
+            self.loading = loading
             window.wait_window(loading)
 
         run_compare_start(self)
@@ -2350,6 +2356,7 @@ class PY_COMPARE:
             messagebox.showinfo(message=self.msg)
         else:
             messagebox.showerror(message=self.msg)
+            
                                 
     def run_compare_opt(self):
         #--------------------------------------------------------------------------
@@ -2380,6 +2387,7 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Unable to clear TEMP directory - clear manually.'
+            self.flag = 1
             return
 
         try:
@@ -2392,6 +2400,7 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Error writing DSG file.'
+            self.flag = 1
             return
 
         try:
@@ -2404,6 +2413,7 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Error Writing SIM files.'
+            self.flag = 1
             return
 
         try:
@@ -2412,12 +2422,15 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Error Writing NLP file.'
+            self.flag = 1
+            return
 
         try:
             command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
             os.system(command)
         except:
             self.msg = 'Error running COMPARE.'
+            self.flag = 1
             return
 
         try:
@@ -2568,11 +2581,28 @@ class PY_COMPARE:
                 ct = ct + 1
 
             # Write all data to log
-            #self.update_log()
-
+            self.update_log()
             self.msg = 'Optimization Complete!'
+
+            # Write Global Error
+            if hasattr(self,'globalerr_opt'):
+                self.globalerr_opt.destroy()
+            self.globalerr_opt = ttk.Label(
+                                self.nb_tab_tab3, 
+                                text=f"Global Error: {'{:0.4e}'.format(self.Compare['Global Error'])}", 
+                                anchor=tk.NW,       
+                                style = 'Modern1.TLabel'                    
+                                )
+            self.globalerr_opt.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Optimization']['LabelGlobalErr'][0], 
+                            rely = self.Placement['Optimization']['LabelGlobalErr'][1],
+                            )
+
+
         except:
             self.msg = 'Error reading output data from COMPARE.'
+            self.flag = 1
             return
 
         if self.msg == 'Optimization Complete!':
@@ -2593,6 +2623,9 @@ class PY_COMPARE:
         # Run Compare
         def run_cmd_anly(callback, temp_dir):
 
+            # Update the model
+            UpdateModelData(None, self, 3, 'Analysis')
+
             # Set error checking flag
             self.flag = 0
 
@@ -2604,6 +2637,7 @@ class PY_COMPARE:
                     except:
                         self.flag = 1
                         self.msg = 'Invalid values for the elastic parameters.'
+                        callback()
 
             # Check all plastic values are populated
             if hasattr(self,'sheet2_anly'):
@@ -2613,6 +2647,7 @@ class PY_COMPARE:
                     except:
                         self.flag = 1
                         self.msg = 'Invalid values for the plastic parameters.'
+                        callback()
 
             if self.flag == 0:
                 if len(list(self.Compare['Characterization'].keys())) > 0:
@@ -2623,7 +2658,7 @@ class PY_COMPARE:
 
             # Run Optimization
             if self.flag == 0:
-                self.run_compare_anly()
+                self.run_compare_anly(self.Compare['Prediction'].keys())
                 
             # Notify when done
             callback()
@@ -2695,8 +2730,8 @@ class PY_COMPARE:
 
         try:
             # Check for analyze
-            if 'Model' in self.Compare.keys():
-                data = copy.deepcopy(self.Compare['Model'])
+            if 'Analysis' in self.Compare.keys():
+                data = copy.deepcopy(self.Compare['Analysis'])
                 if 'Analysis' not in self.Compare.keys():                    
                     self.Compare['Analysis'] = data
 
@@ -2712,7 +2747,7 @@ class PY_COMPARE:
                     for i in range(len(data['VE_Param'])):
                         self.Compare['Analysis']['VE_Param'].append([data['VE_Param'][i][0],
                                                                 data['VE_Param'][i][1],
-                                                                data['VE_Param'][i][6],
+                                                                data['VE_Param'][i][2],
                                                                 ])
                         
                 if 'VP_Param' in list(data.keys()):
@@ -2720,10 +2755,12 @@ class PY_COMPARE:
                     for i in range(len(data['VP_Param'])):
                         self.Compare['Analysis']['VP_Param'].append([data['VP_Param'][i][0],
                                                                 data['VP_Param'][i][1],
-                                                                data['VP_Param'][i][6],
+                                                                data['VP_Param'][i][2],
                                                                 ])
         except:
             self.msg='Unable to set Analysis model parameters. Ensure a model has been loaded.'
+            self.flag = 1
+            return
         try:
             # Create and clear the Temp Directory
             temp_dir = os.path.join(os.getcwd(),'Temp')
@@ -2746,6 +2783,8 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Unable to clear TEMP directory - clear manually.'
+            self.flag = 1
+            return
 
         try:
             # Determine Model Type
@@ -2756,6 +2795,8 @@ class PY_COMPARE:
                     mod, Param, Param_U, Param_N = WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests)
         except:
             self.msg = 'Error writing DSG file.'
+            self.flag = 1
+            return
 
         try:
             # Write the Simulation files
@@ -2767,18 +2808,24 @@ class PY_COMPARE:
 
         except:
             self.msg = 'Error writing SIM files.'
+            self.flag = 1
+            return
 
         try:
             # Write the NLP files
             WriteNLP(temp_dir, 'Analy')
         except:
             self.msg = 'Error writing NLP file.'
+            self.flag = 1
+            return
 
         try:
             command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
             os.system(command)
         except:
             self.msg = 'Error running COMPARE.'
+            self.flag = 1
+            return
 
         try:
             # Set model status to 1
@@ -2848,9 +2895,12 @@ class PY_COMPARE:
             self.msg = 'Analysis Complete!'
         except:
             self.msg = 'Error reading output data from COMPARE.'
+            self.flag = 1
+            return
 
         if self.msg == 'Analysis Complete!':
             self.flag = 0
+            self.viz_init = 2
         else:
             self.flag = 1
 
@@ -2991,26 +3041,12 @@ class PY_COMPARE:
 
         self.log = []
     
-    #------------------------------------------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
     #
-    #   VISUALIZATION PAGE
-    #   The Visualization page allows users to visualize the model fit to the 
-    #   characterization set and to test data not in the characterization set
+    #   VISUALIZATION FUNCTIONS
+    #   Functions for the Visualization Tab
     #
-    #------------------------------------------------------------------------------------------------------------------------------------------
-
-    def viz_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the Visualization Page.
-        #
-        #--------------------------------------------------------------------------
-
-        # Delete any local attributes
-        DeleteLocal(self)
-
-        # Create the visualizaton tab
-        CreateVisualizationTab(self,window)
+    #------------------------------------------------------------------------------
 
     def plotter_viz(self):
         #--------------------------------------------------------------------------
@@ -3484,539 +3520,6 @@ class PY_COMPARE:
             self.atts['Visualization']['Local'].append("self.toolbar_viz2")
         if 'self.canvas_viz2' not in self.atts['Visualization']['Local']:
             self.atts['Visualization']['Local'].append("self.canvas_viz2")
-
-    #------------------------------------------------------------------------------------------------------------------------------------------
-    #
-    #   Export Page
-    #   The Export page allows users to populate database records and produce
-    #   excel output files for the project
-    #
-    #------------------------------------------------------------------------------------------------------------------------------------------
-
-    def export_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Export data to excel.
-        #
-        #--------------------------------------------------------------------------
-
-        # Check that a model exists
-        if  'Model ID' in self.Compare.keys():
-            if self.Compare['Model ID'] != None:
-                def export_ex():
-                    #--------------------------------------------------------------------------
-                    #
-                    #   PURPOSE: Create the excel output file.
-                    #
-                    #--------------------------------------------------------------------------
-
-                    # Get the model information
-                    json_string = self.Compare['Model Library'][self.Compare['Model ID']].decode('utf-8')
-                    data = json.loads(json_string)
-
-                    # Get the characterization test names
-                    char_tests = list(self.Compare['Characterization'].keys())
-                    pred_tests = list(self.Compare['Prediction'].keys())
-
-                    # Open the excel template
-                    wb = load_workbook(self.Compare['Paths']['Export Template'], data_only=True)
-
-                    def FormatArea(ws, x1, x2, y1, y2):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Format an area in the excel output file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Make all cells white
-                        for i in range(x1, x2+1):
-                            for j in range(y1, y2+1):
-                                ws.cell(row=i, column=j).fill = PatternFill(fill_type='solid', start_color='FFFFFF', end_color='FFFFFF')
-
-                        # Create the borders
-                        border_thin = Side(style='thin')
-                        border_thick = Side(style='thick')
-
-                        # Format Border
-                        for i in range(x1, x2+1):
-                            ws.cell(row = i, column = y1).border = Border(top=border_thin, left=border_thick, right=border_thin, bottom=border_thin)
-                            ws.cell(row = i, column = y2).border = Border(top=border_thin, left=border_thin, right=border_thick, bottom=border_thin)
-
-                        for i in range(y1, y2+1):
-                            ws.cell(row = x1, column = i).border = Border(top=border_thick, left=border_thin, right=border_thin, bottom=border_thin)
-                            ws.cell(row = x2, column = i).border = Border(top=border_thin, left=border_thin, right=border_thin, bottom=border_thick)
-
-                        # Format Interior
-                        for i in range(x1+1,x2):
-                            for j in range(y1+1,y2):
-                                ws.cell(row = i, column = j).border = Border(top=border_thin, left=border_thin, right=border_thin, bottom=border_thin)
-
-                        # Format Corners
-                        ws.cell(row = x1, column = y1).border = Border(top=border_thick, left=border_thick, right=border_thin, bottom=border_thin)
-                        ws.cell(row = x2, column = y1).border = Border(top=border_thin, left=border_thick, right=border_thin, bottom=border_thick)
-                        ws.cell(row = x1, column = y2).border = Border(top=border_thick, left=border_thin, right=border_thick, bottom=border_thin)
-                        ws.cell(row = x2, column = y2).border = Border(top=border_thin, left=border_thin, right=border_thick, bottom=border_thick)
-
-                    
-                    # Populate the General Model Sheet
-                    # -- General Information
-                    ws = wb['Model Information']
-                    ws.cell(row = 3, column = 3).value = self.Compare['Model ID']
-                    ws.cell(row = 4, column = 3).value = data['Model Name']
-                    ws.cell(row = 5, column = 3).value = self.Compare['Characterization'][char_tests[0]]['Temperature'][0]
-                    ws.cell(row = 6, column = 3).value = data['Compare Type']
-                    if 'Note' in data.keys():
-                        ws.cell(row = 7, column = 3).value = data['Note']
-                    FormatArea(ws, 2, 7, 2, 8)
-
-                    # -- Reversible Model
-                    if 'Reversible Model Name' in data.keys():
-                        ws.cell(row = 10, column = 3).value = data['Reversible Model Name']
-                    if 'M' in data.keys():
-                        ws.cell(row = 11, column = 3).value = int(data['M'])
-                    ct = 0
-                    if 'VE_Param' in data.keys():
-                        ct = len(data['VE_Param'])
-                        for i in range(len(data['VE_Param'])):
-                            ws.cell(row=14+i,column=2).value = data['VE_Param'][i][0]
-                            ws.cell(row=14+i,column=3).value = data['VE_Param'][i][1]
-                            if data['Compare Type'] == 'Optimize':
-                                ws.cell(row=14+i,column=4).value = data['VE_Param'][i][6]
-                            else:
-                                ws.cell(row=14+i,column=4).value = data['VE_Param'][i][2]
-                    FormatArea(ws, 9, 13+ ct, 2, 4)
-
-                    # -- Irreversible Model
-                    if 'Irreversible Model Name' in data.keys():
-                        ws.cell(row = 10, column = 7).value = data['Irreversible Model Name']
-                    if 'N' in data.keys():
-                        ws.cell(row = 11, column = 7).value = int(data['N'])
-                    ct = 0
-                    if 'VP_Param' in data.keys():
-                        ct = len(data['VP_Param'])
-                        for i in range(len(data['VP_Param'])):
-                            ws.cell(row=14+i,column=6).value = data['VP_Param'][i][0]
-                            ws.cell(row=14+i,column=7).value = data['VP_Param'][i][1]
-                            if data['Compare Type'] == 'Optimize':
-                                ws.cell(row=14+i,column=8).value = data['VP_Param'][i][6]
-                            else:
-                                ws.cell(row=14+i,column=8).value = data['VP_Param'][i][2]
-                    FormatArea(ws, 9, 13+ ct, 6, 8)
-
-                    # Test information
-                    ws = wb['Test Information']
-
-                    # Write Characaterization Test Data
-                    for i in range(len(char_tests)):
-                        ws.cell(row = 3+i, column = 2).value = char_tests[i]
-                        ws.cell(row = 3+i, column = 3).value = self.Compare['Characterization'][char_tests[i]]['Test Type']
-                        ws.cell(row = 3+i, column = 4).value = self.Compare['Characterization'][char_tests[i]]['Loading Direction'][0]
-                        ws.cell(row = 3+i, column = 5).value = self.Compare['Characterization'][char_tests[i]]['Control'][0]
-                        ws.cell(row = 3+i, column = 6).value = self.Compare['Characterization'][char_tests[i]]['Load Rate'][0][0]
-                        ws.cell(row = 3+i, column = 7).value = self.Compare['Characterization'][char_tests[i]]['Load Rate'][0][1]
-                        ws.cell(row = 3+i, column = 8).value = self.Compare['Characterization'][char_tests[i]]['Angle']
-                        ws.cell(row = 3+i, column = 9).value = 'Characterization'
-                        ws.cell(row = 3+i, column = 10).value = self.Compare['Characterization'][char_tests[i]]['RelWeight']
-                        ws.cell(row = 3+i, column = 11).value = self.Compare['Prediction'][char_tests[i]]['Error']
-                    ct = len(char_tests)
-
-                    # Write Verification Test Data
-                    for i in range(len(pred_tests)):
-                        if self.Compare['Prediction'][pred_tests[i]] is not None:
-                            if pred_tests[i] not in char_tests:
-                                if self.Compare['Prediction'][pred_tests[i]]['Error'] is not None:
-                                    ws.cell(row = 3+ct, column = 2).value = pred_tests[i]
-                                    ws.cell(row = 3+ct, column = 3).value = self.Compare['Data'][pred_tests[i]]['Test Type']
-                                    ws.cell(row = 3+ct, column = 4).value = self.Compare['Data'][pred_tests[i]]['Loading Direction'][0]
-                                    ws.cell(row = 3+ct, column = 5).value = self.Compare['Data'][pred_tests[i]]['Control'][0]
-                                    ws.cell(row = 3+ct, column = 6).value = self.Compare['Data'][pred_tests[i]]['Load Rate'][0][0]
-                                    ws.cell(row = 3+ct, column = 7).value = self.Compare['Data'][pred_tests[i]]['Load Rate'][0][1]
-                                    ws.cell(row = 3+ct, column = 8).value = self.Compare['Data'][pred_tests[i]]['Angle']
-                                    ws.cell(row = 3+ct, column = 9).value = 'Verification'
-                                    ws.cell(row = 3+ct, column = 11).value = self.Compare['Prediction'][pred_tests[i]]['Error']
-                                    ct = ct + 1
-
-                    FormatArea(ws, 2, 2+ct, 2, 11)
-
-                    # Response Curves
-                    ws = wb['Response Curves']
-                    max_x = 2
-
-                    # Write response curves
-                    start_col = 2
-                    for i in range(len(pred_tests)):
-                        start_col_test = start_col
-                        if self.Compare['Prediction'][pred_tests[i]] is not None:
-                            # -- Write the test name
-                            ws.cell(row = 2, column=start_col).value = pred_tests[i]
-
-                            # -- Write Time
-                            if 'Time' in self.Compare['Prediction'][pred_tests[i]].keys():
-                                ws.cell(row = 3, column=start_col).value = 'Time (s)'
-                                for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Time'])):
-                                    ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Time'][j]
-                                if j > max_x:
-                                    max_x = j+4
-                                start_col = start_col + 1
-
-                            # -- Write Strain
-                            if 'Strain' in self.Compare['Prediction'][pred_tests[i]].keys():
-                                keys = list(self.Compare['Prediction'][pred_tests[i]]['Strain'].keys())
-                                for key in keys:
-                                    ws.cell(row = 3, column=start_col).value = 'Strain-' + str(key) + '(-)'
-                                    for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Strain'][key])):
-                                        ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Strain'][key][j]
-                                    if j > max_x:
-                                        max_x = j+4
-                                    start_col = start_col + 1
-
-                            # -- Write Stress
-                            if 'Stress' in self.Compare['Prediction'][pred_tests[i]].keys():
-                                keys = list(self.Compare['Prediction'][pred_tests[i]]['Stress'].keys())
-                                for key in keys:
-                                    ws.cell(row = 3, column=start_col).value = 'Stress-' + str(key) + '(MPa)'
-                                    for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Stress'][key])):
-                                        ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Stress'][key][j]
-                                    if j > max_x:
-                                        max_x = j+4
-                                    start_col = start_col + 1
-
-                            # -- Merge Test Cells
-                            ws.merge_cells(start_row=2, start_column=start_col_test, end_row=2, end_column=start_col-1)
-
-                    FormatArea(ws, 2, max_x, 2, start_col-1)
-
-                    # Ask for the save name from the user
-                    file_path = filedialog.asksaveasfilename(
-                                    defaultextension=".xlsx",
-                                    filetypes=[("Excel Files", "*.xlsx")],
-                                    title="Save As",
-                                    confirmoverwrite=True
-                                )
-                    
-                    if file_path:
-                        try:
-                            wb.save(file_path)
-                            messagebox.showinfo(message = 'Export File Saved!')
-                        except:
-                            messagebox.showerror(message = "An error occurred. Please check that the file is closed.")
-
-                # Create the excel export
-                export_ex()
-
-            else:
-                    messagebox.showinfo(message = 'No Model Selected.')
-        else:
-            messagebox.showinfo(message = 'No Model Selected.')
-
-    #------------------------------------------------------------------------------------------------------------------------------------------
-    #
-    #   Settings Page
-    #   The Settings page allows users alter settings regarding their instance of PYMI COMPARE
-    #
-    #------------------------------------------------------------------------------------------------------------------------------------------
-
-    def settings_tab(self):
-        #--------------------------------------------------------------------------
-        #
-        #   PURPOSE: Create the settings window.
-        #
-        #--------------------------------------------------------------------------
-
-        # Set Paths Button
-        def set_paths(self):
-            #----------------------------------------------------------------------
-            #
-            #   PURPOSE: Create the settings window.
-            #
-            #----------------------------------------------------------------------
-
-            # Set flag to check for open setings tab
-            if hasattr(self,"settings_window") == False:
-                self.settings_window = 0
-            if self.settings_window == 0:
-                self.settings_window = 1
-
-                # Create the window
-                root = tk.Toplevel(window)
-                root.config(width=900, height=700)
-                root.title("Path Dependencies")
-                root.configure(bg='white')
-                root.grab_set()
-
-                # Reset Window
-                def reset_window():
-                    #--------------------------------------------------------------
-                    #
-                    #   PURPOSE: Reset the path window.
-                    #
-                    #--------------------------------------------------------------
-
-                    # Define attribute lst
-                    atts =  ["self.comp_path", "self.mod_path", "self.imp_path", "self.exp_path",
-                            "self.comp_path_btn", "self.mod_path_btn", "self.imp_path_btn", "self.exp_path_btn",
-                            "self.exp_dwnld_btn", "self.imp_dwnld_btn"]
-                    
-                    # Destory attributes
-                    for att in atts:
-                        try:
-                            eval(att).destroy()
-                        except:
-                            pass
-
-                    # Set the paths
-                    # -- Compare Executable
-                    def set_comp_path(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Set the compare path file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask for the new file path
-                        file = filedialog.askopenfile(title = "Compare Executable", filetypes= [('Executable', '*.exe')], mode ='r',)
-                        
-                        # Set new path and reset window
-                        if file is not None:
-                            self.Compare['Paths']['Compare Executable'] = file.name
-                            self.comp_path.configure(text='')
-                            reset_window()
-
-                    # Create label
-                    self.comp_path = ttk.Label( 
-                                            root, 
-                                            text="Compare Executable Path: " + self.Compare['Paths']['Compare Executable'] ,
-                                            style = "Modern2.TLabel",
-                                            )
-                    self.comp_path.place(
-                                        anchor='w', 
-                                        relx = 0.025, 
-                                        rely = 0.1
-                                        )
-
-                    # Create button to edit path
-                    self.comp_path_btn = ttk.Button(
-                                                    root, 
-                                                    text = "Edit", 
-                                                    command = lambda:set_comp_path(self), 
-                                                    style = "Modern4.TButton",
-                                                    width = 10
-                                                    )
-                    self.comp_path_btn.place(
-                                            anchor = 'w', 
-                                            relx = 0.025, 
-                                            rely = 0.15
-                                            )
-
-                    # -- Model Library
-                    def set_mod_path(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Set the model library path file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask for the new file path
-                        file = filedialog.askopenfile(title = "Available Models", filetypes= [('Excel', '*.xlsx')], mode ='r',)
-                        
-                        # Set new path and reset window
-                        if file is not None:
-                            self.Compare['Paths']['Model Library'] = file.name
-                            self.mod_path.configure(text='')
-                            reset_window()
-
-                    # Create the label
-                    self.mod_path = ttk.Label(
-                                            root, 
-                                            text="Available Models: " + self.Compare['Paths']['Model Library'] , 
-                                            style = "Modern2.TLabel"
-                                            )
-                    self.mod_path.place(
-                                        anchor='w', 
-                                        relx = 0.025, 
-                                        rely = 0.2
-                                        )
-
-                    # Create Button to edit the path
-                    self.mod_path_btn = ttk.Button(
-                                                root, 
-                                                text = "Edit", 
-                                                command = lambda:set_mod_path(self), 
-                                                style = "Modern4.TButton",
-                                                width = 10
-                                                )
-                    self.mod_path_btn.place(
-                                            anchor = 'w', 
-                                            relx = 0.025, 
-                                            rely = 0.25
-                                            )
-                    
-                    # -- Excel Import Template
-                    def set_imp_path(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Set the excel import template file path file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask for the new file path
-                        file = filedialog.askopenfile(title = "Import Template", filetypes= [('Excel', '*.xlsx')], mode ='r',)
-                        
-                        # Set new path and reset window
-                        if file is not None:
-                            self.Compare['Paths']['Import Template'] = file.name
-                            self.imp_path.configure(text='')
-                            reset_window()
-
-
-                    def download_imp(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Download the import template file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask where to save the file
-                        try:
-                            file = filedialog.asksaveasfile(title = "Import Template", filetypes=[('Excel', '*.xlsx')],
-                                                        initialdir = str(Path.home() / "Downloads"),
-                                                        initialfile="ImportTemplate.xlsx")
-                        except:
-                            file = filedialog.asksaveasfile(title = "Import Template", filetypes=[('Excel', '*.xlsx')],
-                                                            initialfile="ImportTemplate.xlsx")
-
-                        # Copy the file
-                        if file is not None:
-                            shutil.copy(self.Compare['Paths']['Import Template'], file.name)
-
-                    # Create the lable
-                    self.imp_path = ttk.Label(
-                                            root, 
-                                            text="Excel Import Template: " + self.Compare['Paths']['Import Template'] , 
-                                            style = "Modern2.TLabel")
-                    self.imp_path.place(
-                                        anchor='w', 
-                                        relx = 0.025, 
-                                        rely = 0.3
-                                        )
-
-                    # Create button to edit the path
-                    self.imp_path_btn = ttk.Button(
-                                                root, 
-                                                text = "Edit", 
-                                                command = lambda:set_imp_path(self), 
-                                                style = 'Modern4.TButton',
-                                                width = 10
-                                                )
-                    self.imp_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.35)
-
-                    # Create button to download file
-                    self.imp_dwnld_btn = ttk.Button(
-                                                root, 
-                                                text = "Download", 
-                                                command = lambda:download_imp(self), 
-                                                style = 'Modern4.TButton',
-                                                width = 10
-                                                )
-                    self.imp_dwnld_btn.place(
-                                            anchor = 'w', 
-                                            relx = 0.125, 
-                                            rely = 0.35
-                                            )
-                    
-                    # -- Excel Export Template
-                    def set_exp_path(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Set the export template path file.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask for the new file path
-                        file = filedialog.askopenfile(title = "Export Template", filetypes= [('Excel', '*.xlsx')], mode ='r',)
-                        
-                        # Set new path and reset window
-                        if file is not None:
-                            self.Compare['Paths']['Export Template'] = file.name
-                            self.exp_path.configure(text='')
-                            reset_window()
-
-                    def download_exp(self):
-                        #----------------------------------------------------------
-                        #
-                        #   PURPOSE: Download the export template.
-                        #
-                        #----------------------------------------------------------
-
-                        # Ask for the new file path
-                        try:
-                            file = filedialog.asksaveasfile(title = "Export Template", filetypes=[('Excel', '*.xlsx')],
-                                                        initialdir = str(Path.home() / "Downloads"),
-                                                        initialfile="ExportTemplate.xlsx")
-                        except:
-                            file = filedialog.asksaveasfile(title = "Export Template", filetypes=[('Excel', '*.xlsx')],
-                                                            initialfile="ExportTemplate.xlsx")
-
-                        # Copy file
-                        if file is not None:
-                            shutil.copy(self.Compare['Paths']['Export Template'], file.name)
-
-                    # Create the label
-                    self.exp_path = ttk.Label(
-                                            root, 
-                                            text="Excel Export Template: " + self.Compare['Paths']['Export Template'] , 
-                                            style = 'Modern2.TLabel'
-                                            )
-                    self.exp_path.place(
-                                        anchor='w', 
-                                        relx = 0.025, 
-                                        rely = 0.4
-                                        )
-
-                    # Create button to edit the path
-                    self.exp_path_btn = ttk.Button(
-                                                root, 
-                                                text = "Edit", 
-                                                command = lambda:set_exp_path(self), 
-                                                style = "Modern4.TButton",
-                                                width = 10
-                                                )
-                    self.exp_path_btn.place(anchor = 'w', relx = 0.025, rely = 0.45)
-
-                    # Create button to download the file
-                    self.exp_dwnld_btn = ttk.Button(
-                                                root, 
-                                                text = "Download", 
-                                                command = lambda:download_exp(self), 
-                                                style = "Modern4.TButton",
-                                                width = 10
-                                                )
-                    self.exp_dwnld_btn.place(
-                                            anchor = 'w', 
-                                            relx = 0.125, 
-                                            rely = 0.45
-                                            )
-                
-                # Create the window
-                reset_window()
-
-                # Create Exit Protocol
-                def on_closing_root(self):
-                    #--------------------------------------------------------------
-                    #
-                    #   PURPOSE: Set exit protocol for the setting window.
-                    #
-                    #--------------------------------------------------------------
-
-                    # Reset clicked and destory the window
-                    self.settings_window = 0
-                    root.destroy()
-
-                # Add the exit protocol to the root
-                root.protocol("WM_DELETE_WINDOW", lambda:on_closing_root(self))
-
-        # Call Path Selection
-        set_paths(self)
 
 # Run the GUI
 PY_COMPARE()

@@ -16,7 +16,9 @@ def Placements(self, screen_width, screen_height):
                 'Characterization':{},
                 'Optimization':{},
                 'Analysis':{},
-                'Visualization':{}
+                'Visualization':{},
+                'Export':{},
+                'Settings':{}
                 }
     
     # Set Window Sizes
@@ -34,7 +36,7 @@ def Placements(self, screen_width, screen_height):
     self.scale = ((self.screen_w / sizes[-1][0]) * (self.screen_h / sizes[-1][1])) ** 0.5
 
     # -- Home Page
-    Placement['HomePage']['Toolbar'] = [0.5, 0.0, 1, 0.03]
+    Placement['HomePage']['Toolbar'] = [0.0, 0.0, 0.3, 0.035]
     Placement['HomePage']['Title'] = [0.5, 0.005, 0.3, 0.07, 0.9]
     Placement['HomePage']['Logo'] = [0.999, 0.03, 0.06, 0.06, 0.8]
     Placement['General']['FrameTab'] = [0.5, 0.075, 0.99, 0.915]
@@ -44,10 +46,6 @@ def Placements(self, screen_width, screen_height):
     # -- General Page
     startx = 0.0
     delx = 0.105
-    starty = 0.13
-    btnw = 14
-
-    
 
     # -- Data
     Placement['Data']['ComboX'] = [0.67, 0.05, 0.075, 0.03]
@@ -74,7 +72,7 @@ def Placements(self, screen_width, screen_height):
     Placement['Characterization']['LabelChar'] = [0, 0.05]
     Placement['Characterization']['SheetChar'] = [0, 0.075, 0.4, 0.3, 0.15, 0.11, 0.12, 0.12, 0.12, 0.14, 0.12, 0.11]
     Placement['Characterization']['ButtonRed'] = [0.765, 0.9, 0.08, 0.04]
-    Placement['Characterization']['SheetRed'] = [0.5, 0.4, 0.6, 0.7, 0.48, 0.48]
+    Placement['Characterization']['SheetRed'] = [0.5, 0.4, 0.8, 0.7, 0.48, 0.48]
     Placement['Characterization']['ButtonGetRed'] = [0.5, 0.9, 0.8, 0.1]
     Placement['Characterization']['ButtonAdd'] = [0.74, 0.96, 0.04, 0.04]
     Placement['Characterization']['ButtonDel'] = [0.79, 0.96, 0.04, 0.04]
@@ -113,6 +111,7 @@ def Placements(self, screen_width, screen_height):
     Placement['Optimization']['ModLibSheet'] = [0.5, 0.05, 0.95, 0.95, 0.2, .125, 0.25, 0.25, 0.125]
     Placement['Optimization']['ModLibNotesLabel'] = [0.5, 0.075]
     Placement['Optimization']['ModLibNotesArea'] = [0.5, 0.15, 0.8, 0.8]
+    Placement['Optimization']['LabelGlobalErr'] = [startx + delx*7, 0.98]
     
     # -- Analysis
     Placement['Analysis']['LabelSelModel'] = [0, 0.05, 0.1, 0.035]
@@ -131,10 +130,10 @@ def Placements(self, screen_width, screen_height):
     Placement['Analysis']['ButtonModLib'] = [startx + delx*1, 0.98, 0.1, 0.04]
     Placement['Analysis']['ButtonAnaly'] = [startx + delx*2, 0.98, 0.1, 0.04]
     Placement['Analysis']['ButtonSaveMod'] = [startx + delx*3, 0.98, 0.1, 0.04]
+    Placement['Analysis']['ButtonView'] = [startx + delx*4, 0.98, 0.1, 0.04]
     Placement['Analysis']['ButtonNote'] = [0.1, 0.12, 0.075, 0.04]
     Placement['Analysis']['NotesLabel'] = [0.5, 0.1]
     Placement['Analysis']['NotesArea'] = [0.5, 0.5, 0.8, 0.6]
-
 
     # -- Visualization
     Placement['Visualization']['ComboX'] = [0.4975, 0.15, 0.1, 0.03]
@@ -151,6 +150,27 @@ def Placements(self, screen_width, screen_height):
     Placement['Visualization']['Toolbar1'] = [0.507, 0.825, 0.268, 0.05]
     Placement['Visualization']['Figure2'] = [0.8125, 0.224, 0.3, 0.6, 4.25, 4, 125]
     Placement['Visualization']['Toolbar2'] = [0.8445, 0.825, 0.268, 0.05]
+
+    # -- Export
+    Placement['Export']['LabelOpts'] = [0.025, 0.01]
+    Placement['Export']['Check1'] = [0.025, 0.045]
+    Placement['Export']['Check2'] = [0.025, 0.08]
+    Placement['Export']['Check3'] = [0.025, 0.115]
+    Placement['Export']['Check4'] = [0.025, 0.15]
+    Placement['Export']['Check5'] = [0.025, 0.185]
+    Placement['Export']['ButtonExp'] = [0.025, 0.25, 0.06, 0.0325]
+
+    # -- Settings
+    Placement['Settings']['LabelComp'] = [0.025, 0.1]
+    Placement['Settings']['ButtonComp'] = [0.025, 0.125, 0.06, 0.0325]
+    Placement['Settings']['LabelMod'] = [0.025, 0.2]
+    Placement['Settings']['ButtonMod'] = [0.025, 0.225, 0.06, 0.0325]
+    Placement['Settings']['LabelImp'] = [0.025, 0.3]
+    Placement['Settings']['ButtonImp'] = [0.025, 0.325, 0.06, 0.0325]
+    Placement['Settings']['ButtonImpD'] = [0.1, 0.325, 0.06, 0.0325]
+    Placement['Settings']['LabelExp'] = [0.025, 0.4]
+    Placement['Settings']['ButtonExp'] = [0.025, 0.425, 0.06, 0.0325]
+    Placement['Settings']['ButtonExpD'] = [0.1, 0.425, 0.06, 0.0325]
     
     
 

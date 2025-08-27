@@ -93,7 +93,7 @@ def GetStyles(self):
                         "Modern5.TButton",
                         background="#FFFFFF",
                         foreground="black",
-                        font=("Segoe UI", max([8, int(10*self.scale)])),
+                        font=("Segoe UI", max([self.min_font, int(12*self.scale)])),
                         borderwidth=2,
                         padding=2,
                         focuscolor='',
@@ -113,6 +113,16 @@ def GetStyles(self):
                         ]
                 )
     
+    # Checkbox Style
+    self.style.configure(
+                        "TCheckbutton",
+                        focuscolor='none',
+                        font=("Segoe UI", max([self.min_font,int(12*self.scale)])),
+                        padding= max([min_pad, int(10*self.scale)]),    
+                        foreground="black",      
+                        background="white"
+                        ) 
+    
     # Combo Box Style
     self.style.configure(
                         "Modern.TCombobox",
@@ -125,9 +135,9 @@ def GetStyles(self):
                         borderwidth=1,
                         relief="flat",
                         padding=2,
-                        font=("Segoe UI", max([8, int(12*self.scale)]))
+                        font=("Segoe UI", max([self.min_font, int(12*self.scale)]))
                         )
-    self.style_man['Combo'] = ("Segoe UI", max([8, int(12*self.scale)]))
+    self.style_man['Combo'] = ("Segoe UI", max([self.min_font, int(12*self.scale)]))
     self.style.map(
                         "Modern.TCombobox",
                         fieldbackground=[("readonly", "white"), ("active", "white")], 
@@ -157,7 +167,7 @@ def GetStyles(self):
                         "Modern1.TLabel",
                         foreground="black",
                         background="white",
-                        font=("Segoe UI", max([8, int(14*self.scale)])),
+                        font=("Segoe UI", max([self.min_font, int(14*self.scale)])),
                         padding=0
                         )
     
@@ -166,7 +176,7 @@ def GetStyles(self):
                         "Modern2.TLabel",
                         foreground="black",
                         background="white",
-                        font=("Segoe UI", max([8, int(10*self.scale)])),
+                        font=("Segoe UI", max([self.min_font, int(12*self.scale)])),
                         padding=0
                         )
     
@@ -175,7 +185,16 @@ def GetStyles(self):
                         "Modern3.TLabel",
                         foreground="black",
                         background="white",
-                        font=("Segoe UI", max([8, int(12*self.scale)])),
+                        font=("Segoe UI", max([self.min_font, int(12*self.scale)])),
+                        padding=0
+                        )
+    
+    # -- Label 4
+    self.style.configure(
+                        "Modern4.TLabel",
+                        foreground="black",
+                        background="white",
+                        font=("Segoe UI", max([self.min_font, int(14*self.scale)]), 'bold'),
                         padding=0
                         )
     
@@ -240,5 +259,5 @@ def GetStyles(self):
                         background="#0b3d91",
                         troughcolor="#d9d9d9",
                         bordercolor="#cccccc",
-                        arrowcolor="#d9d9d9"#"#0b3d91",
+                        arrowcolor="#d9d9d9"
                         )

@@ -22,54 +22,82 @@ def UpdateModelData(event, self, opt, tag):
         self.Compare[tag] = {}
 
     # Get the model
-    if hasattr(self,"opt1"):
+    if tag == 'Model':
         # Get the Model Name
-        if hasattr(self,"optmenu1"):
-            if self.optmenu1.winfo_exists():
-                self.Compare[tag]['Model Name'] = self.optmenu1.get()
+        if hasattr(self,"optmenu1_opt"):
+            if self.optmenu1_opt.winfo_exists():
+                self.Compare['Model']['Model Name'] = self.optmenu1_opt.get()
 
         # Get the Reversible Model
-        if hasattr(self,"optmenu2"):
-            if self.optmenu2.winfo_exists():
-                self.Compare[tag]['Reversible Model Name'] = self.optmenu2.get() 
+        if hasattr(self,"optmenu2_opt"):
+            if self.optmenu2_opt.winfo_exists():
+                self.Compare['Model']['Reversible Model Name'] = self.optmenu2_opt.get() 
 
         # Get the Irreversible Model
-        if hasattr(self,"optmenu3"):
-            if self.optmenu3.winfo_exists():
-                self.Compare[tag]['Irreversible Model Name'] = self.optmenu3.get() 
+        if hasattr(self,"optmenu3_opt"):
+            if self.optmenu3_opt.winfo_exists():
+                self.Compare['Model']['Irreversible Model Name'] = self.optmenu3_opt.get() 
 
         # Get the Viscoelastic Mechanisms
-        if hasattr(self,"optmenu4"):
-            if self.optmenu4.winfo_exists():
+        if hasattr(self,"optmenu4_opt"):
+            if self.optmenu4_opt.winfo_exists():
                 if opt == 1 or opt == 3:
-                    self.Compare[tag]['M'] = self.optmenu4.get()
-
-        # Set the model parameter sheet names
-        if tag == 'Model':
-            s1 = 'sheet1'
-            s1val = 'self.sheet1'
-            s2 = 'sheet2'
-            s2val = 'self.sheet2'
-        else:
-            s1 = 'sheet_anly1'
-            s1val = 'self.sheet_anly1'
-            s2 = 'sheet_anly2'
-            s2val = 'self.sheet_anly2'
+                    self.Compare['Model']['M'] = self.optmenu4_opt.get()
 
         # Get the Viscoelastic Parameters
-        if hasattr(self,s1):
-            if eval(s1val).winfo_exists():
+        if hasattr(self,'sheet1_opt'):
+            if self.sheet1_opt.winfo_exists():
                 if opt == 1 or opt == 3:
-                    self.Compare[tag]['VE_Param'] = eval(s1val).data
+                    self.Compare['Model']['VE_Param'] = self.sheet1_opt.data
                     
         # Get the Viscoplastic Mechanisms
-        if hasattr(self,"optmenu5"):
-            if self.optmenu5.winfo_exists():
+        if hasattr(self,"optmenu5_opt"):
+            if self.optmenu5_opt.winfo_exists():
                 if opt == 2 or opt == 3:
-                    self.Compare[tag]['N'] = self.optmenu5.get() 
+                    self.Compare['Model']['N'] = self.optmenu5_opt.get() 
 
         # Get the Viscoplastic Parameters
-        if hasattr(self,s2):
-            if eval(s2val).winfo_exists():
+        if hasattr(self,'sheet2_opt'):
+            if self.sheet2_opt.winfo_exists():
                 if opt == 2 or opt == 3:
-                    self.Compare[tag]['VP_Param'] = eval(s2val).data
+                    self.Compare['Model']['VP_Param'] = self.sheet2_opt.data
+
+    elif tag == 'Analysis':
+        # Get the Model Name
+        if hasattr(self,"optmenu1_analy"):
+            if self.optmenu1_analy.winfo_exists():
+                self.Compare['Analysis']['Model Name'] = self.optmenu1_analy.get()
+
+        # Get the Reversible Model
+        if hasattr(self,"optmenu2_analy"):
+            if self.optmenu2_analy.winfo_exists():
+                self.Compare['Analysis']['Reversible Model Name'] = self.optmenu2_analy.get() 
+
+        # Get the Irreversible Model
+        if hasattr(self,"optmenu3_analy"):
+            if self.optmenu3_analy.winfo_exists():
+                self.Compare['Analysis']['Irreversible Model Name'] = self.optmenu3_analy.get() 
+
+        # Get the Viscoelastic Mechanisms
+        if hasattr(self,"optmenu4_analy"):
+            if self.optmenu4_analy.winfo_exists():
+                if opt == 1 or opt == 3:
+                    self.Compare['Analysis']['M'] = self.optmenu4_analy.get()
+
+        # Get the Viscoelastic Parameters
+        if hasattr(self,'sheet1_analy'):
+            if self.sheet1_analy.winfo_exists():
+                if opt == 1 or opt == 3:
+                    self.Compare['Analysis']['VE_Param'] = self.sheet1_analy.data
+                    
+        # Get the Viscoplastic Mechanisms
+        if hasattr(self,"optmenu5_analy"):
+            if self.optmenu5_analy.winfo_exists():
+                if opt == 2 or opt == 3:
+                    self.Compare['Analysis']['N'] = self.optmenu5_analy.get() 
+
+        # Get the Viscoplastic Parameters
+        if hasattr(self,'sheet2_analy'):
+            if self.sheet2_analy.winfo_exists():
+                if opt == 2 or opt == 3:
+                    self.Compare['Analysis']['VP_Param'] = self.sheet2_analy.data

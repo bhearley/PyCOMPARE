@@ -42,6 +42,12 @@ def CreateAnalysisTab(self,window):
 
     # Deselect Function
     def on_click(event):
+        #--------------------------------------------------------------------------
+        #
+        #   PURPOSE: Deselect from sheets not currently pressed in
+        #
+        #--------------------------------------------------------------------------
+
         widget = event.widget
 
         # If the click is *not* inside the sheet, deselect it
@@ -52,11 +58,12 @@ def CreateAnalysisTab(self,window):
             pass
 
         try:
-            if widget != self.sheet2_opt.MT:
+            if widget != self.sheet2_analy.MT:
                 self.sheet2_analy.deselect("all")
         except:
             pass
 
+    # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
 
     def change_model(value):
@@ -136,6 +143,8 @@ def CreateAnalysisTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu2_analy.configure(font = self.style_man['Combo'])
+            self.optmenu2_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu2_analy.place(
                                 anchor='n', 
                                 relx = self.Placement['Analysis']['ComboRev'][0], 
@@ -188,6 +197,8 @@ def CreateAnalysisTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu3_analy.configure(font = self.style_man['Combo'])
+            self.optmenu3_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu3_analy.place(
                                 anchor='n', 
                                 relx = self.Placement['Analysis']['ComboIrrev'][0], 
@@ -597,6 +608,8 @@ def CreateAnalysisTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu4_analy.configure(font = self.style_man['Combo'])
+            self.optmenu4_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu4_analy.place(
                                 anchor='n', 
                                 relx = self.Placement['Analysis']['ComboVE'][0], 
@@ -639,6 +652,8 @@ def CreateAnalysisTab(self,window):
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
+            self.optmenu5_analy.configure(font = self.style_man['Combo'])
+            self.optmenu5_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
             self.optmenu5_analy.place(
                                 anchor='n', 
                                 relx = self.Placement['Analysis']['ComboVP'][0], 
@@ -843,6 +858,343 @@ def CreateAnalysisTab(self,window):
         if 'self.btn_addnote_analy' not in self.atts['Analysis']['Local']:
                 self.atts['Analysis']['Local'].append('self.btn_addnote_analy')
 
+        # Function to view model history
+        def view_history(self):
+            #--------------------------------------------------------------
+            #
+            #   PURPOSE: View run history for this project.
+            #
+            #--------------------------------------------------------------
+
+            def view_hist_data(self):
+                #--------------------------------------------------------------
+                #
+                #   PURPOSE: Get parameters and test error for chosen run.
+                #
+                #--------------------------------------------------------------
+
+                # Delete the old tables if they exist
+                try:
+                    self.hist_param_sheet.destroy()
+                    self.hist_test_sheet.destroy()
+                except:
+                    pass
+
+                # Get currently selected row
+                currently_selected = self.run_hist_sheet.get_currently_selected()
+
+                # Highlight Row
+                for i in range(len(self.run_hist_sheet.data)):
+                    self.run_hist_sheet.highlight_rows(i,'white','black')
+                self.run_hist_sheet.highlight_rows(currently_selected.row,'lightblue1','black')
+
+                # Get parameters
+                params = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Parameters']
+                param_keys = list(params.keys())
+
+                # Create Parameter sheet
+                Cols = ['Parameter', 'Value', 'Unit']
+                self.hist_param_sheet = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(param_keys), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols, 
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                                header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"))
+                self.hist_param_sheet.place(
+                                    anchor = 'ne', 
+                                    relx = self.Placement['Optimization']['HistSheetPar'][0], 
+                                    rely = self.Placement['Optimization']['HistSheetPar'][1],
+                                    relwidth = self.Placement['Optimization']['HistSheetPar'][2], 
+                                    relheight = self.Placement['Optimization']['HistSheetPar'][3],
+                                    )
+
+                # Format the sheet
+                self.hist_param_sheet.change_theme("blue")
+                root.update_idletasks()
+                total_width = self.hist_param_sheet.winfo_width()
+                self.hist_param_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][4]), redraw = True)
+                self.hist_param_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][5]), redraw = True)
+                self.hist_param_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][6]), redraw = True)
+                self.hist_param_sheet.table_align(align = 'c',redraw=True)
+                self.hist_param_sheet.set_index_width(0)
+
+                # Fill existing values values
+                for i, key in enumerate(param_keys):
+                    self.hist_param_sheet.set_cell_data(i,0,key)
+                    self.hist_param_sheet.set_cell_data(i,1,params[key][0])
+                    self.hist_param_sheet.set_cell_data(i,2,params[key][1]) 
+                self.hist_param_sheet.redraw()
+
+                # Get parameters
+                tests = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Test Error']
+                test_keys = list(tests.keys())
+
+                # Create Parameter sheet
+                Cols = ['Name', 'Type', 'Weight', 'Error']
+                self.hist_test_sheet = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(test_keys), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols,
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                                header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"),
+                                                )
+                self.hist_test_sheet.place(
+                                    anchor = 'ne', 
+                                    relx = self.Placement['Optimization']['HistSheetTest'][0], 
+                                    rely = self.Placement['Optimization']['HistSheetTest'][1], 
+                                    relwidth = self.Placement['Optimization']['HistSheetTest'][2], 
+                                    relheight = self.Placement['Optimization']['HistSheetTest'][3], 
+                                    )
+                
+                # Format the sheet
+                self.hist_test_sheet.change_theme("blue")
+                root.update_idletasks()
+                total_width = self.hist_test_sheet.winfo_width()
+                self.hist_test_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][4]), redraw = True)
+                self.hist_test_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][5]), redraw = True)
+                self.hist_test_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][6]), redraw = True)
+                self.hist_test_sheet.column_width(column = 3, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][7]), redraw = True)
+                self.hist_test_sheet.table_align(align = 'c',redraw=True)
+                self.hist_test_sheet.set_index_width(0)
+
+                # Fill existing values values
+                for i, key in enumerate(test_keys):
+                    self.hist_test_sheet.set_cell_data(i,0,key)
+                    self.hist_test_sheet.set_cell_data(i,1,tests[key][0])
+                    self.hist_test_sheet.set_cell_data(i,2,tests[key][1]) 
+                    self.hist_test_sheet.set_cell_data(i,3,tests[key][2]) 
+                self.hist_test_sheet.redraw()
+
+                # Deselect
+                self.run_hist_sheet.deselect("all", redraw=True)
+
+            # Get the log file
+            with open(self.log_file, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            lines = [line.strip() for line in lines]
+
+            # Get indices of each test run
+            test_start = []
+            for i, line in enumerate(lines):
+                if "-- NEW RUN --" in line:
+                    test_start.append(i)
+            test_start.append(len(lines))
+
+            self.run_history = {}
+            for i in range(len(test_start)-1):
+                # Initialize Data
+                self.run_history['Run #' + str(i+1)] = {}
+
+                # Get Optimization Results
+                self.run_history['Run #' + str(i+1)]['Parameters'] = {}
+                self.run_history['Run #' + str(i+1)]['Global Error'] = None
+                self.run_history['Run #' + str(i+1)]['Test Error'] = {}
+                for j in range(test_start[i], test_start[i+1]):
+                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
+                    for key in keys:
+                        if ':' in lines[j] and key == lines[j].split(':')[0].strip():
+                            self.run_history['Run #' + str(i+1)][key.split(':')[0]] = lines[j].split(':')[1].strip()
+
+                    if "OPTIMIZATION RESULTS:" in lines[j]:
+                        ct = 2
+                        while lines[j+ct] != '':
+                            line = lines[j+ct]
+                            line = line.split(' ')
+                            cline = [x for x in line if x != '']
+                            try:
+                                self.run_history['Run #' + str(i+1)]['Parameters'][cline[0]] = [float(cline[2]), cline[1]]
+                            except:
+                                self.run_history['Run #' + str(i+1)]['Parameters'][cline[0]] = [float(cline[1]), '']
+                            ct = ct + 1
+                            if j+ct == test_start[i+1]:
+                                break
+
+                    if "ERROR:" in lines[j]:
+                        self.run_history['Run #' + str(i+1)]['Global Error'] = float(lines[j+1].split('=')[1])
+                        ct = 5
+                        while lines[j+ct] != '':
+                            line = lines[j+ct]
+                            line = line.split(' ')
+                            cline = [x for x in line if x != '']
+                            self.run_history['Run #' + str(i+1)]['Test Error'][cline[0]] = [cline[1], float(cline[2]), float(cline[3])]
+
+                            ct = ct + 1
+                            if j+ct == test_start[i+1]:
+                                break
+
+
+            def load_hist_data(self):
+                #--------------------------------------------------------------
+                #
+                #   PURPOSE: Load a previous run back into PYCOMPARE
+                #
+                #--------------------------------------------------------------
+
+                # Get currently selected row
+                currently_selected = self.run_hist_sheet.get_currently_selected()
+
+                # Get the model type
+                mod_type = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Model Name']
+                try:
+                    self.optmenu1_analy.set(mod_type)
+                    change_model(mod_type)
+                except:
+                    messagebox.showerror('Unable to load model.')
+
+                # Get the reversible model
+                try:
+                    if 'Reversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        rev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Reversible Model Name']
+                        if rev_model in self.optmenu2_analy['values']:
+                            self.optmenu2_analy.set(rev_model)
+                            UpdateModelData(None, self, 1, 'Analysis')
+                except:
+                    pass
+
+                # Get the reversible mechanisms
+                try:
+                    if 'Viscoelastic Mechanisms' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        rev_mech = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Viscoelastic Mechanisms']
+                        if rev_mech in self.optmenu4_analy['values']:
+                            self.optmenu4_analy.set(rev_mech)
+                            VE_param(rev_mech)
+                except:
+                    pass
+
+                # Get the irreversible model
+                try:
+                    if 'Irreversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        irrev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Irreversible Model Name']
+                        if irrev_model in self.optmenu3_analy['values']:
+                            self.optmenu3_analy.set(irrev_model)
+                            UpdateModelData(None, self, 2, 'Analysis')
+                except:
+                    pass
+
+                # Get the irreversible mechanisms
+                try:
+                    if 'Viscoplastic Mechanisms' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
+                        irrev_mech = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Viscoplastic Mechanisms']
+                        if irrev_mech in self.optmenu5_analy['values']:
+                            self.optmenu5_analy.set(irrev_mech)
+                            VP_param(irrev_mech)
+                except:
+                    pass
+
+                # Get parameters
+                params = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Parameters']
+                param_keys = list(params.keys())
+
+                # Write Parameters
+                for key in param_keys:
+                    for i in range(len(self.sheet1_analy.data)):
+                        if key == self.sheet1_analy.data[i][0]:
+                            self.sheet1_analy.set_cell_data(i,1,params[key][1])
+                            self.sheet1_analy.set_cell_data(i,2,'{:0.4e}'.format(params[key][0]))
+
+                    for i in range(len(self.sheet2_analy.data)):
+                        if key == self.sheet2_analy.data[i][0]:
+                            self.sheet2_analy.set_cell_data(i,1,params[key][1])
+                            self.sheet2_analy.set_cell_data(i,2,'{:0.4e}'.format(params[key][0]))
+            
+                # Recreate the Optimize Page
+                self.analy_init = 1
+                self.viz_init = 0
+                root.destroy()
+                CreateAnalysisTab(self,window)
+
+
+            # Create the run history window
+            root = tk.Toplevel(window)
+            root.title("Run History")
+            root.geometry(f"{int(900*self.scale)}x{int(600*self.scale)}")
+            root.resizable(False, False)
+            root.configure(bg='white')
+            root.grab_set()
+
+            # Create the label
+            ttk.Label(
+                        root, 
+                        text="Run History", 
+                        anchor=tk.CENTER,       
+                        style = "Modern1.TLabel"                   
+                        ).place(
+                                anchor='n', 
+                                relx = self.Placement['Optimization']['HistLabel'][0], 
+                                rely = self.Placement['Optimization']['HistLabel'][1]
+                                )
+            
+            # Create the sheet
+            Cols = ['Run', 'No. of Tests', 'Global Error']
+            self.run_hist_sheet = tksheet.Sheet(
+                                            root, 
+                                            total_rows = len(self.run_history.keys()), 
+                                            total_columns = len(Cols), 
+                                            headers = Cols,
+                                            show_x_scrollbar = False, 
+                                            show_y_scrollbar = True,
+                                            font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                            header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"),
+            )
+            self.run_hist_sheet.place(
+                                anchor = 'nw', 
+                                relx = self.Placement['Optimization']['HistSheetRun'][0], 
+                                rely = self.Placement['Optimization']['HistSheetRun'][1],
+                                relwidth = self.Placement['Optimization']['HistSheetRun'][2], 
+                                relheight = self.Placement['Optimization']['HistSheetRun'][3], 
+                                )
+            
+            
+            # Format the sheet
+            self.run_hist_sheet.change_theme("blue")
+            root.update_idletasks()
+            total_width = self.run_hist_sheet.winfo_width()
+            self.run_hist_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][4]), redraw = True)
+            self.run_hist_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][5]), redraw = True)
+            self.run_hist_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][6]), redraw = True)
+            self.run_hist_sheet.table_align(align = 'c',redraw=True)
+            self.run_hist_sheet.set_index_width(0)
+
+            # Enable Bindings
+            self.run_hist_sheet.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys","rc_popup_menu")
+            self.run_hist_sheet.popup_menu_add_command('View Data', lambda : view_hist_data(self), table_menu = True, index_menu = True, header_menu = True)
+            self.run_hist_sheet.popup_menu_add_command('Load Model', lambda : load_hist_data(self), table_menu = True, index_menu = True, header_menu = True)
+
+            
+            # Fill existing values values
+            key_list = list(self.run_history.keys())
+            key_list.reverse()
+            for i, key in enumerate(key_list):
+                j = list(self.run_history.keys()).index(key)
+                self.run_hist_sheet.set_cell_data(i,0,list(self.run_history.keys())[j])
+                self.run_hist_sheet.set_cell_data(i,1,len(self.run_history[list(self.run_history.keys())[j]]['Test Error'].keys()))
+                self.run_hist_sheet.set_cell_data(i,2,self.run_history[list(self.run_history.keys())[j]]['Global Error']) 
+            self.run_hist_sheet.redraw()
+
+
+        # Create button to view model history
+        self.btn_view_hist_analy = ttk.Button(
+                                    self.nb_tab_tab4, 
+                                    text = "Run History", 
+                                    command = lambda : view_history(self), 
+                                    style = "Modern3.TButton",
+                                    )
+        self.btn_view_hist_analy.place(
+                            anchor = 'w', 
+                            relx = self.Placement['Analysis']['ButtonView'][0], 
+                            rely = self.Placement['Analysis']['ButtonView'][1], 
+                            relwidth = self.Placement['Analysis']['ButtonView'][2], 
+                            relheight = self.Placement['Analysis']['ButtonView'][3]
+                            )
+        if 'self.btn_view_hist_analy' not in self.atts['Analysis']['Local']:
+            self.atts['Analysis']['Local'].append('self.btn_view_hist_analy')
+
         # Update Model Data
         UpdateModelData(None, self, 3, 'Analysis')
 
@@ -855,7 +1207,7 @@ def CreateAnalysisTab(self,window):
     # Create the label for Model Type
     
     
-    if 'self.desc1_analy' not in self.atts['Analysis']['Local']:
+    if self.analy_init == 1:
 
         self.desc1_analy = ttk.Label(
                         self.nb_tab_tab4, 
@@ -891,6 +1243,8 @@ def CreateAnalysisTab(self,window):
                                     style="Modern.TCombobox",
                                     state="readonly"
                                     )
+        self.optmenu1_analy.configure(font = self.style_man['Combo'])
+        self.optmenu1_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
         self.optmenu1_analy.place(
                             anchor='nw', 
                             relx = self.Placement['Analysis']['ComboSelModel'][0], 

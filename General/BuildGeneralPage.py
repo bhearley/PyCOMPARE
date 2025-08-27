@@ -42,6 +42,7 @@ def BuildGeneralPage(self,window):
     if hasattr(self, 'frame_tab') == True:
         def clear_frame(frame):
             for widget in frame.winfo_children():
+
                 # If the widget is a Notebook, also destroy its tabs
                 if isinstance(widget, ttk.Notebook):
                     for tab_id in widget.tabs():
@@ -121,5 +122,9 @@ def BuildGeneralPage(self,window):
     # Initialize with data tab
     self.db_init = 1
     self.char_init = 1
+    self.opt_init = 1
+    self.analy_init = 1
     self.viz_init = 1
+    self.exp_init = 1
+    self.set_init = 1
     CreateDataTab(self, window)

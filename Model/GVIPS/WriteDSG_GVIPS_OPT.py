@@ -251,7 +251,7 @@ def WriteDSG_GVIPS_OPT_IN(self, temp_dir):
     Param_N.append(PN)
     PN = PN+1
 
-    # -- Write Zeta and Psi
+    # -- Write Xi and Zeta
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
     Param_V.append(1e-14)
     Param_V.append(1e-14)
