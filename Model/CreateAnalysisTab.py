@@ -9,7 +9,6 @@ def CreateAnalysisTab(self,window):
     # Import Modules
     import copy
     import json
-    from openpyxl import load_workbook
     import tkinter as tk
     from tkinter import messagebox
     from tkinter import simpledialog
@@ -29,7 +28,8 @@ def CreateAnalysisTab(self,window):
 
     # Get available model information
     if hasattr(self,"model_info_all") == False:
-        self.model_info_all = load_workbook(self.Compare['Paths']['Model Library'], data_only=True)
+        with open(self.Compare['Paths']['Model Library'], 'r', encoding='utf8') as f:
+            self.model_info_all = json.load(f)
     
     self.clicked = 0
 
@@ -38,7 +38,7 @@ def CreateAnalysisTab(self,window):
         self.Compare['Model Library'] = {}
 
     # Define Available Models
-    self.Models = self.model_info_all.sheetnames
+    self.Models = list(self.model_info_all.keys())
 
     # Deselect Function
     def on_click(event):
@@ -72,148 +72,6 @@ def CreateAnalysisTab(self,window):
         #   PURPOSE: Recreate page based on model choice.
         #
         #----------------------------------------------------------------------
-
-        # Clear the model information if the model type changed
-        try:
-            if value != self.Compare['Analysis']['Model Name']:
-                # Prompt user to save model
-                self.save_model(None)
-
-                # Clear model information
-                self.Compare['Analysis'] = {}
-        except:
-            pass
-        
-        # Delete local attributes
-        for att in self.atts['Analysis']['Local']:
-            try:
-                eval(f"{att}").destroy()
-            except:
-                pass
-
-        # Read the model info
-        ws = self.model_info_all[value]
-        self.Compare['Analysis']['Model Name'] = value
-        self.Compare['Analysis']['Model Info'] = {}
-        for i in range(1,ws.max_row+1):
-            self.Compare['Analysis']['Model Info'][ws.cell(row=i,column=1).value] = []
-            j = 2
-            if "Units" not in ws.cell(row=i,column=1).value:
-                while ws.cell(row=i,column=j).value != None:
-                    self.Compare['Analysis']['Model Info'][ws.cell(row=i,column=1).value].append(ws.cell(row=i,column=j).value)
-                    j= j+1
-            else:
-                for j in range(2,len(self.Compare['Analysis']['Model Info'][ws.cell(row=i-1,column=1).value])+2):
-                    self.Compare['Analysis']['Model Info'][ws.cell(row=i,column=1).value].append(ws.cell(row=i,column=j).value)
-            
-        # Get available reversible models
-        self.RevModels = self.Compare['Analysis']['Model Info']['Reversible Models']
-        
-        if len(self.RevModels) > 0:
-            # Create the label
-            self.desc2_analy = ttk.Label(
-                                self.nb_tab_tab4, 
-                                text="Reversible Model:", 
-                                anchor=tk.NW,       
-                                style = 'Modern1.TLabel'                    
-                                )
-            self.desc2_analy.place(
-                            anchor = 'n', 
-                            relx = self.Placement['Analysis']['LabelRev'][0], 
-                            rely = self.Placement['Analysis']['LabelRev'][1],
-                            )
-            
-            if 'self.desc2_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.desc2_analy') 
-
-            # Initialize the model
-            rmod_opt = self.RevModels[0]
-
-            # Check if previous data exists
-            if 'Analysis' in list(self.Compare.keys()):
-                # Set the reversible model type
-                if 'Reversible Model Name' in list(self.Compare['Analysis'].keys()):
-                    if self.Compare['Analysis']['Reversible Model Name'] in self.RevModels:
-                        rmod_opt = self.Compare['Analysis']['Reversible Model Name']
-
-            # Create the reversible model drop down   
-            self.optmenu2_analy = ttk.Combobox(
-                                        self.nb_tab_tab4,
-                                        values=self.RevModels,
-                                        style="Modern.TCombobox",
-                                        state="readonly"
-                                        )
-            self.optmenu2_analy.configure(font = self.style_man['Combo'])
-            self.optmenu2_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu2_analy.place(
-                                anchor='n', 
-                                relx = self.Placement['Analysis']['ComboRev'][0], 
-                                rely = self.Placement['Analysis']['ComboRev'][1],
-                                relwidth = self.Placement['Analysis']['ComboRev'][2], 
-                                relheight = self.Placement['Analysis']['ComboRev'][3]
-                                )
-            self.optmenu2_analy.set(rmod_opt)
-            self.optmenu2_analy.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
-            if 'self.optmenu2_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.optmenu2_analy') 
-
-            # Initialize Parameter List
-            self.Params_VE = self.Compare['Analysis']['Model Info']['Reversible Deformation Parameters'] + self.Compare['Analysis']['Model Info']['Reversible Damage Parameters']
-            self.Params_VE_Units = self.Compare['Analysis']['Model Info']['Reversible Deformation Parameter Units'] + self.Compare['Analysis']['Model Info']['Reversible Damage Parameter Units']
-
-        # Get available irreversible models
-        self.IrrevModels = self.Compare['Analysis']['Model Info']['Irreversible Models']
-
-        if len(self.IrrevModels) > 0:
-            # Create the label
-            self.desc3_analy = ttk.Label(
-                                self.nb_tab_tab4, 
-                                text= "Irreversible Model:", 
-                                anchor=tk.NW,       
-                                style = "Modern1.TLabel"
-                                )
-            self.desc3_analy.place(
-                            anchor = 'n', 
-                            relx = self.Placement['Analysis']['LabelIrrev'][0], 
-                            rely = self.Placement['Analysis']['LabelIrrev'][1]
-                            )
-            if 'self.desc3_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.desc3_analy') 
-
-            # Initialize the irreversible model
-            irmod_opt = self.IrrevModels[0]
-
-            # Check if previous data exists
-            if 'Analysis' in list(self.Compare.keys()):
-                # Set the reversible model type
-                if 'Irreversible Model Name' in list(self.Compare['Analysis'].keys()):
-                    if self.Compare['Analysis']['Irreversible Model Name'] in self.IrrevModels:
-                        irmod_opt = self.Compare['Analysis']['Irreversible Model Name']
-
-            # Create the irreversible model drop down
-            self.optmenu3_analy = ttk.Combobox(
-                                        self.nb_tab_tab4,
-                                        values=self.IrrevModels,
-                                        style="Modern.TCombobox",
-                                        state="readonly"
-                                        )
-            self.optmenu3_analy.configure(font = self.style_man['Combo'])
-            self.optmenu3_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu3_analy.place(
-                                anchor='n', 
-                                relx = self.Placement['Analysis']['ComboIrrev'][0], 
-                                rely = self.Placement['Analysis']['ComboIrrev'][1],
-                                relwidth = self.Placement['Analysis']['ComboIrrev'][2], 
-                                relheight = self.Placement['Analysis']['ComboIrrev'][3]
-                                )
-            self.optmenu3_analy.set(irmod_opt)
-            self.optmenu3_analy.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Model'))
-            if 'self.optmenu3_analy' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu3_analy') 
-
-            # Initialize Parameter List
-            self.Params_VP = self.Compare['Analysis']['Model Info']['Irreversible Deformation Parameters'] + self.Compare['Analysis']['Model Info']['Irreversible Damage Parameters']
-            self.Params_VP_Units = self.Compare['Analysis']['Model Info']['Irreversible Deformation Parameter Units'] + self.Compare['Analysis']['Model Info']['Irreversible Damage Parameter Units']
 
         def update_reversible_table(self):
             #------------------------------------------------------------------
@@ -377,9 +235,9 @@ def CreateAnalysisTab(self,window):
             self.Params_VE_Units = []
 
             # Add non-mechanism dependent parameters
-            for i in range(len(self.Compare['Analysis']['Model Info']['Reversible Deformation Parameters'])):
-                param = self.Compare['Analysis']['Model Info']['Reversible Deformation Parameters'][i]
-                unit = self.Compare['Analysis']['Model Info']['Reversible Deformation Parameter Units'][i]
+            for i in range(len(self.model_info_all[self.mod_analy]['Reversible Models'][self.rmod_analy]['Parameters'])):
+                param = self.model_info_all[self.mod_analy]['Reversible Models'][self.rmod_analy]['Parameters'][i]
+                unit = self.model_info_all[self.mod_analy]['Reversible Models'][self.rmod_analy]['Units'][i]
                 if '_[M]' not in param:
                     self.Params_VE.append(param)
                     self.Params_VE_Units.append(unit)
@@ -392,6 +250,77 @@ def CreateAnalysisTab(self,window):
             # Update the reversible mechanisms table
             update_reversible_table(self)
 
+        def change_rev_model(value):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Recreate the number of viscoelastic mechanisms
+            #
+            #------------------------------------------------------------------
+
+            # Destory old widgets
+            if hasattr(self, "optmenu4_analy"):
+                if self.optmenu4_analy.winfo_exists():
+                    self.desc4_analy.destroy()
+                    self.optmenu4_analy.destroy()
+
+            # Store Value
+            self.rmod_analy = self.optmenu2_analy.get()
+
+            # Update the model
+            UpdateModelData(value, self, 1, 'Model')
+
+            # Get number of viscoelastic parameters
+            self.VEMech =  list(self.model_info_all[self.mod_analy]['Reversible Models'][self.rmod_analy ]['Mechanisms'])
+            if len(self.VEMech) > 0:
+                # Create the label
+                self.desc4_analy = ttk.Label(
+                                    self.nb_tab_tab4, 
+                                    text="Viscoelastic Mechanisms (M):", 
+                                    anchor=tk.NW,       
+                                    style = "Modern1.TLabel"                   
+                                    )
+                self.desc4_analy.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Optimization']['LabelVE'][0], 
+                                rely = self.Placement['Optimization']['LabelVE'][1]
+                                )
+                if 'self.desc4_analy' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.desc4_analy') 
+
+                # Initialize number of viscoelastic mechanisms
+                ve_analy = self.VEMech[0]
+
+                # Check if previous data exists
+                if 'Model' in list(self.Compare.keys()):
+                    # Set the reversible model type
+                    if 'M' in list(self.Compare['Model'].keys()):
+                        if int(self.Compare['Model']['M']) in self.VEMech:
+                            ve_analy = int(self.Compare['Model']['M'])
+
+                # Create the drop down
+                self.optmenu4_analy = ttk.Combobox(
+                                            self.nb_tab_tab4,
+                                            values=self.VEMech,
+                                            style="Modern.TCombobox",
+                                            state="readonly"
+                                            )
+                self.optmenu4_analy.configure(font = self.style_man['Combo'])
+                self.optmenu4_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+                self.optmenu4_analy.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Optimization']['ComboVE'][0], 
+                                    rely = self.Placement['Optimization']['ComboVE'][1], 
+                                    relwidth = self.Placement['Optimization']['ComboVE'][2], 
+                                    relheight = self.Placement['Optimization']['ComboVE'][3]
+                                    )
+                self.optmenu4_analy.set(ve_analy)
+                self.optmenu4_analy.bind("<<ComboboxSelected>>",  VE_param)
+                if 'self.optmenu4_analy' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.optmenu4_analy')
+
+                # Get list of viscoelastic parameters
+                VE_param(ve_analy)
+        
         def update_irreversible_table(self):
             #------------------------------------------------------------------
             #
@@ -541,7 +470,6 @@ def CreateAnalysisTab(self,window):
             # Update the Model Data
             UpdateModelData(None, self, 2, 'Analysis')
 
-        # Get Number of ViscoPlastic Mechanisms
         def VP_param(values):
             #------------------------------------------------------------------
             #
@@ -557,9 +485,9 @@ def CreateAnalysisTab(self,window):
             self.Params_VP_Units = []
 
             # Add non-mechanism dependent parameters
-            for i in range(len(self.Compare['Analysis']['Model Info']['Irreversible Deformation Parameters'])):
-                param = self.Compare['Analysis']['Model Info']['Irreversible Deformation Parameters'][i]
-                unit = self.Compare['Analysis']['Model Info']['Irreversible Deformation Parameter Units'][i]
+            for i in range(len(self.model_info_all[self.mod_analy]['Irreversible Models'][self.irrmod_analy]['Parameters'])):
+                param = self.model_info_all[self.mod_analy]['Irreversible Models'][self.irrmod_analy]['Parameters'][i]
+                unit = self.model_info_all[self.mod_analy]['Irreversible Models'][self.irrmod_analy]['Units'][i]
                 if '_[N]' not in param:
                     self.Params_VP.append(param)
                     self.Params_VP_Units.append(unit)
@@ -571,103 +499,211 @@ def CreateAnalysisTab(self,window):
 
             # Update the reversible mechanisms table
             update_irreversible_table(self)
+        
+        def change_irrev_model(value):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Recreate the number of viscoelastic mechanisms
+            #
+            #------------------------------------------------------------------
 
-        # Get number of viscoelastic parameters
-        self.VEMech = self.Compare['Analysis']['Model Info']['Reversible Mechanisms']
-        if len(self.VEMech) > 0:
-            # Create the label
-            self.desc4_analy = ttk.Label(
-                                self.nb_tab_tab4, 
-                                text="Viscoelastic Mechanisms (M):", 
+            # Destory old widgets
+            if hasattr(self, "optmenu5_analy"):
+                if self.optmenu5_analy.winfo_exists():
+                    self.desc5_analy.destroy()
+                    self.optmenu5_analy.destroy()
+
+            # Store Value
+            self.irrmod_analy = self.optmenu3_analy.get()
+
+            # Update the model
+            UpdateModelData(value, self, 2, 'Model')
+
+            # Get number of viscoelastic parameters
+            self.VPMech =  list(self.model_info_all[self.mod_analy]['Irreversible Models'][self.irrmod_analy ]['Mechanisms'])
+
+            if len(self.VPMech) > 0:
+                # Create the label
+                self.desc5_analy = ttk.Label(self.nb_tab_tab4, 
+                                text="Viscoplastic Mechanisms (N):", 
                                 anchor=tk.CENTER,       
-                                style = "Modern1.TLabel"                   
+                                style = "Modern1.TLabel"                  
                                 )
-            self.desc4_analy.place(
+                self.desc5_analy.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Optimization']['LabelVP'][0], 
+                                rely = self.Placement['Optimization']['LabelVP'][1]
+                                )
+                if 'self.desc5_analy' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.desc5_analy')
+
+                # Initialize Viscoplastic number of mechanisms
+                vp_analy = self.VPMech[0]
+
+                # Check if previous data exists
+                if 'Model' in list(self.Compare.keys()):
+                    # Set the reversible model type
+                    if 'N' in list(self.Compare['Model'].keys()):
+                        if int(self.Compare['Model']['N']) in self.VPMech:
+                            vp_analy = int(self.Compare['Model']['N'])
+
+                # Create the drop down menu
+                self.optmenu5_analy = ttk.Combobox(
+                                            self.nb_tab_tab4,
+                                            values=self.VEMech,
+                                            style="Modern.TCombobox",
+                                            state="readonly"
+                                            )
+                self.optmenu5_analy.configure(font = self.style_man['Combo'])
+                self.optmenu5_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+                self.optmenu5_analy.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Optimization']['ComboVP'][0], 
+                                    rely = self.Placement['Optimization']['ComboVP'][1], 
+                                    relwidth = self.Placement['Optimization']['ComboVP'][2], 
+                                    relheight = self.Placement['Optimization']['ComboVP'][3]
+                                    )
+                self.optmenu5_analy.set(vp_analy)
+                self.optmenu5_analy.bind("<<ComboboxSelected>>",  VP_param)
+                if 'self.optmenu5_analy' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.optmenu5_analy')
+
+                # Get list of viscoplastic parameters
+                VP_param(vp_analy)
+
+        # Get the model
+        self.mod_analy = self.optmenu1_analy.get()
+
+        # Clear the model information if the model type changed
+        try:
+            if self.mod_analy != self.Compare['Analysis']['Model Name']:
+                # Prompt user to save model
+                self.save_model(None)
+
+                # Clear model information
+                self.Compare['Analysis'] = {}
+        except:
+            pass
+        
+        # Delete local attributes
+        for att in self.atts['Analysis']['Local']:
+            try:
+                eval(f"{att}").destroy()
+            except:
+                pass
+
+        # Read the model info
+        self.Compare['Analysis']['Model Name'] = self.mod_analy
+        self.Compare['Analysis']['Model Info'] = {}
+            
+        # Get available reversible models
+        self.RevModels = list(self.model_info_all[self.mod_analy]['Reversible Models'].keys())
+        self.Compare['Analysis']['Model Info']['Reversible Models'] = self.RevModels
+        
+        if len(self.RevModels) > 0:
+            # Create the label
+            self.desc2_analy = ttk.Label(
+                                self.nb_tab_tab4, 
+                                text="Reversible Model:", 
+                                anchor=tk.NW,       
+                                style = 'Modern1.TLabel'                    
+                                )
+            self.desc2_analy.place(
                             anchor = 'n', 
-                            relx = self.Placement['Analysis']['LabelVE'][0], 
-                            rely = self.Placement['Analysis']['LabelVE'][1]
+                            relx = self.Placement['Analysis']['LabelRev'][0], 
+                            rely = self.Placement['Analysis']['LabelRev'][1],
                             )
             
-            if 'self.desc4_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.desc4_analy')
+            if 'self.desc2_analy' not in self.atts['Analysis']['Local']:
+                self.atts['Analysis']['Local'].append('self.desc2_analy') 
 
-            # Initialize number of viscoelastic mechanisms
-            ve_opt = self.VEMech[0]
+            # Initialize the model
+            rmod_analy = self.RevModels[0]
 
             # Check if previous data exists
             if 'Analysis' in list(self.Compare.keys()):
                 # Set the reversible model type
-                if 'M' in list(self.Compare['Analysis'].keys()):
-                    if int(self.Compare['Analysis']['M']) in self.VEMech:
-                        ve_opt = int(self.Compare['Analysis']['M'])
+                if 'Reversible Model Name' in list(self.Compare['Analysis'].keys()):
+                    if self.Compare['Analysis']['Reversible Model Name'] in self.RevModels:
+                        rmod_analy = self.Compare['Analysis']['Reversible Model Name']
 
-            # Create the drop down
-            self.optmenu4_analy = ttk.Combobox(
+            # Create the reversible model drop down   
+            self.optmenu2_analy = ttk.Combobox(
                                         self.nb_tab_tab4,
-                                        values=self.VEMech,
+                                        values=self.RevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu4_analy.configure(font = self.style_man['Combo'])
-            self.optmenu4_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu4_analy.place(
+            self.optmenu2_analy.configure(font = self.style_man['Combo'])
+            self.optmenu2_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu2_analy.place(
                                 anchor='n', 
-                                relx = self.Placement['Analysis']['ComboVE'][0], 
-                                rely = self.Placement['Analysis']['ComboVE'][1],
-                                relwidth = self.Placement['Analysis']['ComboVE'][2],
-                                relheight = self.Placement['Analysis']['ComboVE'][3],
+                                relx = self.Placement['Analysis']['ComboRev'][0], 
+                                rely = self.Placement['Analysis']['ComboRev'][1],
+                                relwidth = self.Placement['Analysis']['ComboRev'][2], 
+                                relheight = self.Placement['Analysis']['ComboRev'][3]
                                 )
-            self.optmenu4_analy.set(ve_opt)
-            self.optmenu4_analy.bind("<<ComboboxSelected>>",  VE_param)
-            if 'self.optmenu4_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.optmenu4_analy')
+            self.optmenu2_analy.set(rmod_analy)
+            self.optmenu2_analy.bind("<<ComboboxSelected>>",  lambda event:change_rev_model(event))
+            if 'self.optmenu2_analy' not in self.atts['Analysis']['Local']:
+                self.atts['Analysis']['Local'].append('self.optmenu2_analy') 
 
-            # Get list of viscoelastic parameters
-            VE_param(ve_opt)
+           # Call the reversible model function
+            change_rev_model(rmod_analy)
 
-        # Get Number of Viscoplastic Mechanisms
-        self.VPMech = self.Compare['Analysis']['Model Info']['Irreversible Mechanisms']
-        if len(self.VPMech) > 0:
+        # Get available irreversible models
+        self.IrrevModels =  list(self.model_info_all[self.mod_analy]['Irreversible Models'].keys())
+        self.Compare['Analysis']['Model Info']['Irreversible Models'] = self.IrrevModels
+
+        if len(self.IrrevModels) > 0:
             # Create the label
-            self.desc5_analy = ttk.Label(self.nb_tab_tab4, 
-                            text="Viscoplastic Mechanisms (N):", 
-                            anchor=tk.CENTER,       
-                            style = "Modern1.TLabel"                  
-                            )
-            self.desc5_analy.place(
+            self.desc3_analy = ttk.Label(
+                                self.nb_tab_tab4, 
+                                text= "Irreversible Model:", 
+                                anchor=tk.NW,       
+                                style = "Modern1.TLabel"
+                                )
+            self.desc3_analy.place(
                             anchor = 'n', 
-                            relx = self.Placement['Analysis']['LabelVP'][0], 
-                            rely = self.Placement['Analysis']['LabelVP'][1]
+                            relx = self.Placement['Analysis']['LabelIrrev'][0], 
+                            rely = self.Placement['Analysis']['LabelIrrev'][1]
                             )
-            if 'self.desc5_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.desc5_analy')
+            if 'self.desc3_analy' not in self.atts['Analysis']['Local']:
+                self.atts['Analysis']['Local'].append('self.desc3_analy') 
 
-            # Initialize Viscoplastic number of mechanisms
-            vp_opt = self.VPMech[0]
+            # Initialize the irreversible model
+            irmod_analy = self.IrrevModels[0]
 
-            # Create the drop down menu
-            self.optmenu5_analy = ttk.Combobox(
+            # Check if previous data exists
+            if 'Analysis' in list(self.Compare.keys()):
+                # Set the reversible model type
+                if 'Irreversible Model Name' in list(self.Compare['Analysis'].keys()):
+                    if self.Compare['Analysis']['Irreversible Model Name'] in self.IrrevModels:
+                        irmod_analy = self.Compare['Analysis']['Irreversible Model Name']
+
+            # Create the irreversible model drop down
+            self.optmenu3_analy = ttk.Combobox(
                                         self.nb_tab_tab4,
-                                        values=self.VEMech,
+                                        values=self.IrrevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu5_analy.configure(font = self.style_man['Combo'])
-            self.optmenu5_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu5_analy.place(
+            self.optmenu3_analy.configure(font = self.style_man['Combo'])
+            self.optmenu3_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu3_analy.place(
                                 anchor='n', 
-                                relx = self.Placement['Analysis']['ComboVP'][0], 
-                                rely = self.Placement['Analysis']['ComboVP'][1], 
-                                relwidth = self.Placement['Analysis']['ComboVP'][2], 
-                                relheight = self.Placement['Analysis']['ComboVP'][3]
+                                relx = self.Placement['Analysis']['ComboIrrev'][0], 
+                                rely = self.Placement['Analysis']['ComboIrrev'][1],
+                                relwidth = self.Placement['Analysis']['ComboIrrev'][2], 
+                                relheight = self.Placement['Analysis']['ComboIrrev'][3]
                                 )
-            self.optmenu5_analy.set(ve_opt)
-            self.optmenu5_analy.bind("<<ComboboxSelected>>",  VP_param)
-            if 'self.optmenu5_analy' not in self.atts['Analysis']['Local']:
-                self.atts['Analysis']['Local'].append('self.optmenu5_analy')
+            self.optmenu3_analy.set(irmod_analy)
+            self.optmenu3_analy.bind("<<ComboboxSelected>>",  lambda event:change_irrev_model(event))
+            if 'self.optmenu3_analy' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu3_analy') 
 
-            # Get list of viscoplastic parameters
-            VP_param(vp_opt)
+            # Call the irreversible model function
+            change_irrev_model(irmod_analy)
 
         # Create the Load from Database button
         self.btn_load_analy = ttk.Button(
@@ -924,7 +960,7 @@ def CreateAnalysisTab(self,window):
                 # Fill existing values values
                 for i, key in enumerate(param_keys):
                     self.hist_param_sheet.set_cell_data(i,0,key)
-                    self.hist_param_sheet.set_cell_data(i,1,params[key][0])
+                    self.hist_param_sheet.set_cell_data(i,1,'{:0.4e}'.format(params[key][0]))
                     self.hist_param_sheet.set_cell_data(i,2,params[key][1]) 
                 self.hist_param_sheet.redraw()
 
@@ -1053,7 +1089,7 @@ def CreateAnalysisTab(self,window):
                         rev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Reversible Model Name']
                         if rev_model in self.optmenu2_analy['values']:
                             self.optmenu2_analy.set(rev_model)
-                            UpdateModelData(None, self, 1, 'Analysis')
+                            change_rev_model(rev_model)
                 except:
                     pass
 
@@ -1073,7 +1109,7 @@ def CreateAnalysisTab(self,window):
                         irrev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Irreversible Model Name']
                         if irrev_model in self.optmenu3_analy['values']:
                             self.optmenu3_analy.set(irrev_model)
-                            UpdateModelData(None, self, 2, 'Analysis')
+                            change_irrev_model(irrev_model)
                 except:
                     pass
 
@@ -1227,14 +1263,14 @@ def CreateAnalysisTab(self,window):
         self.atts['Analysis']['Permanent'].append('self.desc1_analy') 
 
         # Initialize the model option
-        mod_opt = self.Models[0]
+        mod_analy = self.Models[0]
 
         # Check if previous value exists
         if 'Analysis' in list(self.Compare.keys()):
             # Set the model name
             if 'Model Name' in list(self.Compare['Analysis'].keys()):
                 if self.Compare['Analysis']['Model Name'] in self.Models:
-                    mod_opt = self.Compare['Analysis']['Model Name']
+                    mod_analy = self.Compare['Analysis']['Model Name']
 
         # Create Option Menu for Model Type
         self.optmenu1_analy = ttk.Combobox(
@@ -1252,7 +1288,7 @@ def CreateAnalysisTab(self,window):
                             relwidth = self.Placement['Analysis']['ComboSelModel'][2], 
                             relheight = self.Placement['Analysis']['ComboSelModel'][3]
                             )
-        self.optmenu1_analy.set(mod_opt)
+        self.optmenu1_analy.set(mod_analy)
         self.optmenu1_analy.bind("<<ComboboxSelected>>",  change_model)
-        change_model(mod_opt)
+        change_model(mod_analy)
         self.atts['Analysis']['Permanent'].append('self.optmenu1_analy')

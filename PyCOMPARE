@@ -94,7 +94,7 @@ class PY_COMPARE:
         self.Compare = {}
 
         # Initialize the Path Dependencies
-        model_library = os.path.join(self.home,'Model','AvailableModels.xlsx')
+        model_library = os.path.join(self.home,'Model','AvailableModels.json')
         import_template = os.path.join(self.home,'Templates','ImportTemplate.xlsx')
         export_template = os.path.join(self.home,'Templates','ExportTemplate.xlsx')
         compare_path = os.path.join(self.home,'compnasardamage.exe')
@@ -2392,11 +2392,10 @@ class PY_COMPARE:
 
         try:
             # Determine Model Type
-            if self.Compare['Model']['Model Name'] == 'GVIPS':
-                if self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic' and self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
-                    
-                    # Write the DGS file
-                    mod, Param, Param_U, Param_N = WriteDSG_GVIPS_OPT_IN(self, temp_dir)
+            if self.Compare['Model']['Model Name'] == 'GVIPS ISO':
+
+                # Write the DGS file
+                mod, Param, Param_U, Param_N = WriteDSG_GVIPS_OPT(self, temp_dir)
 
         except:
             self.msg = 'Error writing DSG file.'
@@ -2446,15 +2445,19 @@ class PY_COMPARE:
             #Update the Viscoelastic parameters
             if hasattr(self,'sheet1_opt'):
                 VE = self.sheet1_opt.data
-                for i in range(self.sheet1_opt.visible_rows[1]):
+                for i in range(len(VE)):
                     val = float(Vals[Param_N[Param.index(VE[i][0])]-1])
                     try:
                         val = UnitConversion(Param_U[Param.index(VE[i][0])], val, VE[i][1])
                     except:
                         pass
                     self.sheet1_opt.set_cell_data(i,6,'{:0.4e}'.format(val), redraw = False)
-                    if val >= 0.99*float(VE[i][4]) or val <= 1.01*float(VE[i][2]):
-                        clr = 'red'
+
+                    if VE[i][5] == 'Active':
+                        if val >= 0.99*float(VE[i][4]) or val <= 1.01*float(VE[i][2]):
+                            clr = 'red'
+                        else:
+                            clr = 'green'
                     else:
                         clr = 'green'
                     self.sheet1_opt.highlight((i,6),fg= clr, bg = 'white', redraw = False)
@@ -2462,15 +2465,19 @@ class PY_COMPARE:
             #Update the Viscoplastic parameters
             if hasattr(self,'sheet2_opt'):
                 VP = self.sheet2_opt.data
-                for i in range(self.sheet2_opt.visible_rows[1]):
+                for i in range(len(VP)):
                     val = float(Vals[Param_N[Param.index(VP[i][0])]-1])
                     try:
                         val = UnitConversion(Param_U[Param.index(VP[i][0])], val, VP[i][1])
                     except:
                         pass
                     self.sheet2_opt.set_cell_data(i,6,'{:0.4e}'.format(val), redraw = False)
-                    if val >= 0.99*float(VP[i][4]) or val <= 1.01*float(VP[i][2]):
-                        clr = 'red'
+
+                    if VP[i][5] == 'Active':
+                        if val >= 0.99*float(VP[i][4]) or val <= 1.01*float(VP[i][2]):
+                            clr = 'red'
+                        else:
+                            clr = 'green'
                     else:
                         clr = 'green'
                     self.sheet2_opt.highlight((i,6),fg= clr, bg = 'white', redraw = False)
@@ -2788,11 +2795,10 @@ class PY_COMPARE:
 
         try:
             # Determine Model Type
-            if self.Compare['Analysis']['Model Name'] == 'GVIPS':
-                if self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic' and self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
+            if self.Compare['Analysis']['Model Name'] == 'GVIPS ISO':
                     
-                    # Write the DGS file
-                    mod, Param, Param_U, Param_N = WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests)
+                # Write the DGS file
+                mod, Param, Param_U, Param_N = WriteDSG_GVIPS_ANLY(self, temp_dir, tests)
         except:
             self.msg = 'Error writing DSG file.'
             self.flag = 1
@@ -2965,7 +2971,7 @@ class PY_COMPARE:
             param.append(self.Compare['Model']['VP_Param'][i])
 
         formatter_header = "{:<10} {:<10} {:<10} {:<10} {:<10}"
-        formatter_data   = "{:<10} {:<10} {:<10.4f} {:<10.4f} {:<10.4f}"
+        formatter_data   = "{:<10} {:<10} {:<10.4e} {:<10.4e} {:<10.4e}"
 
         # Write to file
         for row in param:
@@ -2989,7 +2995,7 @@ class PY_COMPARE:
             param.append(self.Compare['Model']['VP_Param'][i])
 
         formatter_header = "{:<10} {:<10} {:<10}"
-        formatter_data   = "{:<10} {:<10} {:<10.4f}"
+        formatter_data   = "{:<10} {:<10} {:<10.4e}"
 
         # Write to file
         for row in param:

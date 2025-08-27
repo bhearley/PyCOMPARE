@@ -1,0 +1,54 @@
+{
+    "GVIPS ISO":{
+        "Reversible Models":{
+            "Isotropic Viscoelastic":{
+                "Mechanisms":[1, 2, 3, 4, 5, 6, 7],
+                "Parameters":["E", "ν",	"M_[M]", "ρ_[M]"],
+                "Units":["GPa","","MPa","s"]
+                },
+            "Isotropic Viscoelastic w/ Damage":{
+                    "Mechanisms":[1, 2, 3, 4, 5, 6, 7],
+                    "Parameters":["E", "ν",	"M_[M]", "ρ_[M]", "ce", "Ye", "μe", "ne", "Ɛcut_e"],
+                    "Units":["GPa","","MPa","s", "", "", "", "", "", ""]
+                }
+        },
+        "Irreversible Models":{
+            "Isotropic Viscoplastic":{
+                "Mechanisms":[1, 2, 3, 4, 5],
+                "Parameters":["κ", "n", "μ", "k_[N]", "R_[N]", "H_[N]", "β_[N]", "m_[N]"],
+                "Units":["MPa","","GPa-s","MPa", "1/s", "GPa", "",""]
+                },
+            "Isotropic Viscoplastic w/ Damage":{
+                    "Mechanisms":[1, 2, 3, 4, 5],
+                    "Parameters":["κ", "n", "μ", "k_[N]", "R_[N]", "H_[N]", "β_[N]", "m_[N]", "cd_[N]", "Yd_[N]", "μd_[N]", "nd_[N]", "Ɛcut_p"],
+                    "Units":["MPa","","GPa-s","MPa", "1/s", "GPa", "","", "", "", "", "", ""]
+                }
+        }
+    },
+    "GVIPS":{
+        "Reversible Models":{
+            "Isotropic Viscoelastic":{
+                "Mechanisms":[1, 2, 3, 4, 5, 6, 7],
+                "Parameters":["E", "ν",	"M_[M]", "ρ_[M]"],
+                "Units":["GPa","","MPa","s"]
+                },
+            "Isotropic Viscoelastic w/ Damage":{
+                    "Mechanisms":[1, 2, 3, 4, 5, 6, 7],
+                    "Parameters":["E", "ν",	"M_[M]", "ρ_[M]", "ce", "Ye", "μe", "ne", "Ɛcut_e"],
+                    "Units":["GPa","","MPa","s", "", "", "", "", "", ""]
+                }
+        },
+        "Irreversible Models":{
+            "Isotropic Viscoplastic":{
+                "Mechanisms":[1, 2, 3, 4, 5],
+                "Parameters":["κ", "n", "μ", "k_[N]", "R_[N]", "H_[N]", "β_[N]", "m_[N]"],
+                "Units":["MPa","","GPa-s","MPa", "1/s", "GPa", "",""]
+                },
+            "Isotropic Viscoplastic w/ Damage":{
+                    "Mechanisms":[1, 2, 3, 4, 5],
+                    "Parameters":["κ", "n", "μ", "k_[N]", "R_[N]", "H_[N]", "β_[N]", "m_[N]", "cd_[N]", "Yd_[N]", "μd_[N]", "nd_[N]", "Ɛcut_p"],
+                    "Units":["MPa","","GPa-s","MPa", "1/s", "GPa", "","", "", "", "", "", ""]
+                }
+        }
+    }
+}

@@ -69,7 +69,7 @@ def CreateSettingsTab(self):
             #----------------------------------------------------------
 
             # Ask for the new file path
-            file = filedialog.askopenfile(title = "Available Models", filetypes= [('Excel', '*.xlsx')], mode ='r',)
+            file = filedialog.askopenfile(title = "Available Models", filetypes= [('Excel', '*.json')], mode ='r',)
             
             # Set new path and reset window
             if file is not None:

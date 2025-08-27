@@ -10,7 +10,6 @@ def CreateModelTab(self,window):
     # Import Modules
     import copy
     import json
-    from openpyxl import load_workbook
     import tkinter as tk
     from tkinter import messagebox
     from tkinter import simpledialog
@@ -31,7 +30,8 @@ def CreateModelTab(self,window):
 
     # Get available model information
     if hasattr(self,"model_info_all") == False:
-        self.model_info_all = load_workbook(self.Compare['Paths']['Model Library'], data_only=True)
+        with open(self.Compare['Paths']['Model Library'], 'r', encoding='utf8') as f:
+            self.model_info_all = json.load(f)
 
     self.optimize = 0
     self.clicked = 0
@@ -41,7 +41,7 @@ def CreateModelTab(self,window):
         self.Compare['Model Library'] = {}
 
     # Define Available Models
-    self.Models = self.model_info_all.sheetnames
+    self.Models = list(self.model_info_all.keys())
 
     # Deselect Function
     def on_click(event):
@@ -69,160 +69,13 @@ def CreateModelTab(self,window):
     # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
 
-    def change_model(values):
+    def change_model(value):
         #----------------------------------------------------------------------
         #
         #   PURPOSE: Recreate page based on model choice.
         #
         #----------------------------------------------------------------------
 
-        # Get the model
-        value = self.optmenu1_opt.get()
-
-        # Clear the model information if the model type changed
-        try:
-            if value != self.Compare['Model']['Model Name']:
-                # Prompt user to save model
-                self.save_model(None)
-
-                # Clear model information
-                self.Compare['Model'] = {}
-                self.Compare['Model']['Status'] = 0
-        except:
-            pass
-        
-        # Delete local attributes
-        for att in self.atts['Optimize']['Local']:
-            try:
-                eval(f"{att}").destroy()
-            except:
-                pass
-
-        # Read the model info
-        ws = self.model_info_all[value]
-        self.Compare['Model']['Model Name'] = value
-        self.Compare['Model']['Model Info'] = {}
-        for i in range(1,ws.max_row+1):
-            self.Compare['Model']['Model Info'][ws.cell(row=i,column=1).value] = []
-            j = 2
-            if "Units" not in ws.cell(row=i,column=1).value:
-                while ws.cell(row=i,column=j).value != None:
-                    self.Compare['Model']['Model Info'][ws.cell(row=i,column=1).value].append(ws.cell(row=i,column=j).value)
-                    j= j+1
-            else:
-                for j in range(2,len(self.Compare['Model']['Model Info'][ws.cell(row=i-1,column=1).value])+2):
-                    self.Compare['Model']['Model Info'][ws.cell(row=i,column=1).value].append(ws.cell(row=i,column=j).value)
-            
-        # Get available reversible models
-        self.RevModels = self.Compare['Model']['Model Info']['Reversible Models']
-        
-        if len(self.RevModels) > 0:
-            # Create the label
-            self.desc2_opt = ttk.Label(
-                                self.nb_tab_tab3, 
-                                text="Reversible Model:", 
-                                anchor=tk.NW,       
-                                style = 'Modern1.TLabel'                    
-                                )
-            self.desc2_opt.place(
-                            anchor = 'n', 
-                            relx = self.Placement['Optimization']['LabelRev'][0], 
-                            rely = self.Placement['Optimization']['LabelRev'][1],
-                            )
-            
-            if 'self.desc2_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.desc2_opt')    
-
-            # Initialize the model
-            rmod_opt = self.RevModels[0]
-
-            # Check if previous data exists
-            if 'Model' in list(self.Compare.keys()):
-                # Set the reversible model type
-                if 'Reversible Model Name' in list(self.Compare['Model'].keys()):
-                    if self.Compare['Model']['Reversible Model Name'] in self.RevModels:
-                        rmod_opt = self.Compare['Model']['Reversible Model Name']
-
-            # Create the reversible model drop down   
-            self.optmenu2_opt = ttk.Combobox(
-                                        self.nb_tab_tab3,
-                                        values=self.RevModels,
-                                        style="Modern.TCombobox",
-                                        state="readonly"
-                                        )
-            self.optmenu2_opt.configure(font = self.style_man['Combo'])
-            self.optmenu2_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu2_opt.place(
-                                anchor='n', 
-                                relx = self.Placement['Optimization']['ComboRev'][0], 
-                                rely = self.Placement['Optimization']['ComboRev'][1],
-                                relwidth = self.Placement['Optimization']['ComboRev'][2], 
-                                relheight = self.Placement['Optimization']['ComboRev'][3]
-                                )
-            self.optmenu2_opt.set(rmod_opt)
-            self.optmenu2_opt.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 1, 'Model'))
-            if 'self.optmenu2_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu2_opt') 
-
-            # Initialize Parameter List
-            self.Params_VE = self.Compare['Model']['Model Info']['Reversible Deformation Parameters'] + self.Compare['Model']['Model Info']['Reversible Damage Parameters']
-            self.Params_VE_Units = self.Compare['Model']['Model Info']['Reversible Deformation Parameter Units'] + self.Compare['Model']['Model Info']['Reversible Damage Parameter Units']
-
-        # Get available irreversible models
-        self.IrrevModels = self.Compare['Model']['Model Info']['Irreversible Models']
-
-        if len(self.IrrevModels) > 0:
-            # Create the label
-            self.desc3_opt = ttk.Label(
-                                self.nb_tab_tab3, 
-                                text= "Irreversible Model:", 
-                                anchor=tk.NW,       
-                                style = "Modern1.TLabel"
-                                )
-            self.desc3_opt.place(
-                            anchor = 'n', 
-                            relx = self.Placement['Optimization']['LabelIrrev'][0], 
-                            rely = self.Placement['Optimization']['LabelIrrev'][1]
-                            )
-            if 'self.desc3_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.desc3_opt') 
-
-            # Initialize the irreversible model
-            irmod_opt = self.IrrevModels[0]
-
-            # Check if previous data exists
-            if 'Model' in list(self.Compare.keys()):
-                # Set the reversible model type
-                if 'Irreversible Model Name' in list(self.Compare['Model'].keys()):
-                    if self.Compare['Model']['Irreversible Model Name'] in self.IrrevModels:
-                        irmod_opt = self.Compare['Model']['Irreversible Model Name']
-
-            # Create the irreversible model drop down
-            self.optmenu3_opt = ttk.Combobox(
-                                        self.nb_tab_tab3,
-                                        values=self.IrrevModels,
-                                        style="Modern.TCombobox",
-                                        state="readonly"
-                                        )
-            self.optmenu3_opt.configure(font = self.style_man['Combo'])
-            self.optmenu3_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu3_opt.place(
-                                anchor='n', 
-                                relx = self.Placement['Optimization']['ComboIrrev'][0], 
-                                rely = self.Placement['Optimization']['ComboIrrev'][1],
-                                relwidth = self.Placement['Optimization']['ComboIrrev'][2], 
-                                relheight = self.Placement['Optimization']['ComboIrrev'][3]
-                                )
-            self.optmenu3_opt.set(irmod_opt)
-            self.optmenu3_opt.bind("<<ComboboxSelected>>",  lambda event:UpdateModelData(event, self, 2, 'Model'))
-            if 'self.optmenu3_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu3_opt') 
-
-            # Initialize Parameter List
-            self.Params_VP = self.Compare['Model']['Model Info']['Irreversible Deformation Parameters'] + self.Compare['Model']['Model Info']['Irreversible Damage Parameters']
-            self.Params_VP_Units = self.Compare['Model']['Model Info']['Irreversible Deformation Parameter Units'] + self.Compare['Model']['Model Info']['Irreversible Damage Parameter Units']
-
-        # Update Reversible Parameters
         def update_reversible_table(self):
             #------------------------------------------------------------------
             #
@@ -470,7 +323,7 @@ def CreateModelTab(self,window):
             #
             #------------------------------------------------------------------
 
-            # Get the value
+            # Get Value
             value = self.optmenu4_opt.get()
 
             # Initialize Parameters
@@ -478,9 +331,9 @@ def CreateModelTab(self,window):
             self.Params_VE_Units = []
 
             # Add non-mechanism dependent parameters
-            for i in range(len(self.Compare['Model']['Model Info']['Reversible Deformation Parameters'])):
-                param = self.Compare['Model']['Model Info']['Reversible Deformation Parameters'][i]
-                unit = self.Compare['Model']['Model Info']['Reversible Deformation Parameter Units'][i]
+            for i in range(len(self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Parameters'])):
+                param = self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Parameters'][i]
+                unit = self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Units'][i]
                 if '_[M]' not in param:
                     self.Params_VE.append(param)
                     self.Params_VE_Units.append(unit)
@@ -492,6 +345,77 @@ def CreateModelTab(self,window):
 
             # Update the reversible mechanisms table
             update_reversible_table(self)
+
+        def change_rev_model(value):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Recreate the number of viscoelastic mechanisms
+            #
+            #------------------------------------------------------------------
+
+            # Destory old widgets
+            if hasattr(self, "optmenu4_opt"):
+                if self.optmenu4_opt.winfo_exists():
+                    self.desc4_opt.destroy()
+                    self.optmenu4_opt.destroy()
+
+            # Store Value
+            self.rmod_opt = self.optmenu2_opt.get()
+
+            # Update the model
+            UpdateModelData(value, self, 1, 'Model')
+
+            # Get number of viscoelastic parameters
+            self.VEMech =  list(self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt ]['Mechanisms'])
+            if len(self.VEMech) > 0:
+                # Create the label
+                self.desc4_opt = ttk.Label(
+                                    self.nb_tab_tab3, 
+                                    text="Viscoelastic Mechanisms (M):", 
+                                    anchor=tk.NW,       
+                                    style = "Modern1.TLabel"                   
+                                    )
+                self.desc4_opt.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Optimization']['LabelVE'][0], 
+                                rely = self.Placement['Optimization']['LabelVE'][1]
+                                )
+                if 'self.desc4_opt' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.desc4_opt') 
+
+                # Initialize number of viscoelastic mechanisms
+                ve_opt = self.VEMech[0]
+
+                # Check if previous data exists
+                if 'Model' in list(self.Compare.keys()):
+                    # Set the reversible model type
+                    if 'M' in list(self.Compare['Model'].keys()):
+                        if int(self.Compare['Model']['M']) in self.VEMech:
+                            ve_opt = int(self.Compare['Model']['M'])
+
+                # Create the drop down
+                self.optmenu4_opt = ttk.Combobox(
+                                            self.nb_tab_tab3,
+                                            values=self.VEMech,
+                                            style="Modern.TCombobox",
+                                            state="readonly"
+                                            )
+                self.optmenu4_opt.configure(font = self.style_man['Combo'])
+                self.optmenu4_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+                self.optmenu4_opt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Optimization']['ComboVE'][0], 
+                                    rely = self.Placement['Optimization']['ComboVE'][1], 
+                                    relwidth = self.Placement['Optimization']['ComboVE'][2], 
+                                    relheight = self.Placement['Optimization']['ComboVE'][3]
+                                    )
+                self.optmenu4_opt.set(ve_opt)
+                self.optmenu4_opt.bind("<<ComboboxSelected>>",  VE_param)
+                if 'self.optmenu4_opt' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.optmenu4_opt')
+
+                # Get list of viscoelastic parameters
+                VE_param(ve_opt)
 
         def update_irreversible_table(self):
             #------------------------------------------------------------------
@@ -734,8 +658,7 @@ def CreateModelTab(self,window):
             # Update the Model Data
             UpdateModelData(None, self, 2, 'Model')
 
-        # Get Number of ViscoPlastic Mechanisms
-        def VP_param(values):
+        def VP_param(value):
             #------------------------------------------------------------------
             #
             #   PURPOSE: Get List of of ViscoPlastic Mechanisms.
@@ -750,9 +673,9 @@ def CreateModelTab(self,window):
             self.Params_VP_Units = []
 
             # Add non-mechanism dependent parameters
-            for i in range(len(self.Compare['Model']['Model Info']['Irreversible Deformation Parameters'])):
-                param = self.Compare['Model']['Model Info']['Irreversible Deformation Parameters'][i]
-                unit = self.Compare['Model']['Model Info']['Irreversible Deformation Parameter Units'][i]
+            for i in range(len(self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Parameters'])):
+                param = self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Parameters'][i]
+                unit = self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Units'][i]
                 if '_[N]' not in param:
                     self.Params_VP.append(param)
                     self.Params_VP_Units.append(unit)
@@ -762,113 +685,216 @@ def CreateModelTab(self,window):
                         self.Params_VP.append(param_mech)
                         self.Params_VP_Units.append(unit)
 
-            # Update the reversible mechanisms table
+            # Update the irreversible mechanisms table
             update_irreversible_table(self)
 
+        def change_irrev_model(value):
+            #------------------------------------------------------------------
+            #
+            #   PURPOSE: Recreate the number of viscoelastic mechanisms
+            #
+            #------------------------------------------------------------------
 
-        # Get number of viscoelastic parameters
-        self.VEMech = self.Compare['Model']['Model Info']['Reversible Mechanisms']
-        if len(self.VEMech) > 0:
+            # Destory old widgets
+            if hasattr(self, "optmenu5_opt"):
+                if self.optmenu5_opt.winfo_exists():
+                    self.desc5_opt.destroy()
+                    self.optmenu5_opt.destroy()
+
+            # Store Value
+            self.irrmod_opt = self.optmenu3_opt.get()
+
+            # Update the model
+            UpdateModelData(value, self, 2, 'Model')
+
+            # Get number of viscoelastic parameters
+            self.VPMech =  list(self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt ]['Mechanisms'])
+
+            if len(self.VPMech) > 0:
+                # Create the label
+                self.desc5_opt = ttk.Label(self.nb_tab_tab3, 
+                                text="Viscoplastic Mechanisms (N):", 
+                                anchor=tk.CENTER,       
+                                style = "Modern1.TLabel"                  
+                                )
+                self.desc5_opt.place(
+                                anchor = 'n', 
+                                relx = self.Placement['Optimization']['LabelVP'][0], 
+                                rely = self.Placement['Optimization']['LabelVP'][1]
+                                )
+                if 'self.desc5_opt' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.desc5_opt')
+
+                # Initialize Viscoplastic number of mechanisms
+                vp_opt = self.VPMech[0]
+
+                # Check if previous data exists
+                if 'Model' in list(self.Compare.keys()):
+                    # Set the reversible model type
+                    if 'N' in list(self.Compare['Model'].keys()):
+                        if int(self.Compare['Model']['N']) in self.VPMech:
+                            vp_opt = int(self.Compare['Model']['N'])
+
+                # Create the drop down menu
+                self.optmenu5_opt = ttk.Combobox(
+                                            self.nb_tab_tab3,
+                                            values=self.VEMech,
+                                            style="Modern.TCombobox",
+                                            state="readonly"
+                                            )
+                self.optmenu5_opt.configure(font = self.style_man['Combo'])
+                self.optmenu5_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+                self.optmenu5_opt.place(
+                                    anchor='n', 
+                                    relx = self.Placement['Optimization']['ComboVP'][0], 
+                                    rely = self.Placement['Optimization']['ComboVP'][1], 
+                                    relwidth = self.Placement['Optimization']['ComboVP'][2], 
+                                    relheight = self.Placement['Optimization']['ComboVP'][3]
+                                    )
+                self.optmenu5_opt.set(vp_opt)
+                self.optmenu5_opt.bind("<<ComboboxSelected>>",  VP_param)
+                if 'self.optmenu5_opt' not in self.atts['Optimize']['Local']:
+                    self.atts['Optimize']['Local'].append('self.optmenu5_opt')
+
+                # Get list of viscoplastic parameters
+                VP_param(vp_opt)
+
+        # Get the model
+        self.mod_opt = self.optmenu1_opt.get()
+
+        # Clear the model information if the model type changed
+        try:
+            if value != self.Compare['Model']['Model Name']:
+                # Prompt user to save model
+                self.save_model(None)
+
+                # Clear model information
+                self.Compare['Model'] = {}
+                self.Compare['Model']['Status'] = 0
+        except:
+            pass
+        
+        # Delete local attributes
+        for att in self.atts['Optimize']['Local']:
+            try:
+                eval(f"{att}").destroy()
+            except:
+                pass
+
+        # Read the model info
+        self.Compare['Model']['Model Name'] = self.mod_opt
+        self.Compare['Model']['Model Info'] = {}
+            
+        # Get available reversible models
+        self.RevModels = list(self.model_info_all[self.mod_opt]['Reversible Models'].keys())
+        self.Compare['Model']['Model Info']['Reversible Models'] = self.RevModels
+        
+        if len(self.RevModels) > 0:
             # Create the label
-            self.desc4_opt = ttk.Label(
+            self.desc2_opt = ttk.Label(
                                 self.nb_tab_tab3, 
-                                text="Viscoelastic Mechanisms (M):", 
+                                text="Reversible Model:", 
                                 anchor=tk.NW,       
-                                style = "Modern1.TLabel"                   
+                                style = 'Modern1.TLabel'                    
                                 )
-            self.desc4_opt.place(
+            self.desc2_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['LabelVE'][0], 
-                            rely = self.Placement['Optimization']['LabelVE'][1]
+                            relx = self.Placement['Optimization']['LabelRev'][0], 
+                            rely = self.Placement['Optimization']['LabelRev'][1],
                             )
-            if 'self.desc4_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.desc4_opt') 
+            
+            if 'self.desc2_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc2_opt')    
 
-            # Initialize number of viscoelastic mechanisms
-            ve_opt = self.VEMech[0]
+            # Initialize the model
+            rmod_opt = self.RevModels[0]
 
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
                 # Set the reversible model type
-                if 'M' in list(self.Compare['Model'].keys()):
-                    if int(self.Compare['Model']['M']) in self.VEMech:
-                        ve_opt = int(self.Compare['Model']['M'])
+                if 'Reversible Model Name' in list(self.Compare['Model'].keys()):
+                    if self.Compare['Model']['Reversible Model Name'] in self.RevModels:
+                        rmod_opt = self.Compare['Model']['Reversible Model Name']
 
-            # Create the drop down
-            self.optmenu4_opt = ttk.Combobox(
+            # Create the reversible model drop down   
+            self.optmenu2_opt = ttk.Combobox(
                                         self.nb_tab_tab3,
-                                        values=self.VEMech,
+                                        values=self.RevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu4_opt.configure(font = self.style_man['Combo'])
-            self.optmenu4_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu4_opt.place(
+            self.optmenu2_opt.configure(font = self.style_man['Combo'])
+            self.optmenu2_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu2_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['ComboVE'][0], 
-                                rely = self.Placement['Optimization']['ComboVE'][1], 
-                                relwidth = self.Placement['Optimization']['ComboVE'][2], 
-                                relheight = self.Placement['Optimization']['ComboVE'][3]
+                                relx = self.Placement['Optimization']['ComboRev'][0], 
+                                rely = self.Placement['Optimization']['ComboRev'][1],
+                                relwidth = self.Placement['Optimization']['ComboRev'][2], 
+                                relheight = self.Placement['Optimization']['ComboRev'][3]
                                 )
-            self.optmenu4_opt.set(ve_opt)
-            self.optmenu4_opt.bind("<<ComboboxSelected>>",  VE_param)
-            if 'self.optmenu4_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu4_opt')
+            self.optmenu2_opt.set(rmod_opt)
+            self.optmenu2_opt.bind("<<ComboboxSelected>>",  lambda event:change_rev_model(event))
+            if 'self.optmenu2_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu2_opt') 
 
-            # Get list of viscoelastic parameters
-            VE_param(ve_opt)
+            # Call the reversible model function
+            change_rev_model(rmod_opt)
 
-        # Get Number of Viscoplastic Mechanisms
-        self.VPMech = self.Compare['Model']['Model Info']['Irreversible Mechanisms']
-        if len(self.VPMech) > 0:
+        # Get available irreversible models
+        self.IrrevModels =  list(self.model_info_all[self.mod_opt]['Irreversible Models'].keys())
+        self.Compare['Model']['Model Info']['Irreversible Models'] = self.IrrevModels
+
+        if len(self.IrrevModels) > 0:
             # Create the label
-            self.desc5_opt = ttk.Label(self.nb_tab_tab3, 
-                            text="Viscoplastic Mechanisms (N):", 
-                            anchor=tk.CENTER,       
-                            style = "Modern1.TLabel"                  
-                            )
-            self.desc5_opt.place(
+            self.desc3_opt = ttk.Label(
+                                self.nb_tab_tab3, 
+                                text= "Irreversible Model:", 
+                                anchor=tk.NW,       
+                                style = "Modern1.TLabel"
+                                )
+            self.desc3_opt.place(
                             anchor = 'n', 
-                            relx = self.Placement['Optimization']['LabelVP'][0], 
-                            rely = self.Placement['Optimization']['LabelVP'][1]
+                            relx = self.Placement['Optimization']['LabelIrrev'][0], 
+                            rely = self.Placement['Optimization']['LabelIrrev'][1]
                             )
-            if 'self.desc5_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.desc5_opt')
+            if 'self.desc3_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.desc3_opt') 
 
-            # Initialize Viscoplastic number of mechanisms
-            vp_opt = self.VPMech[0]
+            # Initialize the irreversible model
+            irmod_opt = self.IrrevModels[0]
 
             # Check if previous data exists
             if 'Model' in list(self.Compare.keys()):
                 # Set the reversible model type
-                if 'N' in list(self.Compare['Model'].keys()):
-                    if int(self.Compare['Model']['N']) in self.VPMech:
-                        vp_opt = int(self.Compare['Model']['N'])
+                if 'Irreversible Model Name' in list(self.Compare['Model'].keys()):
+                    if self.Compare['Model']['Irreversible Model Name'] in self.IrrevModels:
+                        irmod_opt = self.Compare['Model']['Irreversible Model Name']
 
-            # Create the drop down menu
-            self.optmenu5_opt = ttk.Combobox(
+            # Create the irreversible model drop down
+            self.optmenu3_opt = ttk.Combobox(
                                         self.nb_tab_tab3,
-                                        values=self.VEMech,
+                                        values=self.IrrevModels,
                                         style="Modern.TCombobox",
                                         state="readonly"
                                         )
-            self.optmenu5_opt.configure(font = self.style_man['Combo'])
-            self.optmenu5_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
-            self.optmenu5_opt.place(
+            self.optmenu3_opt.configure(font = self.style_man['Combo'])
+            self.optmenu3_opt.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
+            self.optmenu3_opt.place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['ComboVP'][0], 
-                                rely = self.Placement['Optimization']['ComboVP'][1], 
-                                relwidth = self.Placement['Optimization']['ComboVP'][2], 
-                                relheight = self.Placement['Optimization']['ComboVP'][3]
+                                relx = self.Placement['Optimization']['ComboIrrev'][0], 
+                                rely = self.Placement['Optimization']['ComboIrrev'][1],
+                                relwidth = self.Placement['Optimization']['ComboIrrev'][2], 
+                                relheight = self.Placement['Optimization']['ComboIrrev'][3]
                                 )
-            self.optmenu5_opt.set(vp_opt)
-            self.optmenu5_opt.bind("<<ComboboxSelected>>",  VP_param)
-            if 'self.optmenu5_opt' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu5_opt')
+            self.optmenu3_opt.set(irmod_opt)
+            self.optmenu3_opt.bind("<<ComboboxSelected>>",  lambda event:change_irrev_model(event))
+            if 'self.optmenu3_opt' not in self.atts['Optimize']['Local']:
+                self.atts['Optimize']['Local'].append('self.optmenu3_opt') 
 
-            # Get list of viscoplastic parameters
-            VP_param(vp_opt)
+            # Call the irreversible model function
+            change_irrev_model(irmod_opt)
 
+        
         # Create the bounds slider
         def update_value(value):
             #------------------------------------------------------------------
@@ -1262,7 +1288,7 @@ def CreateModelTab(self,window):
                 # Fill existing values values
                 for i, key in enumerate(param_keys):
                     self.hist_param_sheet.set_cell_data(i,0,key)
-                    self.hist_param_sheet.set_cell_data(i,1,params[key][0])
+                    self.hist_param_sheet.set_cell_data(i,1,'{:0.4e}'.format(params[key][0]))
                     self.hist_param_sheet.set_cell_data(i,2,params[key][1]) 
                 self.hist_param_sheet.redraw()
 
@@ -1379,11 +1405,12 @@ def CreateModelTab(self,window):
 
                 # Get the model type
                 mod_type = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Model Name']
+
                 try:
                     self.optmenu1_opt.set(mod_type)
                     change_model(mod_type)
                 except:
-                    messagebox.showerror('Unable to load model.')
+                    messagebox.showerror(message = 'Unable to load model.')
 
                 # Get the reversible model
                 try:
@@ -1391,7 +1418,7 @@ def CreateModelTab(self,window):
                         rev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Reversible Model Name']
                         if rev_model in self.optmenu2_opt['values']:
                             self.optmenu2_opt.set(rev_model)
-                            UpdateModelData(None, self, 1, 'Model')
+                            change_rev_model(rev_model)
                 except:
                     pass
 
@@ -1410,8 +1437,7 @@ def CreateModelTab(self,window):
                     if 'Irreversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
                         irrev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Irreversible Model Name']
                         if irrev_model in self.optmenu3_opt['values']:
-                            self.optmenu3_opt.set(irrev_model)
-                            UpdateModelData(None, self, 2, 'Model')
+                            change_irrev_model(irrev_model)
                 except:
                     pass
 

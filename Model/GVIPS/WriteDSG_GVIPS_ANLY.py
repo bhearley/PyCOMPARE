@@ -1,15 +1,4 @@
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-# WriteDGS_GVIPS_ANLY.py
-#
-# PURPOSE: Write the DGS Input file for compare for 4 different model types for Optimization:
-#   - Isotropic No Damage (_IN)
-#   - Isotropic With Damage (_ID)
-#   - Anisotropic No Damage (_AN)
-#   - Anisotropic No Damage (_AD)
-#
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
+def WriteDSG_GVIPS_ANLY(self, temp_dir, tests):
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------
     #
     # PURPOSE: Write the DGS Input file for compare for Isototropic with No Damate
@@ -203,51 +192,132 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
         Param_N.append(PN)
         PN = PN+1
 
-    # -- Write Viscoplastic Damage Parameters
+     # Damage
     Param_D = []
-    for i in range(int(self.Compare['Analysis']['N'])):
-        line = line + ' ' + str(1)
-        Param_V.append(1)
-        Param_D.append('cd' + str(i+1))
-        Param_N.append(PN)
-        PN = PN+1
-    for i in range(int(self.Compare['Analysis']['N'])):
-        line = line + ' ' + str(1e21)
-        Param_V.append(1e21)
-        Param_D.append('Yd' + str(i+1))
-        Param_N.append(PN)
-        PN = PN+1
-    for i in range(int(self.Compare['Analysis']['N'])):
-        line = line + ' ' + str(1e21)
-        Param_V.append(1e21)
-        Param_D.append('μd' + str(i+1))
-        Param_N.append(PN)
-        PN = PN+1
-    for i in range(int(self.Compare['Analysis']['N'])):
-        line = line + ' ' + str(1)
-        Param_V.append(1)
-        Param_D.append('nd' + str(i+1))
-        Param_N.append(PN)
-        PN = PN+1
+
+    if self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
+
+        # -- Write Viscoplastic Damage Parameters as infinity
+        for i in range(int(self.Compare['Analysis']['N'])):
+            line = line + ' ' + str(1)
+            Param_V.append(1)
+            Param_D.append('cd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            line = line + ' ' + str(1e21)
+            Param_V.append(1e21)
+            Param_D.append('Yd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            line = line + ' ' + str(1e21)
+            Param_V.append(1e21)
+            Param_D.append('μd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            line = line + ' ' + str(1)
+            Param_V.append(1)
+            Param_D.append('nd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+
+    elif self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic w/ Damage':
+
+        # -- Write Viscoplastic Damage Parameters 
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('cd' + str(i+1))][2])
+            line = line + ' ' + str(val)
+            Param_V.append(val)
+            Param_U.append('')
+            Param_D.append('cd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('Yd' + str(i+1))][2])
+            line = line + ' ' + str(val)
+            Param_V.append(val)
+            Param_U.append('')
+            Param_D.append('Yd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('μd' + str(i+1))][2])
+            line = line + ' ' + str(val)
+            Param_V.append(val)
+            Param_U.append('')
+            Param_D.append('μd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('nd' + str(i+1))][2])
+            line = line + ' ' + str(val)
+            Param_V.append(val)
+            Param_U.append('')
+            Param_D.append('nd' + str(i+1))
+            Param_N.append(PN)
+            PN = PN+1
         
-    # -- Write Viscoelastic Damage Parameters
-    line = line + ' ' + str(1) + ' ' + str(1e21) + ' ' + str(1e21) + ' ' + str(1)
-    Param_V.append(1)
-    Param_V.append(1e21)
-    Param_V.append(1e21)
-    Param_V.append(1)
-    Param_D.append('ce')
-    Param_N.append(PN)
-    PN = PN+1
-    Param_D.append('Ye')
-    Param_N.append(PN)
-    PN = PN+1
-    Param_D.append('μe')
-    Param_N.append(PN)
-    PN = PN+1
-    Param_D.append('ne')
-    Param_N.append(PN)
-    PN = PN+1
+    if self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic':
+
+        # -- Write Viscoelastic Damage Parameters as infinity
+        line = line + ' ' + str(1) + ' ' + str(1e21) + ' ' + str(1e21) + ' ' + str(1)
+        Param_V.append(1)
+        Param_U.append('')
+        Param_V.append(1e21)
+        Param_U.append('')
+        Param_V.append(1e21)
+        Param_U.append('')
+        Param_V.append(1)
+        Param_U.append('')
+        Param_D.append('ce')
+        Param_N.append(PN)
+        PN = PN+1
+        Param_D.append('Ye')
+        Param_N.append(PN)
+        PN = PN+1
+        Param_D.append('μe')
+        Param_N.append(PN)
+        PN = PN+1
+        Param_D.append('ne')
+        Param_N.append(PN)
+        PN = PN+1
+
+    elif self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic w/ Damage':
+
+        # -- Write Viscoelastic Damage Parameters
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('ce')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('ce')
+        Param_N.append(PN)
+        PN = PN+1
+
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('Ye')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('Ye')
+        Param_N.append(PN)
+        PN = PN+1
+
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('μe')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('μe')
+        Param_N.append(PN)
+        PN = PN+1
+
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('ne')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('ne')
+        Param_N.append(PN)
+        PN = PN+1
     
     # -- Write Xi and Zeta
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
@@ -261,15 +331,39 @@ def WriteDSG_GVIPS_ANLY_IN(self, temp_dir, tests):
     PN = PN+1
     
     # -- Write Cutoff strength and stiffness
-    line = line + ' ' + str(1e21) + ' ' + str(1e21)
-    Param_V.append(1e21)
-    Param_V.append(1e21)
-    Param_D.append('COS')
-    Param_N.append(PN)
-    PN = PN+1
-    Param_D.append('COE')
-    Param_N.append(PN)
-    PN = PN+1
+    if self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic':
+        line = line + ' ' + str(1e21) 
+        Param_V.append(1e21)
+        Param_U.append('')
+        Param_D.append('Ɛcut_e')
+        Param_N.append(PN)
+        PN = PN+1
+
+    elif self.Compare['Analysis']['Reversible Model Name'] == 'Isotropic Viscoelastic w/ Damage':
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('Ɛcut_e')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('Ɛcut_e')
+        Param_N.append(PN)
+        PN = PN+1
+
+    if self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
+        line = line + ' ' + str(1e21) 
+        Param_V.append(1e21)
+        Param_U.append('')
+        Param_D.append('Ɛcut_p')
+        Param_N.append(PN)
+        PN = PN+1
+
+    elif self.Compare['Analysis']['Irreversible Model Name'] == 'Isotropic Viscoplastic w/ Damage':
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('Ɛcut_p')][2])
+        line = line + ' ' + str(val)
+        Param_V.append(val)
+        Param_U.append('')
+        Param_D.append('Ɛcut_p')
+        Param_N.append(PN)
+        PN = PN+1
 
     # -- Write dummy
     line = line + ' ' + str(0.01)

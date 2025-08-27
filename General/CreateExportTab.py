@@ -195,7 +195,7 @@ def CreateExportTab(self,window):
                                         ws.cell(row = 3, column=start_col).value = 'Time (s)'
                                         for j in range(len(self.Compare['Data'][pred_tests[i]]['Time'][:self.Compare['Data'][pred_tests[i]]['Stage Index'][-1]])):
                                             ws.cell(row = 4+j, column=start_col).value = self.Compare['Data'][pred_tests[i]]['Time'][j]
-                                        if j > max_x:
+                                        if j+4 > max_x:
                                             max_x = j+4
                                         start_col = start_col + 1
 
@@ -206,7 +206,7 @@ def CreateExportTab(self,window):
                                             ws.cell(row = 3, column=start_col).value = 'Strain-' + str(key) + '(-)'
                                             for j in range(len(self.Compare['Data'][pred_tests[i]]['Strain'][key][:self.Compare['Data'][pred_tests[i]]['Stage Index'][-1]])):
                                                 ws.cell(row = 4+j, column=start_col).value = self.Compare['Data'][pred_tests[i]]['Strain'][key][j]
-                                            if j > max_x:
+                                            if j+4 > max_x:
                                                 max_x = j+4
                                             start_col = start_col + 1
 
@@ -232,7 +232,7 @@ def CreateExportTab(self,window):
                         ws = wb['Reduced Curves']
                         if self.var_exp_chk4.get() == 1:
                             # Set Max x
-                            max_x = 2
+                            max_x = 4
 
                             # Write response curves
                             start_col = 2
@@ -248,7 +248,7 @@ def CreateExportTab(self,window):
                                         ws.cell(row = 3, column=start_col).value = 'Time (s)'
                                         for j in range(len(self.Compare['Data'][pred_tests[i]]['Reduced Data']['Time'])):
                                             ws.cell(row = 4+j, column=start_col).value = self.Compare['Data'][pred_tests[i]]['Reduced Data']['Time'][j]
-                                        if j > max_x:
+                                        if j+4 > max_x:
                                             max_x = j+4
                                         start_col = start_col + 1
 
@@ -259,7 +259,7 @@ def CreateExportTab(self,window):
                                             ws.cell(row = 3, column=start_col).value = 'Strain-' + str(key) + '(-)'
                                             for j in range(len(self.Compare['Data'][pred_tests[i]]['Reduced Data']['Strain'][key])):
                                                 ws.cell(row = 4+j, column=start_col).value = self.Compare['Data'][pred_tests[i]]['Reduced Data']['Strain'][key][j]
-                                            if j > max_x:
+                                            if j+4 > max_x:
                                                 max_x = j+4
                                             start_col = start_col + 1
 
@@ -270,7 +270,7 @@ def CreateExportTab(self,window):
                                             ws.cell(row = 3, column=start_col).value = 'Stress-' + str(key) + '(MPa)'
                                             for j in range(len(self.Compare['Data'][pred_tests[i]]['Reduced Data']['Stress'][key])):
                                                 ws.cell(row = 4+j, column=start_col).value = self.Compare['Data'][pred_tests[i]]['Reduced Data']['Stress'][key][j]
-                                            if j > max_x:
+                                            if j+4 > max_x:
                                                 max_x = j+4
                                             start_col = start_col + 1
 
@@ -300,7 +300,7 @@ def CreateExportTab(self,window):
                                         ws.cell(row = 3, column=start_col).value = 'Time (s)'
                                         for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Time'])):
                                             ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Time'][j]
-                                        if j > max_x:
+                                        if j+4 > max_x:
                                             max_x = j+4
                                         start_col = start_col + 1
 
@@ -311,7 +311,7 @@ def CreateExportTab(self,window):
                                             ws.cell(row = 3, column=start_col).value = 'Strain-' + str(key) + '(-)'
                                             for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Strain'][key])):
                                                 ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Strain'][key][j]
-                                            if j > max_x:
+                                            if j+4 > max_x:
                                                 max_x = j+4
                                             start_col = start_col + 1
 
@@ -322,7 +322,7 @@ def CreateExportTab(self,window):
                                             ws.cell(row = 3, column=start_col).value = 'Stress-' + str(key) + '(MPa)'
                                             for j in range(len(self.Compare['Prediction'][pred_tests[i]]['Stress'][key])):
                                                 ws.cell(row = 4+j, column=start_col).value = self.Compare['Prediction'][pred_tests[i]]['Stress'][key][j]
-                                            if j > max_x:
+                                            if j+4 > max_x:
                                                 max_x = j+4
                                             start_col = start_col + 1
 
