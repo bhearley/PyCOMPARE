@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
-# WriteSIM.py
+# WriteSIM_ISO.py
 #
 # PURPOSE: Write the simulation *.in files for each test
 #
@@ -13,7 +13,7 @@
 #   Param       List of Parameter names
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def WriteSIM(self, TestData, temp_dir, ct_file, mod, Param):
+def WriteSIM_ISO(self, TestData, temp_dir, ct_file, mod, Param):
     # Import Modules
     import os
     import numpy as np

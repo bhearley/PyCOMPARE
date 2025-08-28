@@ -226,6 +226,7 @@ def CreateModelTab(self,window):
                     except:
                         pass
 
+            
             self.sheet1_opt.enable_bindings('single_select','cell_select', 'column_select', 'edit_cell',"arrowkeys", "right_click_popup_menu")
             self.sheet1_opt.popup_menu_add_command('Sort', lambda : sort_cols(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet1_opt.popup_menu_add_command('Change All to Active', lambda : all_active(self), table_menu = True, index_menu = True, header_menu = True)
@@ -245,6 +246,17 @@ def CreateModelTab(self,window):
             self.sheet1_opt.column_width(column = 6, width = int(total_width*self.Placement['Optimization']['Sheet1'][10]), redraw = True)
             self.sheet1_opt.table_align(align = 'c',redraw=True)
 
+            # Set Cell Color
+            for i in range(len(self.Params_VE)):
+                if self.Params_VE_Status[i] == 'A':
+                    self.sheet1_opt.highlight_cells(i, 2, bg='white', fg = 'black', redraw=False)
+                    self.sheet1_opt.highlight_cells(i, 4, bg='white', fg = 'black', redraw=False)
+                    self.sheet1_opt.highlight_cells(i, 5, bg='white', fg = 'black', redraw=False)
+                else:
+                    self.sheet1_opt.highlight_cells(i, 2, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
+                    self.sheet1_opt.highlight_cells(i, 4, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
+                    self.sheet1_opt.highlight_cells(i, 5, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
+
             # Set unit dictionary
             Units = {'Stress':['GPa','MPa','kPa','Pa','msi','ksi','psi'],
                     'Time':['s'],
@@ -257,7 +269,11 @@ def CreateModelTab(self,window):
                     self.sheet1_opt.set_cell_data(i,0, '{:0.4e}'.format(self.Params_VE[i]))
                 except:
                     self.sheet1_opt.set_cell_data(i,0, self.Params_VE[i])
-                self.sheet1_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+
+                if self.Params_VE_Status[i] == 'A':
+                    self.sheet1_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+                else:
+                    self.sheet1_opt.create_dropdown(r=i, c = 5,values=['Passive'])
                 if self.Params_VE_Units[i] != None:
                     for key in list(Units.keys()):
                         if self.Params_VE_Units[i] in Units[key]:
@@ -310,6 +326,9 @@ def CreateModelTab(self,window):
                 except:
                     pass
 
+            # Format the table
+            self.format_cell(None, 'self.sheet1_opt')
+
             # Redraw the table
             self.sheet1_opt.redraw()
 
@@ -324,24 +343,31 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             # Get Value
-            value = self.optmenu4_opt.get()
+            try:
+                value = self.optmenu4_opt.get()
+            except:
+                value = 1
 
             # Initialize Parameters
             self.Params_VE = []
             self.Params_VE_Units = []
+            self.Params_VE_Status = []
 
             # Add non-mechanism dependent parameters
             for i in range(len(self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Parameters'])):
                 param = self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Parameters'][i]
                 unit = self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Units'][i]
+                status = self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt]['Active'][i]
                 if '_[M]' not in param:
                     self.Params_VE.append(param)
                     self.Params_VE_Units.append(unit)
+                    self.Params_VE_Status.append(status)
                 else:
                     for i in range(int(value)):
                         param_mech = param.replace("_[M]",str(i+1))
                         self.Params_VE.append(param_mech)
                         self.Params_VE_Units.append(unit)
+                        self.Params_VE_Status.append(status)
 
             # Update the reversible mechanisms table
             update_reversible_table(self)
@@ -366,6 +392,7 @@ def CreateModelTab(self,window):
             UpdateModelData(value, self, 1, 'Model')
 
             # Get number of viscoelastic parameters
+            ve_opt = None
             self.VEMech =  list(self.model_info_all[self.mod_opt]['Reversible Models'][self.rmod_opt ]['Mechanisms'])
             if len(self.VEMech) > 0:
                 # Create the label
@@ -414,8 +441,8 @@ def CreateModelTab(self,window):
                 if 'self.optmenu4_opt' not in self.atts['Optimize']['Local']:
                     self.atts['Optimize']['Local'].append('self.optmenu4_opt')
 
-                # Get list of viscoelastic parameters
-                VE_param(ve_opt)
+            # Get list of viscoelastic parameters
+            VE_param(ve_opt)
 
         def update_irreversible_table(self):
             #------------------------------------------------------------------
@@ -560,7 +587,7 @@ def CreateModelTab(self,window):
                         # -- Check upper bound
                         self.sheet2_opt.highlight((i,4),fg = 'black', bg = 'white')
                         try:
-                            if float(self.sheet1_opt.data[i][4]) < float(self.sheet2_opt.data[i][3]):
+                            if float(self.sheet2_opt.data[i][4]) < float(self.sheet2_opt.data[i][3]):
                                 self.sheet2_opt.highlight((i,4),fg = 'red', bg = 'white')
                         except:
                             pass
@@ -573,6 +600,17 @@ def CreateModelTab(self,window):
             self.sheet2_opt.popup_menu_add_command('Change All to Passive', lambda : all_passive(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet2_opt.popup_menu_add_command('Auto-Generate Bounds', lambda : genbounds(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet2_opt.extra_bindings([("cell_select", lambda event: self.cell_select_opt(event, 'sheet2_opt'))])
+
+            # Set Cell Color
+            for i in range(len(self.Params_VP)):
+                if self.Params_VP_Status[i] == 'A':
+                    self.sheet2_opt.highlight_cells(i, 2, bg='white', fg = 'black', redraw=False)
+                    self.sheet2_opt.highlight_cells(i, 4, bg='white', fg = 'black', redraw=False)
+                    self.sheet2_opt.highlight_cells(i, 5, bg='white', fg = 'black', redraw=False)
+                else:
+                    self.sheet2_opt.highlight_cells(i, 2, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
+                    self.sheet2_opt.highlight_cells(i, 4, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
+                    self.sheet2_opt.highlight_cells(i, 5, bg='#e0e0e0', fg = '#a0a0a0', redraw=False)
 
             # Set Column Widths
             window.update_idletasks()
@@ -599,7 +637,10 @@ def CreateModelTab(self,window):
                     self.sheet2_opt.set_cell_data(i,0, '{:0.4e}'.format(self.Params_VP[i]))
                 except:
                     self.sheet2_opt.set_cell_data(i,0, self.Params_VP[i])
-                self.sheet2_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+                if self.Params_VP_Status[i] == 'A':
+                    self.sheet2_opt.create_dropdown(r=i, c = 5,values=['Active','Passive'])
+                else:
+                    self.sheet2_opt.create_dropdown(r=i, c = 5,values=['Passive'])
                 if self.Params_VP_Units[i] != None:
                     for key in list(Units.keys()):
                         if self.Params_VP_Units[i] in Units[key]:
@@ -652,6 +693,9 @@ def CreateModelTab(self,window):
                 except:
                     pass
 
+            # Format the table
+            self.format_cell(None, 'self.sheet2_opt')
+
             #Redraw the table
             self.sheet2_opt.redraw()
 
@@ -666,24 +710,32 @@ def CreateModelTab(self,window):
             #------------------------------------------------------------------
 
             # Get Value
-            value = self.optmenu5_opt.get()
+            try:
+                value = self.optmenu5_opt.get()
+            except:
+                value = 1
+
 
             # Initialize Parameters
             self.Params_VP = []
             self.Params_VP_Units = []
+            self.Params_VP_Status = []
 
             # Add non-mechanism dependent parameters
             for i in range(len(self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Parameters'])):
                 param = self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Parameters'][i]
                 unit = self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Units'][i]
+                status = self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt]['Active'][i]
                 if '_[N]' not in param:
                     self.Params_VP.append(param)
                     self.Params_VP_Units.append(unit)
+                    self.Params_VP_Status.append(status)
                 else:
                     for j in range(int(value)):
                         param_mech = param.replace("_[N]",str(j+1))
                         self.Params_VP.append(param_mech)
                         self.Params_VP_Units.append(unit)
+                        self.Params_VP_Status.append(status)
 
             # Update the irreversible mechanisms table
             update_irreversible_table(self)
@@ -708,6 +760,7 @@ def CreateModelTab(self,window):
             UpdateModelData(value, self, 2, 'Model')
 
             # Get number of viscoelastic parameters
+            vp_opt = None
             self.VPMech =  list(self.model_info_all[self.mod_opt]['Irreversible Models'][self.irrmod_opt ]['Mechanisms'])
 
             if len(self.VPMech) > 0:
@@ -756,8 +809,8 @@ def CreateModelTab(self,window):
                 if 'self.optmenu5_opt' not in self.atts['Optimize']['Local']:
                     self.atts['Optimize']['Local'].append('self.optmenu5_opt')
 
-                # Get list of viscoplastic parameters
-                VP_param(vp_opt)
+            # Get list of viscoplastic parameters
+            VP_param(vp_opt)
 
         # Get the model
         self.mod_opt = self.optmenu1_opt.get()
@@ -783,7 +836,9 @@ def CreateModelTab(self,window):
 
         # Read the model info
         self.Compare['Model']['Model Name'] = self.mod_opt
-        self.Compare['Model']['Model Info'] = {}
+        self.Compare['Model']['Model Info'] = {'Core': self.model_info_all[self.mod_opt]['Model Info']['Core'],
+                                               'Model': self.model_info_all[self.mod_opt]['Model Info']['Model'],
+                                               }
             
         # Get available reversible models
         self.RevModels = list(self.model_info_all[self.mod_opt]['Reversible Models'].keys())
@@ -1002,54 +1057,76 @@ def CreateModelTab(self,window):
             #
             #------------------------------------------------------------------
 
-            # Check that values exist
-            flag = 0
-            # -- Check Viscoelastic
-            for i in range(len(self.sheet1_opt.data)):
-                try:
-                    val = float(self.sheet1_opt.data[i][-1])
-                except:
-                    flag = 1
+            # # Check that values exist
+            # flag = 0
+            # # -- Check Viscoelastic
+            # for i in range(len(self.sheet1_opt.data)):
+            #     try:
+            #         val = float(self.sheet1_opt.data[i][-1])
+            #     except:
+            #         flag = 1
 
-            # -- Check Viscoplastic
-            for i in range(len(self.sheet2_opt.data)):
-                try:
-                    val = float(self.sheet2_opt.data[i][-1])
-                except:
-                    flag = 1
+            # # -- Check Viscoplastic
+            # for i in range(len(self.sheet2_opt.data)):
+            #     try:
+            #         val = float(self.sheet2_opt.data[i][-1])
+            #     except:
+            #         flag = 1
 
-            if flag == 1:
-                messagebox.showerror(message ='No COMPARE result found.')
-                return
+            # if flag == 1:
+            #     messagebox.showerror(message ='No COMPARE result found.')
+            #     return
             
             # Get list of bound percentages
             # -- Viscoelastic
             ve_bnds = []
             for i in range(len(self.sheet1_opt.data)):
-                lp = (float(self.sheet1_opt.data[i][2]) - float(self.sheet1_opt.data[i][3]))/(-float(self.sheet1_opt.data[i][3]))
-                up = (float(self.sheet1_opt.data[i][4]) - float(self.sheet1_opt.data[i][3]))/(float(self.sheet1_opt.data[i][3]))
+                try:
+                    lp = (float(self.sheet1_opt.data[i][2]) - float(self.sheet1_opt.data[i][3]))/(-float(self.sheet1_opt.data[i][3]))
+                    up = (float(self.sheet1_opt.data[i][4]) - float(self.sheet1_opt.data[i][3]))/(float(self.sheet1_opt.data[i][3]))
+                except:
+                    lp = ''
+                    up = ''
                 ve_bnds.append([lp, up])
 
             # -- Viscoplastic
             vp_bnds = []
             for i in range(len(self.sheet2_opt.data)):
-                lp = (float(self.sheet2_opt.data[i][2]) - float(self.sheet2_opt.data[i][3]))/(-float(self.sheet2_opt.data[i][3]))
-                up = (float(self.sheet2_opt.data[i][4]) - float(self.sheet2_opt.data[i][3]))/(float(self.sheet2_opt.data[i][3]))
+                try:
+                    lp = (float(self.sheet2_opt.data[i][2]) - float(self.sheet2_opt.data[i][3]))/(-float(self.sheet2_opt.data[i][3]))
+                    up = (float(self.sheet2_opt.data[i][4]) - float(self.sheet2_opt.data[i][3]))/(float(self.sheet2_opt.data[i][3]))
+                except:
+                    lp = ''
+                    up = ''
                 vp_bnds.append([lp, up])
 
             # Reset Values
             # -- Viscoelastic
             for i in range(len(self.sheet1_opt.data)):
-                self.sheet1_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]))
-                self.sheet1_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) - float(self.sheet1_opt.data[i][-1])*ve_bnds[i][0])
-                self.sheet1_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) + float(self.sheet1_opt.data[i][-1])*ve_bnds[i][1])
+                try:
+                    self.sheet1_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]))
+                except:
+                    pass
+
+                try:
+                    self.sheet1_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) - float(self.sheet1_opt.data[i][-1])*ve_bnds[i][0])
+                    self.sheet1_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet1_opt.data[i][-1]) + float(self.sheet1_opt.data[i][-1])*ve_bnds[i][1])
+                except:
+                    pass
                 self.sheet1_opt.data[i][-1] = ''
 
             # -- Viscoplastic
             for i in range(len(self.sheet2_opt.data)):
-                self.sheet2_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]))
-                self.sheet2_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) - float(self.sheet2_opt.data[i][-1])*vp_bnds[i][0])
-                self.sheet2_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) + float(self.sheet2_opt.data[i][-1])*vp_bnds[i][1])
+                try:
+                    self.sheet2_opt.data[i][3] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]))
+                except:
+                    pass
+
+                try:
+                    self.sheet2_opt.data[i][2] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) - float(self.sheet2_opt.data[i][-1])*vp_bnds[i][0])
+                    self.sheet2_opt.data[i][4] = '{:0.4e}'.format(float(self.sheet2_opt.data[i][-1]) + float(self.sheet2_opt.data[i][-1])*vp_bnds[i][1])
+                except:
+                    pass
                 self.sheet2_opt.data[i][-1] = ''
 
             # Redraw sheets
@@ -1360,7 +1437,7 @@ def CreateModelTab(self,window):
                 self.run_history['Run #' + str(i+1)]['Global Error'] = None
                 self.run_history['Run #' + str(i+1)]['Test Error'] = {}
                 for j in range(test_start[i], test_start[i+1]):
-                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
+                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model Name','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
                     for key in keys:
                         if ':' in lines[j] and key == lines[j].split(':')[0].strip():
                             self.run_history['Run #' + str(i+1)][key.split(':')[0]] = lines[j].split(':')[1].strip()
@@ -1437,6 +1514,7 @@ def CreateModelTab(self,window):
                     if 'Irreversible Model Name' in self.run_history[self.run_hist_sheet.data[currently_selected.row][0]].keys():
                         irrev_model = self.run_history[self.run_hist_sheet.data[currently_selected.row][0]]['Irreversible Model Name']
                         if irrev_model in self.optmenu3_opt['values']:
+                            self.optmenu3_opt.set(irrev_model)
                             change_irrev_model(irrev_model)
                 except:
                     pass
@@ -1573,12 +1651,20 @@ def CreateModelTab(self,window):
             self.globalerr_opt.destroy()
 
         if 'Global Error' in self.Compare.keys() and self.viz_init > 0:
-            self.globalerr_opt = ttk.Label(
-                                self.nb_tab_tab3, 
-                                text=f"Global Error: {'{:0.4e}'.format(self.Compare['Global Error'])}", 
-                                anchor=tk.NW,       
-                                style = 'Modern1.TLabel'                    
-                                )
+            try:
+                self.globalerr_opt = ttk.Label(
+                                    self.nb_tab_tab3, 
+                                    text=f"Global Error: {'{:0.4e}'.format(self.Compare['Global Error'])}", 
+                                    anchor=tk.NW,       
+                                    style = 'Modern1.TLabel'                    
+                                    )
+            except:
+                self.globalerr_opt = ttk.Label(
+                                    self.nb_tab_tab3, 
+                                    text=f"Global Error:", 
+                                    anchor=tk.NW,       
+                                    style = 'Modern1.TLabel'                    
+                                    )
             self.globalerr_opt.place(
                             anchor = 'w', 
                             relx = self.Placement['Optimization']['LabelGlobalErr'][0], 
@@ -1594,8 +1680,10 @@ def CreateModelTab(self,window):
         if len(self.Compare['Model']['Model Info']['Irreversible Models']) > 0:
             update_irreversible_table(self)
 
-    # Create the label for Model Type
+    # Initialize the tab
     if self.opt_init == 1:
+
+        # Create the label
         self.desc1_opt = ttk.Label(
                             self.nb_tab_tab3, 
                             text="Select the Model:", 
@@ -1644,4 +1732,4 @@ def CreateModelTab(self,window):
         self.atts['Optimize']['Permanent'].append('self.optmenu1_opt')
 
         # Set Initialization Flag
-        self.opt_int = 0
+        self.opt_init = 0

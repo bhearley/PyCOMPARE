@@ -1,13 +1,12 @@
-def WriteDSG_GVIPS_OPT(self, temp_dir):
+def WriteDSG_GVIPS_ISO_ANLY(self, temp_dir, tests):
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------
     #
-    # PURPOSE: Write the DGS Input file for compare for Isototropic 
+    # PURPOSE: Write the DGS Input file for compare for Isototropic with No Damate
     #
     # INPUTS:
     #   self        GUI data structure
     #   temp_dir    Temporary Direcotry
     # OUTPUTS:
-    #   mod         Model Number
     #   Param       List of parameter names
     #   Param_U     List of parameter units
     #   Param_N     List of parameter numbers
@@ -20,9 +19,6 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     # Import functions
     from Model.UnitConversion import UnitConversion
 
-    # Set the model number
-    mod = 10
-
     # Create the DGS file
     fname_dgs = os.path.join(temp_dir,'comp.dsg')
     file = open(fname_dgs, "w") 
@@ -30,15 +26,15 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     
     # Write the number of tests
     file.write("EXPR:\n")
-    line = ' ' + str(len(self.Compare['Characterization'].keys()))
-    for i in range(len(self.Compare['Characterization'].keys())):
+    line = ' ' + str(len(tests))
+    for i in range(len(tests)):
         line = line + '  ' + str(i+1)
     line = line + '\n'
     file.write(line)
 
     # Write the number of parameters
     file.write("NDV:\n")
-    NDV = 2 + 2*int(self.Compare['Model']['M']) + 12 + 9*int(self.Compare['Model']['N'])
+    NDV = 2 + 2*int(self.Compare['Analysis']['M']) + 12 + 9*int(self.Compare['Analysis']['N'])
     file.write(' ' + str(NDV)+ '\n')
     Param = []   # Initialize parameter list
     Param_V = [] # Initialize list of parameter values
@@ -51,14 +47,14 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
 
     # -- Get the list of viscoelastic parameters
     VE = []
-    for i in range(len(self.Compare['Model']['VE_Param'])):
-        VE.append(self.Compare['Model']['VE_Param'][i][0])
+    for i in range(len(self.Compare['Analysis']['VE_Param'])):
+        VE.append(self.Compare['Analysis']['VE_Param'][i][0])
 
     line = ' '
 
     # -- Write E
-    val = float(self.Compare['Model']['VE_Param'][VE.index('E')][3])
-    unit = self.Compare['Model']['VE_Param'][VE.index('E')][1]
+    val = float(self.Compare['Analysis']['VE_Param'][VE.index('E')][2])
+    unit = self.Compare['Analysis']['VE_Param'][VE.index('E')][1]
     val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('E')
@@ -68,7 +64,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     PN = PN+1
 
     # -- Write ν
-    val = float(self.Compare['Model']['VE_Param'][VE.index('ν')][3])
+    val = float(self.Compare['Analysis']['VE_Param'][VE.index('ν')][2])
     line = line + ' ' + str(val)
     Param.append('ν')
     Param_V.append(val)
@@ -77,9 +73,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     PN = PN+1
 
     # -- Write M
-    for i in range(int(self.Compare['Model']['M'])):
-        val = float(self.Compare['Model']['VE_Param'][VE.index('M' + str(i+1))][3])
-        unit = self.Compare['Model']['VE_Param'][VE.index('M' + str(i+1))][1]
+    for i in range(int(self.Compare['Analysis']['M'])):
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('M' + str(i+1))][2])
+        unit = self.Compare['Analysis']['VE_Param'][VE.index('M' + str(i+1))][1]
         val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('M' + str(i+1))
@@ -89,9 +85,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         PN = PN+1
 
     # -- Write ρ
-    for i in range(int(self.Compare['Model']['M'])):
-        val = float(self.Compare['Model']['VE_Param'][VE.index('ρ' + str(i+1))][3])
-        unit = self.Compare['Model']['VE_Param'][VE.index('ρ' + str(i+1))][1]
+    for i in range(int(self.Compare['Analysis']['M'])):
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('ρ' + str(i+1))][2])
+        unit = self.Compare['Analysis']['VE_Param'][VE.index('ρ' + str(i+1))][1]
         val = UnitConversion(unit, val, 's')
         line = line + ' ' + str(val)
         Param.append('ρ' + str(i+1))
@@ -102,12 +98,12 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
 
     # -- Get the list of viscoplastic parameters
     VP = []
-    for i in range(len(self.Compare['Model']['VP_Param'])):
-        VP.append(self.Compare['Model']['VP_Param'][i][0])
+    for i in range(len(self.Compare['Analysis']['VP_Param'])):
+        VP.append(self.Compare['Analysis']['VP_Param'][i][0])
 
     # -- Write κ
-    val = float(self.Compare['Model']['VP_Param'][VP.index('κ')][3])
-    unit = self.Compare['Model']['VP_Param'][VP.index('κ')][1]
+    val = float(self.Compare['Analysis']['VP_Param'][VP.index('κ')][2])
+    unit = self.Compare['Analysis']['VP_Param'][VP.index('κ')][1]
     val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('κ')
@@ -117,9 +113,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     PN = PN+1
 
     # -- Write kb
-    for i in range(int(self.Compare['Model']['N'])):
-        val = float(self.Compare['Model']['VP_Param'][VP.index('k' + str(i+1))][3])
-        unit = self.Compare['Model']['VP_Param'][VP.index('k' + str(i+1))][1]
+    for i in range(int(self.Compare['Analysis']['N'])):
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('k' + str(i+1))][2])
+        unit = self.Compare['Analysis']['VP_Param'][VP.index('k' + str(i+1))][1]
         val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('k' + str(i+1))
@@ -129,7 +125,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         PN = PN+1
 
     # -- Write n
-    val = float(self.Compare['Model']['VP_Param'][VP.index('n')][3])
+    val = float(self.Compare['Analysis']['VP_Param'][VP.index('n')][2])
     line = line + ' ' + str(val)
     Param.append('n')
     Param_V.append(val)
@@ -138,19 +134,19 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     PN = PN+1
 
     # -- Write μ
-    val = float(self.Compare['Model']['VP_Param'][VP.index('μ')][3])
-    unit = self.Compare['Model']['VP_Param'][VP.index('μ')][1]
-    val = UnitConversion(unit, val, 'MPa-s')
+    val = float(self.Compare['Analysis']['VP_Param'][VP.index('μ')][2])
+    unit = self.Compare['Analysis']['VP_Param'][VP.index('μ')][1]
+    val = UnitConversion(unit, val, 'MPa')
     line = line + ' ' + str(val)
     Param.append('μ')
     Param_V.append(val)
-    Param_U.append('MPa-s')
+    Param_U.append('MPa')
     Param_N.append(PN)
     PN = PN+1
 
     # -- Write m
-    for i in range(int(self.Compare['Model']['N'])):
-        val = float(self.Compare['Model']['VP_Param'][VP.index('m' + str(i+1))][3])
+    for i in range(int(self.Compare['Analysis']['N'])):
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('m' + str(i+1))][2])
         line = line + ' ' + str(val)
         Param.append('m' + str(i+1))
         Param_V.append(val)
@@ -159,8 +155,8 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         PN = PN+1
 
     # -- Write β
-    for i in range(int(self.Compare['Model']['N'])):
-        val = float(self.Compare['Model']['VP_Param'][VP.index('β' + str(i+1))][3])
+    for i in range(int(self.Compare['Analysis']['N'])):
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('β' + str(i+1))][2])
         line = line + ' ' + str(val)
         Param.append('β' + str(i+1))
         Param_V.append(val)
@@ -169,9 +165,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         PN = PN+1
 
     # -- Write R
-    for i in range(int(self.Compare['Model']['N'])):
-        val = float(self.Compare['Model']['VP_Param'][VP.index('R' + str(i+1))][3])
-        unit = self.Compare['Model']['VP_Param'][VP.index('R' + str(i+1))][1]
+    for i in range(int(self.Compare['Analysis']['N'])):
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('R' + str(i+1))][2])
+        unit = self.Compare['Analysis']['VP_Param'][VP.index('R' + str(i+1))][1]
         val = UnitConversion(unit, val, '1/s')
         line = line + ' ' + str(val)
         Param.append('R' + str(i+1))
@@ -181,9 +177,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         PN = PN+1
 
     # -- Write H
-    for i in range(int(self.Compare['Model']['N'])):
-        val = float(self.Compare['Model']['VP_Param'][VP.index('H' + str(i+1))][3])
-        unit = self.Compare['Model']['VP_Param'][VP.index('H' + str(i+1))][1]
+    for i in range(int(self.Compare['Analysis']['N'])):
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('H' + str(i+1))][2])
+        unit = self.Compare['Analysis']['VP_Param'][VP.index('H' + str(i+1))][1]
         val = UnitConversion(unit, val, 'MPa')
         line = line + ' ' + str(val)
         Param.append('H' + str(i+1))
@@ -192,70 +188,66 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-    # Damage
+     # Damage
     Param_D = []
 
-    # -- Write Viscoplastic Damage Parameters
-    if self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
+    if self.Compare['Analysis']['Irreversible Model Name'] == 'Viscoplastic':
 
-        
-        for i in range(int(self.Compare['Model']['N'])):
+        # -- Write Viscoplastic Damage Parameters as infinity
+        for i in range(int(self.Compare['Analysis']['N'])):
             line = line + ' ' + str(1)
             Param_V.append(1)
-            Param_U.append('')
             Param_D.append('cd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
+        for i in range(int(self.Compare['Analysis']['N'])):
             line = line + ' ' + str(1e21)
             Param_V.append(1e21)
-            Param_U.append('')
             Param_D.append('Yd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
+        for i in range(int(self.Compare['Analysis']['N'])):
             line = line + ' ' + str(1e21)
             Param_V.append(1e21)
-            Param_U.append('')
             Param_D.append('μd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
+        for i in range(int(self.Compare['Analysis']['N'])):
             line = line + ' ' + str(1)
             Param_V.append(1)
-            Param_U.append('')
             Param_D.append('nd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
 
-    elif self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic w/ Damage':
+    elif self.Compare['Analysis']['Irreversible Model Name'] == 'Viscoplastic w/ Damage':
 
-        for i in range(int(self.Compare['Model']['N'])):
-            val = float(self.Compare['Model']['VP_Param'][VP.index('cd' + str(i+1))][3])
+        # -- Write Viscoplastic Damage Parameters 
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('cd' + str(i+1))][2])
             line = line + ' ' + str(val)
             Param_V.append(val)
             Param_U.append('')
             Param_D.append('cd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
-            val = float(self.Compare['Model']['VP_Param'][VP.index('Yd' + str(i+1))][3])
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('Yd' + str(i+1))][2])
             line = line + ' ' + str(val)
             Param_V.append(val)
             Param_U.append('')
             Param_D.append('Yd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
-            val = float(self.Compare['Model']['VP_Param'][VP.index('μd' + str(i+1))][3])
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('μd' + str(i+1))][2])
             line = line + ' ' + str(val)
             Param_V.append(val)
             Param_U.append('')
             Param_D.append('μd' + str(i+1))
             Param_N.append(PN)
             PN = PN+1
-        for i in range(int(self.Compare['Model']['N'])):
-            val = float(self.Compare['Model']['VP_Param'][VP.index('nd' + str(i+1))][3])
+        for i in range(int(self.Compare['Analysis']['N'])):
+            val = float(self.Compare['Analysis']['VP_Param'][VP.index('nd' + str(i+1))][2])
             line = line + ' ' + str(val)
             Param_V.append(val)
             Param_U.append('')
@@ -263,10 +255,9 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
             Param_N.append(PN)
             PN = PN+1
         
-    
-    # -- Write Viscoelastic Damage Parameters
-    if self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic':
+    if self.Compare['Analysis']['Reversible Model Name'] == 'Viscoelastic':
 
+        # -- Write Viscoelastic Damage Parameters as infinity
         line = line + ' ' + str(1) + ' ' + str(1e21) + ' ' + str(1e21) + ' ' + str(1)
         Param_V.append(1)
         Param_U.append('')
@@ -289,9 +280,10 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-    elif self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic w/ Damage':
+    elif self.Compare['Analysis']['Reversible Model Name'] == 'Viscoelastic w/ Damage':
 
-        val = float(self.Compare['Model']['VE_Param'][VE.index('ce')][3])
+        # -- Write Viscoelastic Damage Parameters
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('ce')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
@@ -299,7 +291,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-        val = float(self.Compare['Model']['VE_Param'][VE.index('Ye')][3])
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('Ye')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
@@ -307,7 +299,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-        val = float(self.Compare['Model']['VE_Param'][VE.index('μe')][3])
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('μe')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
@@ -315,20 +307,18 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-        val = float(self.Compare['Model']['VE_Param'][VE.index('ne')][3])
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('ne')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
         Param_D.append('ne')
         Param_N.append(PN)
         PN = PN+1
-
-    # -- Write Xi and Psi
+    
+    # -- Write Xi and Zeta
     line = line + ' ' + str(1e-14) + ' ' + str(1e-14)
     Param_V.append(1e-14)
-    Param_U.append('')
     Param_V.append(1e-14)
-    Param_U.append('')
     Param_D.append('ξ')
     Param_N.append(PN)
     PN = PN+1
@@ -336,9 +326,8 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     Param_N.append(PN)
     PN = PN+1
     
-
     # -- Write Cutoff strength and stiffness
-    if self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic':
+    if self.Compare['Analysis']['Reversible Model Name'] == 'Viscoelastic':
         line = line + ' ' + str(1e21) 
         Param_V.append(1e21)
         Param_U.append('')
@@ -346,8 +335,8 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-    elif self.Compare['Model']['Reversible Model Name'] == 'Isotropic Viscoelastic w/ Damage':
-        val = float(self.Compare['Model']['VE_Param'][VE.index('Ɛcut_e')][3])
+    elif self.Compare['Analysis']['Reversible Model Name'] == 'Viscoelastic w/ Damage':
+        val = float(self.Compare['Analysis']['VE_Param'][VE.index('Ɛcut_e')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
@@ -355,7 +344,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-    if self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic':
+    if self.Compare['Analysis']['Irreversible Model Name'] == 'Viscoplastic':
         line = line + ' ' + str(1e21) 
         Param_V.append(1e21)
         Param_U.append('')
@@ -363,8 +352,8 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
         Param_N.append(PN)
         PN = PN+1
 
-    elif self.Compare['Model']['Irreversible Model Name'] == 'Isotropic Viscoplastic w/ Damage':
-        val = float(self.Compare['Model']['VP_Param'][VP.index('Ɛcut_p')][3])
+    elif self.Compare['Analysis']['Irreversible Model Name'] == 'Viscoplastic w/ Damage':
+        val = float(self.Compare['Analysis']['VP_Param'][VP.index('Ɛcut_p')][2])
         line = line + ' ' + str(val)
         Param_V.append(val)
         Param_U.append('')
@@ -375,7 +364,6 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     # -- Write dummy
     line = line + ' ' + str(0.01)
     Param_V.append(0.01)
-    Param_U.append('')
     Param_D.append('DMY')
     Param_N.append(PN)
     PN = PN+1
@@ -385,32 +373,10 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     file.write(line)
 
     # Write Lower Bound
-    ACT = []
     file.write("LOWE:\n")
     line = ' '
     for i in range(len(Param_V)):
         val = Param_V[i]
-        if i < len(Param):
-            P = Param[i]
-            if P in VE:
-                if self.Compare['Model']['VE_Param'][VE.index(P)][5] == 'Active':
-                    ACT.append(i+1)
-                    val = self.Compare['Model']['VE_Param'][VE.index(P)][2]
-                    unit = self.Compare['Model']['VE_Param'][VE.index(P)][1]
-                    try:
-                        val = UnitConversion(unit, val, Param_U[i])
-                    except:
-                        pass
-            elif P in VP:
-                if self.Compare['Model']['VP_Param'][VP.index(P)][5] == 'Active':
-                    ACT.append(i+1)
-                    val = self.Compare['Model']['VP_Param'][VP.index(P)][2]
-                    unit = self.Compare['Model']['VP_Param'][VP.index(P)][1]
-                    try:
-                        val = UnitConversion(unit, val, Param_U[i])
-                    except:
-                        pass
-
         line = line + ' ' + str(val)
     line = line + '\n'
     file.write(line)
@@ -420,41 +386,18 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
     line = ' '
     for i in range(len(Param_V)):
         val = Param_V[i]
-        if i < len(Param):
-            P = Param[i]
-            if P in VE:
-                if self.Compare['Model']['VE_Param'][VE.index(P)][5] == 'Active':
-                    val = self.Compare['Model']['VE_Param'][VE.index(P)][4]
-                    unit = self.Compare['Model']['VE_Param'][VE.index(P)][1]
-                    try:
-                        val = UnitConversion(unit, val, Param_U[i])
-                    except:
-                        pass
-            elif P in VP:
-                if self.Compare['Model']['VP_Param'][VP.index(P)][5] == 'Active':
-                    val = self.Compare['Model']['VP_Param'][VP.index(P)][4]
-                    unit = self.Compare['Model']['VP_Param'][VP.index(P)][1]
-                    try:
-                        val = UnitConversion(unit, val, Param_U[i])
-                    except:
-                        pass
-
         line = line + ' ' + str(val)
     line = line + '\n'
     file.write(line)
 
     # Write active parameters
     file.write("SUBP:\n")
-    line = ' 1 ' + str(len(ACT))
-    for i in ACT:
-        line = line + ' ' + str(i)
-    line = line + '\n'
-    file.write(line)
+    file.write(' 1 1 1\n')
     file.write(' 0 0\n')
 
     # Write LINK
     file.write("LINK:\n")
-    for i in range(len(self.Compare['Characterization'].keys())):
+    for i in range(len(tests)):
         line = ' ' + str(i+1) + ' ' + str(NDV)
         for j in range(NDV):
             line = line + ' ' + str(j+1)
@@ -463,7 +406,7 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
 
     # Write FACT
     file.write("FACT:\n")
-    for i in range(len(self.Compare['Characterization'].keys())):
+    for i in range(len(tests)):
         line = ' ' + str(i+1) +  ' ' + str(NDV) + ' '
         for j in range(NDV):
             line = line + ' ' + str(1.0)
@@ -472,8 +415,8 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
 
     # Write Weights
     weights = []
-    for key in self.Compare['Characterization'].keys():
-        weights.append(self.Compare['Characterization'][key]['RelWeight'])
+    for i in range(len(tests)):
+        weights.append(1)
     tot = sum(weights)
     for i in range(len(weights)):
         weights[i] = weights[i]/tot
@@ -502,5 +445,5 @@ def WriteDSG_GVIPS_OPT(self, temp_dir):
 
     # Set all Parameters
     P = Param + Param_D
-
-    return mod, P, Param_U, Param_N
+    
+    return P, Param_U, Param_N

@@ -134,6 +134,14 @@ def Placements(self, screen_width, screen_height):
     Placement['Analysis']['ButtonNote'] = [0.1, 0.12, 0.075, 0.04]
     Placement['Analysis']['NotesLabel'] = [0.5, 0.1]
     Placement['Analysis']['NotesArea'] = [0.5, 0.5, 0.8, 0.6]
+    Placement['Analysis']['HistLabel'] = [0.5, 0.02]
+    Placement['Analysis']['HistSheetRun'] = [0.025, 0.1, 0.45, 0.85, 0.33, 0.3, 0.3, 0.02]
+    Placement['Analysis']['ScrollHistSheetRun'] = [0.6, 0.1, 0.02, 0.85]
+    Placement['Analysis']['HistSheetPar'] = [0.9675, 0.1, 0.4525, 0.4, 0.315, 0.3, 0.315]
+    Placement['Analysis']['HistSheetTest'] = [0.9675, 0.55, 0.4525, 0.4, 0.28, 0.27, 0.22, 0.17]
+    Placement['Analysis']['ModLibSheet'] = [0.5, 0.05, 0.95, 0.95, 0.2, .125, 0.25, 0.25, 0.125]
+    Placement['Analysis']['ModLibNotesLabel'] = [0.5, 0.075]
+    Placement['Analysis']['ModLibNotesArea'] = [0.5, 0.15, 0.8, 0.8]
 
     # -- Visualization
     Placement['Visualization']['ComboX'] = [0.4975, 0.15, 0.1, 0.03]

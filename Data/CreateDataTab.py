@@ -127,6 +127,10 @@ def CreateDataTab(self, window):
         #
         #--------------------------------------------------------------------------
 
+        def view_data_wait(self):
+            view_data(self)
+            
+
         def view_data(self):
             #----------------------------------------------------------------------
             #
@@ -316,7 +320,8 @@ def CreateDataTab(self, window):
             self.stage_table_db.redraw()
 
             # Call the plotting function
-            self.plotter_db()
+            window.after_idle(lambda: self.plotter_db())
+            #self.plotter_db()
 
         def view_all_data(self):
             #----------------------------------------------------------------------
@@ -504,7 +509,8 @@ def CreateDataTab(self, window):
             # Enanble bindings
             self.sheet_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
             self.sheet_db.popup_menu_add_command('Select/Unselect All', lambda : select_all(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet_db.popup_menu_add_command('View Data', lambda : view_data_wait(self), table_menu = True, index_menu = True, header_menu = True)
+            #self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet_db.popup_menu_add_command('View All Selected Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet_db.popup_menu_add_command('Delete Test', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)
 

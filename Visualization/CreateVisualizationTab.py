@@ -527,12 +527,20 @@ def CreateVisualizationTab(self,window):
 
         if (init_flag == 1 and exist_flag == 0) or init_flag == 2:
             # Create the label
-            self.char_label_viz = ttk.Label(
-                                        self.nb_tab_tab5, 
-                                        text="Characterization Set:  Global Error = " + f"{self.Compare['Global Error']:.3e}", 
-                                        style = "Modern1.TLabel",
-                                        anchor=tk.NW
-                                        )
+            if self.Compare['Global Error'] != '':
+                self.char_label_viz = ttk.Label(
+                                            self.nb_tab_tab5, 
+                                            text="Characterization Set:  Global Error = " + f"{self.Compare['Global Error']:.3e}", 
+                                            style = "Modern1.TLabel",
+                                            anchor=tk.NW
+                                            )
+            else:
+                self.char_label_viz = ttk.Label(
+                                            self.nb_tab_tab5, 
+                                            text="Characterization Set:", 
+                                            style = "Modern1.TLabel",
+                                            anchor=tk.NW
+                                            )
             self.char_label_viz.place(
                                 anchor = 'nw', 
                                 relx = self.Placement['Visualization']['LabelChar'][0], 

@@ -228,7 +228,10 @@ def CreateAnalysisTab(self,window):
             #------------------------------------------------------------------
 
             # Get the value
-            value = self.optmenu4_analy.get()
+            try:
+                value = self.optmenu4_analy.get()
+            except:
+                value = 1
 
             # Initialize Parameters
             self.Params_VE = []
@@ -270,6 +273,7 @@ def CreateAnalysisTab(self,window):
             UpdateModelData(value, self, 1, 'Model')
 
             # Get number of viscoelastic parameters
+            ve_analy = None
             self.VEMech =  list(self.model_info_all[self.mod_analy]['Reversible Models'][self.rmod_analy ]['Mechanisms'])
             if len(self.VEMech) > 0:
                 # Create the label
@@ -281,11 +285,11 @@ def CreateAnalysisTab(self,window):
                                     )
                 self.desc4_analy.place(
                                 anchor = 'n', 
-                                relx = self.Placement['Optimization']['LabelVE'][0], 
-                                rely = self.Placement['Optimization']['LabelVE'][1]
+                                relx = self.Placement['Analysis']['LabelVE'][0], 
+                                rely = self.Placement['Analysis']['LabelVE'][1]
                                 )
-                if 'self.desc4_analy' not in self.atts['Optimize']['Local']:
-                    self.atts['Optimize']['Local'].append('self.desc4_analy') 
+                if 'self.desc4_analy' not in self.atts['Analysis']['Local']:
+                    self.atts['Analysis']['Local'].append('self.desc4_analy') 
 
                 # Initialize number of viscoelastic mechanisms
                 ve_analy = self.VEMech[0]
@@ -308,18 +312,18 @@ def CreateAnalysisTab(self,window):
                 self.optmenu4_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
                 self.optmenu4_analy.place(
                                     anchor='n', 
-                                    relx = self.Placement['Optimization']['ComboVE'][0], 
-                                    rely = self.Placement['Optimization']['ComboVE'][1], 
-                                    relwidth = self.Placement['Optimization']['ComboVE'][2], 
-                                    relheight = self.Placement['Optimization']['ComboVE'][3]
+                                    relx = self.Placement['Analysis']['ComboVE'][0], 
+                                    rely = self.Placement['Analysis']['ComboVE'][1], 
+                                    relwidth = self.Placement['Analysis']['ComboVE'][2], 
+                                    relheight = self.Placement['Analysis']['ComboVE'][3]
                                     )
                 self.optmenu4_analy.set(ve_analy)
                 self.optmenu4_analy.bind("<<ComboboxSelected>>",  VE_param)
-                if 'self.optmenu4_analy' not in self.atts['Optimize']['Local']:
-                    self.atts['Optimize']['Local'].append('self.optmenu4_analy')
+                if 'self.optmenu4_analy' not in self.atts['Analysis']['Local']:
+                    self.atts['Analysis']['Local'].append('self.optmenu4_analy')
 
-                # Get list of viscoelastic parameters
-                VE_param(ve_analy)
+            # Get list of viscoelastic parameters
+            VE_param(ve_analy)
         
         def update_irreversible_table(self):
             #------------------------------------------------------------------
@@ -478,7 +482,10 @@ def CreateAnalysisTab(self,window):
             #------------------------------------------------------------------
 
             # Get Value
-            value = self.optmenu5_analy.get()
+            try:
+                value = self.optmenu5_analy.get()
+            except:
+                value = 1
 
             # Initialize Parameters
             self.Params_VP = []
@@ -520,8 +527,8 @@ def CreateAnalysisTab(self,window):
             UpdateModelData(value, self, 2, 'Model')
 
             # Get number of viscoelastic parameters
+            vp_analy = None
             self.VPMech =  list(self.model_info_all[self.mod_analy]['Irreversible Models'][self.irrmod_analy ]['Mechanisms'])
-
             if len(self.VPMech) > 0:
                 # Create the label
                 self.desc5_analy = ttk.Label(self.nb_tab_tab4, 
@@ -531,11 +538,11 @@ def CreateAnalysisTab(self,window):
                                 )
                 self.desc5_analy.place(
                                 anchor = 'n', 
-                                relx = self.Placement['Optimization']['LabelVP'][0], 
-                                rely = self.Placement['Optimization']['LabelVP'][1]
+                                relx = self.Placement['Analysis']['LabelVP'][0], 
+                                rely = self.Placement['Analysis']['LabelVP'][1]
                                 )
-                if 'self.desc5_analy' not in self.atts['Optimize']['Local']:
-                    self.atts['Optimize']['Local'].append('self.desc5_analy')
+                if 'self.desc5_analy' not in self.atts['Analysis']['Local']:
+                    self.atts['Analysis']['Local'].append('self.desc5_analy')
 
                 # Initialize Viscoplastic number of mechanisms
                 vp_analy = self.VPMech[0]
@@ -558,18 +565,18 @@ def CreateAnalysisTab(self,window):
                 self.optmenu5_analy.option_add('*TCombobox*Listbox.font', self.style_man['Combo'])
                 self.optmenu5_analy.place(
                                     anchor='n', 
-                                    relx = self.Placement['Optimization']['ComboVP'][0], 
-                                    rely = self.Placement['Optimization']['ComboVP'][1], 
-                                    relwidth = self.Placement['Optimization']['ComboVP'][2], 
-                                    relheight = self.Placement['Optimization']['ComboVP'][3]
+                                    relx = self.Placement['Analysis']['ComboVP'][0], 
+                                    rely = self.Placement['Analysis']['ComboVP'][1], 
+                                    relwidth = self.Placement['Analysis']['ComboVP'][2], 
+                                    relheight = self.Placement['Analysis']['ComboVP'][3]
                                     )
                 self.optmenu5_analy.set(vp_analy)
                 self.optmenu5_analy.bind("<<ComboboxSelected>>",  VP_param)
-                if 'self.optmenu5_analy' not in self.atts['Optimize']['Local']:
-                    self.atts['Optimize']['Local'].append('self.optmenu5_analy')
+                if 'self.optmenu5_analy' not in self.atts['Analysis']['Local']:
+                    self.atts['Analysis']['Local'].append('self.optmenu5_analy')
 
-                # Get list of viscoplastic parameters
-                VP_param(vp_analy)
+            # Get list of viscoplastic parameters
+            VP_param(vp_analy)
 
         # Get the model
         self.mod_analy = self.optmenu1_analy.get()
@@ -594,7 +601,10 @@ def CreateAnalysisTab(self,window):
 
         # Read the model info
         self.Compare['Analysis']['Model Name'] = self.mod_analy
-        self.Compare['Analysis']['Model Info'] = {}
+        self.Compare['Analysis']['Model Info'] = {
+                                               'Core': self.model_info_all[self.mod_analy]['Model Info']['Core'],
+                                               'Model': self.model_info_all[self.mod_analy]['Model Info']['Model'],
+                                               }
             
         # Get available reversible models
         self.RevModels = list(self.model_info_all[self.mod_analy]['Reversible Models'].keys())
@@ -699,8 +709,8 @@ def CreateAnalysisTab(self,window):
                                 )
             self.optmenu3_analy.set(irmod_analy)
             self.optmenu3_analy.bind("<<ComboboxSelected>>",  lambda event:change_irrev_model(event))
-            if 'self.optmenu3_analy' not in self.atts['Optimize']['Local']:
-                self.atts['Optimize']['Local'].append('self.optmenu3_analy') 
+            if 'self.optmenu3_analy' not in self.atts['Analysis']['Local']:
+                self.atts['Analysis']['Local'].append('self.optmenu3_analy') 
 
             # Call the irreversible model function
             change_irrev_model(irmod_analy)
@@ -843,10 +853,10 @@ def CreateAnalysisTab(self,window):
                                                     height=int(8*self.scale), 
                                                     font=("Segoe UI", max([self.min_font, int(14*self.scale)]))) 
                 text_area.place(anchor='c', 
-                                relx = self.Placement['Optimization']['NotesArea'][0], 
-                                rely = self.Placement['Optimization']['NotesArea'][1],  
-                                relwidth = self.Placement['Optimization']['NotesArea'][2], 
-                                relheight = self.Placement['Optimization']['NotesArea'][3], 
+                                relx = self.Placement['Analysis']['NotesArea'][0], 
+                                rely = self.Placement['Analysis']['NotesArea'][1],  
+                                relwidth = self.Placement['Analysis']['NotesArea'][2], 
+                                relheight = self.Placement['Analysis']['NotesArea'][3], 
                                 )
 
                 # Display any existing notes
@@ -941,19 +951,19 @@ def CreateAnalysisTab(self,window):
                                                 header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"))
                 self.hist_param_sheet.place(
                                     anchor = 'ne', 
-                                    relx = self.Placement['Optimization']['HistSheetPar'][0], 
-                                    rely = self.Placement['Optimization']['HistSheetPar'][1],
-                                    relwidth = self.Placement['Optimization']['HistSheetPar'][2], 
-                                    relheight = self.Placement['Optimization']['HistSheetPar'][3],
+                                    relx = self.Placement['Analysis']['HistSheetPar'][0], 
+                                    rely = self.Placement['Analysis']['HistSheetPar'][1],
+                                    relwidth = self.Placement['Analysis']['HistSheetPar'][2], 
+                                    relheight = self.Placement['Analysis']['HistSheetPar'][3],
                                     )
 
                 # Format the sheet
                 self.hist_param_sheet.change_theme("blue")
                 root.update_idletasks()
                 total_width = self.hist_param_sheet.winfo_width()
-                self.hist_param_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][4]), redraw = True)
-                self.hist_param_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][5]), redraw = True)
-                self.hist_param_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetPar'][6]), redraw = True)
+                self.hist_param_sheet.column_width(column = 0, width = int(total_width*self.Placement['Analysis']['HistSheetPar'][4]), redraw = True)
+                self.hist_param_sheet.column_width(column = 1, width = int(total_width*self.Placement['Analysis']['HistSheetPar'][5]), redraw = True)
+                self.hist_param_sheet.column_width(column = 2, width = int(total_width*self.Placement['Analysis']['HistSheetPar'][6]), redraw = True)
                 self.hist_param_sheet.table_align(align = 'c',redraw=True)
                 self.hist_param_sheet.set_index_width(0)
 
@@ -982,20 +992,20 @@ def CreateAnalysisTab(self,window):
                                                 )
                 self.hist_test_sheet.place(
                                     anchor = 'ne', 
-                                    relx = self.Placement['Optimization']['HistSheetTest'][0], 
-                                    rely = self.Placement['Optimization']['HistSheetTest'][1], 
-                                    relwidth = self.Placement['Optimization']['HistSheetTest'][2], 
-                                    relheight = self.Placement['Optimization']['HistSheetTest'][3], 
+                                    relx = self.Placement['Analysis']['HistSheetTest'][0], 
+                                    rely = self.Placement['Analysis']['HistSheetTest'][1], 
+                                    relwidth = self.Placement['Analysis']['HistSheetTest'][2], 
+                                    relheight = self.Placement['Analysis']['HistSheetTest'][3], 
                                     )
                 
                 # Format the sheet
                 self.hist_test_sheet.change_theme("blue")
                 root.update_idletasks()
                 total_width = self.hist_test_sheet.winfo_width()
-                self.hist_test_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][4]), redraw = True)
-                self.hist_test_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][5]), redraw = True)
-                self.hist_test_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][6]), redraw = True)
-                self.hist_test_sheet.column_width(column = 3, width = int(total_width*self.Placement['Optimization']['HistSheetTest'][7]), redraw = True)
+                self.hist_test_sheet.column_width(column = 0, width = int(total_width*self.Placement['Analysis']['HistSheetTest'][4]), redraw = True)
+                self.hist_test_sheet.column_width(column = 1, width = int(total_width*self.Placement['Analysis']['HistSheetTest'][5]), redraw = True)
+                self.hist_test_sheet.column_width(column = 2, width = int(total_width*self.Placement['Analysis']['HistSheetTest'][6]), redraw = True)
+                self.hist_test_sheet.column_width(column = 3, width = int(total_width*self.Placement['Analysis']['HistSheetTest'][7]), redraw = True)
                 self.hist_test_sheet.table_align(align = 'c',redraw=True)
                 self.hist_test_sheet.set_index_width(0)
 
@@ -1032,7 +1042,7 @@ def CreateAnalysisTab(self,window):
                 self.run_history['Run #' + str(i+1)]['Global Error'] = None
                 self.run_history['Run #' + str(i+1)]['Test Error'] = {}
                 for j in range(test_start[i], test_start[i+1]):
-                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
+                    keys = ['Model Name', 'Reversible Model Name','Irreversible Model Name','Viscoelastic Mechanisms','Viscoplastic Mechanisms']
                     for key in keys:
                         if ':' in lines[j] and key == lines[j].split(':')[0].strip():
                             self.run_history['Run #' + str(i+1)][key.split(':')[0]] = lines[j].split(':')[1].strip()
@@ -1162,8 +1172,8 @@ def CreateAnalysisTab(self,window):
                         style = "Modern1.TLabel"                   
                         ).place(
                                 anchor='n', 
-                                relx = self.Placement['Optimization']['HistLabel'][0], 
-                                rely = self.Placement['Optimization']['HistLabel'][1]
+                                relx = self.Placement['Analysis']['HistLabel'][0], 
+                                rely = self.Placement['Analysis']['HistLabel'][1]
                                 )
             
             # Create the sheet
@@ -1180,10 +1190,10 @@ def CreateAnalysisTab(self,window):
             )
             self.run_hist_sheet.place(
                                 anchor = 'nw', 
-                                relx = self.Placement['Optimization']['HistSheetRun'][0], 
-                                rely = self.Placement['Optimization']['HistSheetRun'][1],
-                                relwidth = self.Placement['Optimization']['HistSheetRun'][2], 
-                                relheight = self.Placement['Optimization']['HistSheetRun'][3], 
+                                relx = self.Placement['Analysis']['HistSheetRun'][0], 
+                                rely = self.Placement['Analysis']['HistSheetRun'][1],
+                                relwidth = self.Placement['Analysis']['HistSheetRun'][2], 
+                                relheight = self.Placement['Analysis']['HistSheetRun'][3], 
                                 )
             
             
@@ -1191,9 +1201,9 @@ def CreateAnalysisTab(self,window):
             self.run_hist_sheet.change_theme("blue")
             root.update_idletasks()
             total_width = self.run_hist_sheet.winfo_width()
-            self.run_hist_sheet.column_width(column = 0, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][4]), redraw = True)
-            self.run_hist_sheet.column_width(column = 1, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][5]), redraw = True)
-            self.run_hist_sheet.column_width(column = 2, width = int(total_width*self.Placement['Optimization']['HistSheetRun'][6]), redraw = True)
+            self.run_hist_sheet.column_width(column = 0, width = int(total_width*self.Placement['Analysis']['HistSheetRun'][4]), redraw = True)
+            self.run_hist_sheet.column_width(column = 1, width = int(total_width*self.Placement['Analysis']['HistSheetRun'][5]), redraw = True)
+            self.run_hist_sheet.column_width(column = 2, width = int(total_width*self.Placement['Analysis']['HistSheetRun'][6]), redraw = True)
             self.run_hist_sheet.table_align(align = 'c',redraw=True)
             self.run_hist_sheet.set_index_width(0)
 
@@ -1292,3 +1302,6 @@ def CreateAnalysisTab(self,window):
         self.optmenu1_analy.bind("<<ComboboxSelected>>",  change_model)
         change_model(mod_analy)
         self.atts['Analysis']['Permanent'].append('self.optmenu1_analy')
+
+        # Set Flag
+        self.analy_init = 0
