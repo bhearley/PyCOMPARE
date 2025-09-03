@@ -41,7 +41,6 @@ def CreateNewProject(self):
 
     return
  
-
 def LoadProject(self):
     #--------------------------------------------------------------------------
     #
@@ -88,4 +87,15 @@ def LoadProject(self):
     except:
         # Return empty data structure
         self.Compare = {}
+
+    # Re-Initialize the Path Dependencies
+    model_library = os.path.join(self.home,'Model','AvailableModels.json')
+    import_template = os.path.join(self.home,'Templates','ImportTemplate.xlsx')
+    export_template = os.path.join(self.home,'Templates','ExportTemplate.xlsx')
+    compare_path = os.path.join(self.home,'compnasardamage.exe')
+    self.Compare['Paths'] = {'Model Library':model_library,
+                                'Import Template':import_template,
+                                'Export Template':export_template,
+                                'Compare Executable':compare_path,}
+
     return

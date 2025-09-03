@@ -4,3 +4,7 @@ Deprecated/
 Demo/
 Logs/
 LocalDocs/
+buildPyCompare/
+build/
+dist/
+*.zip

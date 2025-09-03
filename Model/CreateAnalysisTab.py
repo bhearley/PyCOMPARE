@@ -31,6 +31,7 @@ def CreateAnalysisTab(self,window):
         with open(self.Compare['Paths']['Model Library'], 'r', encoding='utf8') as f:
             self.model_info_all = json.load(f)
     
+    # Set clicked
     self.clicked = 0
 
     # Preallocate Saved Models
@@ -720,7 +721,7 @@ def CreateAnalysisTab(self,window):
                                     self.nb_tab_tab4, 
                                     text = "Load from Excel", 
                                     command = lambda:self.load_from_db('Analysis'), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_load_analy.place(
                             anchor = 'w', 
@@ -737,7 +738,7 @@ def CreateAnalysisTab(self,window):
                                     self.nb_tab_tab4, 
                                     text = "Model Library", 
                                     command = lambda : self.Model_Library('Analysis'), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_modlib_analy.place(
                             anchor = 'w', 
@@ -754,7 +755,7 @@ def CreateAnalysisTab(self,window):
                                 self.nb_tab_tab4, 
                                 text = "Analyze", 
                                 command = self.analyze, 
-                                style = "Modern3.TButton",
+                                style = "Modern1.TButton",
                                 )
         self.btn_anly.place(
                             anchor = 'w', 
@@ -801,7 +802,7 @@ def CreateAnalysisTab(self,window):
                                     self.nb_tab_tab4, 
                                     text = "Save Model", 
                                     command = save_model_local, 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_savemod_analy.place(
                             anchor = 'w', 
@@ -892,7 +893,7 @@ def CreateAnalysisTab(self,window):
                                     self.nb_tab_tab4, 
                                     text = "Model Notes", 
                                     command = add_note, 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_addnote_analy.place(
                             anchor = 'w', 
@@ -1229,7 +1230,7 @@ def CreateAnalysisTab(self,window):
                                     self.nb_tab_tab4, 
                                     text = "Run History", 
                                     command = lambda : view_history(self), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_view_hist_analy.place(
                             anchor = 'w', 

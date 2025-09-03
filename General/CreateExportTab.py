@@ -6,18 +6,18 @@
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def CreateExportTab(self,window):
+    # Import Modules
+    import json
+    from openpyxl import load_workbook
+    from openpyxl.styles import PatternFill, Border, Side
+    import threading
+    import tkinter as tk
+    from tkinter import filedialog
+    from tkinter import messagebox
+    from tkinter import ttk
 
+    # Check for export initialization
     if self.exp_init == 1:
-
-        # Import Modules
-        import json
-        from openpyxl import load_workbook
-        from openpyxl.styles import PatternFill, Border, Side
-        import threading
-        import tkinter as tk
-        from tkinter import filedialog
-        from tkinter import messagebox
-        from tkinter import ttk
 
         # Create Export Buttons
         def export():
@@ -27,12 +27,10 @@ def CreateExportTab(self,window):
             #
             #--------------------------------------------------------------------------
 
-
             # Check that a model exists
             if  'Model ID' in self.Compare.keys():
                 if self.Compare['Model ID'] != None:
 
-                   
                     def export_ex(callback, self):
                         #--------------------------------------------------------------------------
                         #
@@ -174,7 +172,6 @@ def CreateExportTab(self,window):
                         else:
                             ws.sheet_state = 'hidden'
 
-                        
                         # Experimental Curves
                         ws = wb['Experimental Curves']
                         if self.var_exp_chk3.get() == 1:
@@ -355,6 +352,12 @@ def CreateExportTab(self,window):
                     # Function to display progress bar while running
                     def start_export(self):
 
+                        #----------------------------------------------------------
+                        #
+                        #   PURPOSE: Show progress bar during export
+                        #
+                        #----------------------------------------------------------
+
                         # Create the window
                         loading = tk.Toplevel(window)
                         loading.title("Exporting to Excel")
@@ -494,7 +497,7 @@ def CreateExportTab(self,window):
                                     self.nb_tab_tab6, 
                                     text = "Export", 
                                     command = lambda:export(), 
-                                    style = "Modern4.TButton",
+                                    style = "Modern3.TButton",
                                     )
         self.exp_btn.place(
                                 anchor = 'nw', 

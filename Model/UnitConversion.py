@@ -34,8 +34,6 @@ def UnitConversion(source_unit, source_value, target_unit):
     results = find_file('unit_library.json', os.getcwd())
     if len(results) == 0:
         raise Exception('unit_library.json not found.')
-    elif len(results) > 1:
-        raise Exception('Multiple unit_library.json files not found.')
     else:
         with open(results[0], 'r', encoding ='utf8') as f:
             U = json.load(f)

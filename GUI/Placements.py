@@ -180,8 +180,6 @@ def Placements(self, screen_width, screen_height):
     Placement['Settings']['ButtonExp'] = [0.025, 0.425, 0.06, 0.0325]
     Placement['Settings']['ButtonExpD'] = [0.1, 0.425, 0.06, 0.0325]
     
-    
-
     # Set to self
     self.Placement = Placement
 

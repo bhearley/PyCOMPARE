@@ -7,14 +7,12 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def CreateSettingsTab(self):
 
-    if self.set_init == 1:
+    # Import Modules
+    import shutil
+    from tkinter import filedialog
+    from tkinter import ttk
 
-        # Import Modules
-        from pathlib import Path
-        import shutil
-        import tkinter as tk
-        from tkinter import filedialog
-        from tkinter import ttk
+    if self.set_init == 1:
 
         # Set the paths
         # -- Compare Executable
@@ -50,7 +48,7 @@ def CreateSettingsTab(self):
                                         self.nb_tab_tab7, 
                                         text = "Edit", 
                                         command = lambda:set_comp_path(self), 
-                                        style = "Modern4.TButton",
+                                        style = "Modern3.TButton",
                                         )
         self.comp_path_btn.place(
                                 anchor = 'nw', 
@@ -94,7 +92,7 @@ def CreateSettingsTab(self):
                                     self.nb_tab_tab7, 
                                     text = "Edit", 
                                     command = lambda:set_mod_path(self), 
-                                    style = "Modern4.TButton",
+                                    style = "Modern3.TButton",
                                     )
         self.mod_path_btn.place(
                                 anchor = 'nw', 
@@ -129,13 +127,8 @@ def CreateSettingsTab(self):
             #----------------------------------------------------------
 
             # Ask where to save the file
-            try:
-                file = filedialog.asksaveasfile(title = "Import Template", filetypes=[('Excel', '*.xlsx')],
-                                            initialdir = str(Path.home() / "Downloads"),
+            file = filedialog.asksaveasfile(title = "Import Template", filetypes=[('Excel', '*.xlsx')],
                                             initialfile="ImportTemplate.xlsx")
-            except:
-                file = filedialog.asksaveasfile(title = "Import Template", filetypes=[('Excel', '*.xlsx')],
-                                                initialfile="ImportTemplate.xlsx")
 
             # Copy the file
             if file is not None:
@@ -157,7 +150,7 @@ def CreateSettingsTab(self):
                                     self.nb_tab_tab7, 
                                     text = "Edit", 
                                     command = lambda:set_imp_path(self), 
-                                    style = 'Modern4.TButton',
+                                    style = 'Modern3.TButton',
                                     )
         self.imp_path_btn.place(
                                 anchor = 'nw', 
@@ -172,7 +165,7 @@ def CreateSettingsTab(self):
                                     self.nb_tab_tab7, 
                                     text = "Download", 
                                     command = lambda:download_imp(self), 
-                                    style = 'Modern4.TButton',
+                                    style = 'Modern3.TButton',
                                     )
         self.imp_dwnld_btn.place(
                                 anchor = 'nw', 
@@ -206,13 +199,8 @@ def CreateSettingsTab(self):
             #----------------------------------------------------------
 
             # Ask for the new file path
-            try:
-                file = filedialog.asksaveasfile(title = "Export Template", filetypes=[('Excel', '*.xlsx')],
-                                            initialdir = str(Path.home() / "Downloads"),
+            file = filedialog.asksaveasfile(title = "Export Template", filetypes=[('Excel', '*.xlsx')],
                                             initialfile="ExportTemplate.xlsx")
-            except:
-                file = filedialog.asksaveasfile(title = "Export Template", filetypes=[('Excel', '*.xlsx')],
-                                                initialfile="ExportTemplate.xlsx")
 
             # Copy file
             if file is not None:
@@ -235,7 +223,7 @@ def CreateSettingsTab(self):
                                     self.nb_tab_tab7, 
                                     text = "Edit", 
                                     command = lambda:set_exp_path(self), 
-                                    style = "Modern4.TButton",
+                                    style = "Modern3.TButton",
                                     )
         self.exp_path_btn.place(anchor = 'nw', 
                                 relx = self.Placement['Settings']['ButtonExp'][0],
@@ -248,7 +236,7 @@ def CreateSettingsTab(self):
                                     self.nb_tab_tab7, 
                                     text = "Download", 
                                     command = lambda:download_exp(self), 
-                                    style = "Modern4.TButton",
+                                    style = "Modern3.TButton",
                                     )
         self.exp_dwnld_btn.place(
                                 anchor = 'nw', 

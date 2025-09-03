@@ -19,6 +19,7 @@ def CreateDataTab(self, window):
     from Data.FunctionalDataSampling import FunctionalDataSampling
     from Data.ReadExcelInput import ReadExcelInput
 
+    # Sig Fig Rounding
     def round_sig(x, sig=3):
         #--------------------------------------------------------------------------
         #
@@ -30,6 +31,7 @@ def CreateDataTab(self, window):
             return 0
         return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
     
+    # Deselect Function
     def on_click(event):
         #--------------------------------------------------------------------------
         #
@@ -55,6 +57,7 @@ def CreateDataTab(self, window):
     # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
 
+    # Upload from excel function
     def upload_from_excel():
         #--------------------------------------------------------------------------
         #
@@ -126,10 +129,6 @@ def CreateDataTab(self, window):
         #   PURPOSE: Update the database table.
         #
         #--------------------------------------------------------------------------
-
-        def view_data_wait(self):
-            view_data(self)
-            
 
         def view_data(self):
             #----------------------------------------------------------------------
@@ -320,8 +319,7 @@ def CreateDataTab(self, window):
             self.stage_table_db.redraw()
 
             # Call the plotting function
-            window.after_idle(lambda: self.plotter_db())
-            #self.plotter_db()
+            self.plotter_db()
 
         def view_all_data(self):
             #----------------------------------------------------------------------
@@ -491,10 +489,8 @@ def CreateDataTab(self, window):
             if int(total_width*self.Placement['Data']['SheetDB'][4]) < 21:
                 origA = self.Placement['Data']['SheetDB'][4]
                 origB = self.Placement['Data']['SheetDB'][5]
-
                 self.Placement['Data']['SheetDB'][4] = 21/total_width
                 self.Placement['Data']['SheetDB'][5] = origA + origB - self.Placement['Data']['SheetDB'][4]
-
             self.sheet_db.column_width(column = 0, width = int(total_width*self.Placement['Data']['SheetDB'][4]), redraw = True)
             self.sheet_db.column_width(column = 1, width = int(total_width*self.Placement['Data']['SheetDB'][5]), redraw = True)
             self.sheet_db.column_width(column = 2, width = int(total_width*self.Placement['Data']['SheetDB'][6]), redraw = True)
@@ -509,7 +505,7 @@ def CreateDataTab(self, window):
             # Enanble bindings
             self.sheet_db.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys", "right_click_popup_menu")
             self.sheet_db.popup_menu_add_command('Select/Unselect All', lambda : select_all(self), table_menu = True, index_menu = True, header_menu = True)
-            self.sheet_db.popup_menu_add_command('View Data', lambda : view_data_wait(self), table_menu = True, index_menu = True, header_menu = True)
+            self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
             #self.sheet_db.popup_menu_add_command('View Data', lambda : view_data(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet_db.popup_menu_add_command('View All Selected Data', lambda : view_all_data(self), table_menu = True, index_menu = True, header_menu = True)
             self.sheet_db.popup_menu_add_command('Delete Test', lambda : delete_test(self), table_menu = True, index_menu = True, header_menu = True)
@@ -601,7 +597,7 @@ def CreateDataTab(self, window):
                             self.nb_tab_tab1, 
                             text = "Upload from Excel", 
                             command = upload_from_excel,
-                            style = "Modern3.TButton" ,
+                            style = "Modern1.TButton" ,
                             )
     self.btn_up_exc.place(
                         anchor = 'w', 
@@ -617,7 +613,7 @@ def CreateDataTab(self, window):
                                     self.nb_tab_tab1, 
                                     text = "Add To Characterization", 
                                     command = add_selected,
-                                    style = 'Modern3.TButton', 
+                                    style = 'Modern1.TButton', 
                                     )
     self.btn_add_to_char.place(
                             anchor = 'w', 

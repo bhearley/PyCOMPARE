@@ -16,6 +16,7 @@ def CreateCharacterizationTab(self, window):
     # Initialize button press
     self.clicked = 0
 
+    # Sig Fig Rounding
     def round_sig(x, sig=3):
         #--------------------------------------------------------------------------
         #
@@ -369,7 +370,7 @@ def CreateCharacterizationTab(self, window):
             if self.sheet_char.winfo_exists():
                 exist_flag = 1
 
-        # Create the database sheet
+        # Create the characterization sheet
         if (init_flag == 1 and exist_flag == 0) or init_flag == 0:
 
             # Create the characterization sheet

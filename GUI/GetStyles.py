@@ -16,11 +16,12 @@ def GetStyles(self):
     self.style.theme_use("alt") 
     self.style_man = {}
 
+    # Set minimum sizes
     self.min_font = 10
-    min_pad = 2
+    self.min_pad = 2
 
     # Buttons
-    # -- Blue Large Text
+    # -- 18 pt font
     self.style.configure(
                         "Modern1.TButton",
                         background='#0b3d91',
@@ -37,14 +38,14 @@ def GetStyles(self):
                         background=[("active", "#428bca")]
                 )
     
-    # -- Red Small Text
+    # -- 16 pt font
     self.style.configure(
                         "Modern2.TButton",
                         background='#0b3d91',
                         foreground="white",
                         font=("Segoe UI", max([self.min_font, int(16*self.scale)])),
                         borderwidth=2,
-                        padding=max([min_pad, int(5*self.scale)]),
+                        padding=max([self.min_pad, int(5*self.scale)]),
                         focuscolor='',
                         highlightthickness=0
                         )
@@ -54,26 +55,9 @@ def GetStyles(self):
                         background=[("active", "#428bca")]
                 )
     
-    # -- Red Large Text
+    # -- 12 pt font
     self.style.configure(
                         "Modern3.TButton",
-                        background='#0b3d91',
-                        foreground="white",
-                        font=("Segoe UI", max([self.min_font, int(18*self.scale)])),
-                        borderwidth=2,
-                        padding=max([min_pad, int(4*self.scale)]),
-                        focuscolor='',
-                        highlightthickness=0
-                        )
-
-    self.style.map(
-                        "Modern3.TButton",
-                        background=[("active", "#428bca")]
-                )
-    
-    # -- Red Mini Text
-    self.style.configure(
-                        "Modern4.TButton",
                         background='#0b3d91',
                         foreground="white",
                         font=("Segoe UI", max([self.min_font, int(12*self.scale)])),
@@ -84,13 +68,13 @@ def GetStyles(self):
                         )
 
     self.style.map(
-                        "Modern4.TButton",
+                        "Modern3.TButton",
                         background=[("active", "#428bca")]
                 )
     
     # -- Toolbar
     self.style.configure(
-                        "Modern5.TButton",
+                        "Modern4.TButton",
                         background="#FFFFFF",
                         foreground="black",
                         font=("Segoe UI", max([self.min_font, int(12*self.scale)])),
@@ -102,7 +86,7 @@ def GetStyles(self):
                         )
 
     self.style.map(
-                        "Modern5.TButton",
+                        "Modern4.TButton",
                         background=[
                                 ("active", "#B4B4B4"),
                                 ("pressed", "#FFFFFF")  
@@ -118,7 +102,7 @@ def GetStyles(self):
                         "TCheckbutton",
                         focuscolor='none',
                         font=("Segoe UI", max([self.min_font,int(12*self.scale)])),
-                        padding= max([min_pad, int(10*self.scale)]),    
+                        padding= max([self.min_pad, int(10*self.scale)]),    
                         foreground="black",      
                         background="white"
                         ) 
@@ -247,7 +231,7 @@ def GetStyles(self):
     # Scale Style
     self.style.configure(
                         "Modern.Horizontal.TScale",
-                        troughcolor="#DD361C", 
+                        troughcolor="#0b3d91", 
                         background="white",
                         borderwidth=1,
                         relief='rasied'

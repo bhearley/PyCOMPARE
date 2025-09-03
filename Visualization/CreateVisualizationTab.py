@@ -31,8 +31,8 @@ def CreateVisualizationTab(self,window):
         except:
             pass
 
+    # Bind the deselect function to the window
     window.bind_all("<Button-1>", on_click, add="+")
-
 
     def update_table(init_flag):
         #----------------------------------------------------------------------

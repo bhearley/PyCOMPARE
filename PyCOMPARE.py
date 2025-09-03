@@ -52,7 +52,6 @@ from Model.GVIPS.WriteSIM_TISO import *
 from Model.ReadModel import *
 from Model.UnitConversion import *
 from Model.UpdateModelData import *
-
 from Visualization.CreateVisualizationTab import *
 
 #Create the GUI
@@ -107,7 +106,7 @@ class PY_COMPARE:
                                     'Export Template':export_template,
                                     'Compare Executable':compare_path,}
 
-        # Create Toolbar
+        # Create Main Toolbar
         self.toolbar = ttk.Frame(
                                 window, 
                                 padding=2, 
@@ -123,6 +122,11 @@ class PY_COMPARE:
 
         # Function to show the menu
         def show_menu(event, menu):
+            #--------------------------------------------------------------------------
+            #
+            #   PURPOSE: Show the menu
+            #
+            #--------------------------------------------------------------------------
             menu.post(event.x_root, event.y_root)
 
         # Create the file menu
@@ -135,7 +139,7 @@ class PY_COMPARE:
         self.file_menu.add_command(label="Exit", command=lambda:on_closing(self))
 
         # Create the file menu button
-        self.file_btn = ttk.Button(self.toolbar, text="File", style = "Modern5.TButton")
+        self.file_btn = ttk.Button(self.toolbar, text="File", style = "Modern4.TButton")
         self.file_btn.pack(side="left", padx=2, pady = 0)
         self.file_btn.bind("<Button-1>", lambda e: show_menu(e, self.file_menu))
 
@@ -144,7 +148,7 @@ class PY_COMPARE:
         self.help_menu.add_command(label="About", command=self.help)
 
         # Create the help menu button
-        self.help_btn = ttk.Button(self.toolbar, text="Help", style = "Modern5.TButton")
+        self.help_btn = ttk.Button(self.toolbar, text="Help", style = "Modern4.TButton")
         self.help_btn.pack(side="left", padx=2, pady = 0)
         self.help_btn.bind("<Button-1>", lambda e: show_menu(e, self.help_menu))
 
@@ -176,6 +180,14 @@ class PY_COMPARE:
                             relheight = self.Placement['HomePage']['Logo'][3],
                             )
         
+        try:
+            window.iconbitmap(os.path.join(self.home,'GUI','NasaLogo.ico'))
+        except:
+            img = Image.open(os.path.join(self.home,'GUI','Nasa-Logo-Large.jpg'))
+            img.save(os.path.join(self.home,'GUI','NasaLogo.ico'), sizes=[(16,16), (32,32), (48,48), (64,64), (128, 128), (256, 256)])
+            window.iconbitmap(os.path.join(self.home,'GUI','NasaLogo.ico'))
+
+        
         # Build the general page
         BuildGeneralPage(self, window)
 
@@ -190,20 +202,18 @@ class PY_COMPARE:
             # Prompt user to save
             if messagebox.askyesno(title = "Quit", message = "Do you want to save before exiting?"):
 
-                # Check if project file exists
+                # Check if project file does not exist
                 if hasattr(self,'proj_file') == False or self.proj_file is None:
 
+                    # Create project file
                     CreateNewProject(self)
                 
                 # Update the model info
                 UpdateModelData(None, self, 3, 'Model')
 
-                # Get the Data
-                data = self.Compare
-
                 # Write data to project file
                 with open(self.proj_file, 'wb') as file:
-                    pickle.dump(data, file)
+                    pickle.dump(self.Compare, file)
 
                 # Display save message to user
                 messagebox.showinfo(title = 'Save', message = 'Project Saved!')
@@ -233,12 +243,9 @@ class PY_COMPARE:
                 # Update the model info
                 UpdateModelData(None, self, 3, 'Model')
 
-                # Get the Data
-                data = self.Compare
-
                 # Write data to project file
                 with open(self.proj_file, 'wb') as file:
-                    pickle.dump(data, file)
+                    pickle.dump(self.Compare, file)
 
                 # Display save message to user
                 messagebox.showinfo(title = 'Save', message = 'Project Saved!')
@@ -286,25 +293,23 @@ class PY_COMPARE:
             # Get the file name
             file = self.proj_file
 
+            # Get the log file
             self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
             if os.path.exists(os.path.join(os.getcwd(),"Logs","temp.log")) == True and os.path.exists(self.log_file) == False:
                 os.rename(os.path.join(os.getcwd(),"Logs","temp.log"), self.log_file)
 
         except:
-
             # Create new project file
             CreateNewProject(self)
 
+        # Check that file exists
         if self.proj_file is not None:
             # Update the model info
             UpdateModelData(None, self, 3, 'Model')
 
-            # Get the Compare Data
-            data = self.Compare
-
             # Write data to file
             with open(self.proj_file, 'wb') as file:
-                pickle.dump(data, file)
+                pickle.dump(self.Compare, file)
 
             # Show save message to user
             messagebox.showinfo(title = 'Save', message = 'Project Saved!')
@@ -320,6 +325,7 @@ class PY_COMPARE:
             # Get the file name
             file = self.proj_file
 
+            # Get the log file
             self.log_file = os.path.join(os.getcwd(),"Logs",os.path.basename(self.proj_file).split('.')[0] + ".log")
             if os.path.exists(os.path.join(os.getcwd(),"Logs","temp.log")) == True and os.path.exists(self.log_file) == False:
                 os.rename(os.path.join(os.getcwd(),"Logs","temp.log"), self.log_file)
@@ -332,32 +338,30 @@ class PY_COMPARE:
         # Create new project file
         CreateNewProject(self)
 
-
+        # Check that file exists
         if self.proj_file is not None:
             # Update the model info
             UpdateModelData(None, self, 3, 'Model')
 
-            # Get the Compare Data
-            data = self.Compare
-
             # Write data to file
             with open(self.proj_file, 'wb') as file:
-                pickle.dump(data, file)
+                pickle.dump(self.Compare, file)
 
             # Show save message to user
             messagebox.showinfo(title = 'Save', message = 'Project Saved!')
 
+        # Set the project file
         else:
             self.proj_file = file
 
     def help(self):
         #--------------------------------------------------------------------------
         #
-        #   PURPOSE: Load the help page
+        #   PURPOSE: Load the help page in a web browser
         #
         #--------------------------------------------------------------------------
 
-        # Path to your HTML file
+        # Set path to HTM file
         file_path = os.path.join(os.getcwd(),'Documentation','PyCOMPARE_UserManual.htm')
 
         # Open in default browser
@@ -370,7 +374,7 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
-        # get the notebook and selected tab
+        # Get the notebook and selected tab
         notebook = event.widget  
         tab_id = notebook.select()   
         tab_index = notebook.index(tab_id)  
@@ -602,11 +606,9 @@ class PY_COMPARE:
             # Create the Tkinter canvas
             self.canvas_db = FigureCanvasTkAgg(self.fig_db, master = self.nb_tab_tab1)
             
-
             # Create the Matplotlib toolbar
             self.toolbar_db = NavigationToolbar2Tk(self.canvas_db, self.nb_tab_tab1)
             
-
             # Format Toolbar
             self.toolbar_db.config(bg='white')
             self.toolbar_db._message_label.config(background='white')
@@ -796,6 +798,7 @@ class PY_COMPARE:
             self.ysdata = ys
             self.plot1.plot(xs,ys,'ro',label='Sample Points')
 
+            # Function to add a point
             def AddPoint():
                 #----------------------------------------------------------
                 #
@@ -820,7 +823,7 @@ class PY_COMPARE:
                                     self.nb_tab_tab2, 
                                     text = "Add", 
                                     command = AddPoint, 
-                                    style = 'Modern4.TButton',
+                                    style = 'Modern3.TButton',
                                     )
             self.btn_add_pt.place(
                                 anchor = 'n', 
@@ -832,6 +835,7 @@ class PY_COMPARE:
             if 'self.btn_add_pt' not in self.atts['Characterization']['Local']:
                 self.atts['Characterization']['Local'].append('self.btn_add_pt')
 
+            # Function to delete a point
             def DelPoint():
                 #----------------------------------------------------------
                 #
@@ -855,7 +859,7 @@ class PY_COMPARE:
                                     self.nb_tab_tab2, 
                                     text = "Delete", 
                                     command = DelPoint, 
-                                    style = "Modern4.TButton",
+                                    style = "Modern3.TButton",
                                     )
             self.btn_del_pt.place(
                                 anchor = 'n', 
@@ -919,8 +923,7 @@ class PY_COMPARE:
             self.atts['Characterization']['Local'].append('self.canvas_char')
             self.atts['Characterization']['Local'].append('self.toolbar_char')
 
-        # Enable Data Reduction on the Characterization Table
-                
+        # Enable Data Reduction on the Characterization Table      
         def ReduceData():
             #--------------------------------------------------------------
             #
@@ -939,135 +942,106 @@ class PY_COMPARE:
                 self.test_type = self.sheet_char.data[row][1]
                 self.load_dir = int(self.sheet_char.data[row][3])
                 rows = self.Compare['Data'][self.test_name]['Stage Type']
-
-                # Create the window to ask user for number of points for each stage
-                # -- Only create a window if it is not open
-                try:
-                    if self.window == 1:
-                        flag = 0
-                    else:
-                        flag = 1
-                except:
-                    flag = 1
             except:
-                flag = 0
                 messagebox.showinfo(message="No test selected.")
 
             # Create the Segmentation Control Panel
-            if flag == 1:
-                self.window = 1
-                root = tk.Toplevel(window)
-                root.geometry(f"{int(400*self.scale)}x{int(600*self.scale)}")
-                root.configure(bg='white')
-                root.title("Segmentation Control")
-                root.resizable(False, False)
-                root.grab_set()
+            root = tk.Toplevel(window)
+            root.geometry(f"{int(400*self.scale)}x{int(600*self.scale)}")
+            root.configure(bg='white')
+            root.title("Segmentation Control")
+            root.resizable(False, False)
+            root.grab_set()
 
-                # Create a sheet with number of stages
-                Cols = ['Stage', 'Points']
-                self.stage_pts_sheet = tksheet.Sheet(
-                                                    root, 
-                                                    total_rows = len(rows), 
-                                                    total_columns = len(Cols), 
-                                                    headers = Cols,
-                                                    show_x_scrollbar = False, 
-                                                    show_y_scrollbar = True,
-                                                    font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
-                                                    header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
-                                                    )
-                self.stage_pts_sheet.place(
-                                        anchor = 'c', 
-                                        relx = self.Placement['Characterization']['SheetRed'][0], 
-                                        rely = self.Placement['Characterization']['SheetRed'][1],
-                                        relwidth = self.Placement['Characterization']['SheetRed'][2], 
-                                        relheight = self.Placement['Characterization']['SheetRed'][3], 
-                                        )
-
-                # Format the sheet
-                self.stage_pts_sheet.change_theme("blue")
-                self.stage_pts_sheet.set_index_width(0)
-                window.update_idletasks()
-                total_width = self.stage_pts_sheet.winfo_width()
-                self.stage_pts_sheet.column_width(column = 0, width = int(total_width*self.Placement['Characterization']['SheetRed'][4]), redraw = True)
-                self.stage_pts_sheet.column_width(column = 1, width = int(total_width*self.Placement['Characterization']['SheetRed'][5]), redraw = True)
-                self.stage_pts_sheet.table_align(align = 'c',redraw=True)
-
-                # Enable Bindings
-                self.stage_pts_sheet.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
-                self.stage_pts_sheet.extra_bindings([("cell_select", self.cell_select_stage)]) 
-                
-                # Fill existing values values
-                for i in range(len(rows)):
-                    self.stage_pts_sheet.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
-                    self.stage_pts_sheet.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Stage Divisions'][i]) 
-                
-                # Update the sheet
-                self.stage_pts_sheet.redraw()
-
-                # Reduce Data Points
-                def GetReducedPts():
-                    #------------------------------------------------------
-                    #
-                    #   PURPOSE: Get reduced data points from the button
-                    #            press
-                    #------------------------------------------------------
-
-                    # Reset the window
-                    self.window = 0
-
-                    # Get the number of divisions for each stage
-                    for i in range(len(self.stage_pts_sheet.data)):
-                        divp = int(self.stage_pts_sheet.data[i][1])
-                        if divp < 0:
-                            divp = 0
-                        self.Compare['Data'][self.test_name]['Stage Divisions'][i] = divp
-
-                    # Reduce the data
-                    self.reduce_data(self.test_name, self.load_dir)
-
-                    # Destory the window
-                    root.destroy()
-
-                    # Update the data points
-                    for i in range(len(self.Compare['Data'][self.test_name]['Stage Divisions'])):
-                        self.stage_table_char.set_cell_data(i, 6, self.Compare['Data'][self.test_name]['Stage Divisions'][i])
-                    self.stage_table_char.redraw()
-
-                    # Recall the plotting function
-                    self.plotter_char()
-
-                    # Reset the vizualization flag
-                    self.viz_init = 0
-                        
-                # Create button to get the reduced data points
-                self.btn_get_red = ttk.Button(
-                                            root, 
-                                            text = "Get Data Points", 
-                                            command = GetReducedPts,
-                                            style = 'Modern2.TButton', 
-                                            )
-                self.btn_get_red.place(
+            # Create a sheet with number of stages
+            Cols = ['Stage', 'Points']
+            self.stage_pts_sheet = tksheet.Sheet(
+                                                root, 
+                                                total_rows = len(rows), 
+                                                total_columns = len(Cols), 
+                                                headers = Cols,
+                                                show_x_scrollbar = False, 
+                                                show_y_scrollbar = True,
+                                                font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"normal"),
+                                                header_font = ("Segoe UI", max([self.min_font, int(12*self.scale)]),"bold"),
+                                                )
+            self.stage_pts_sheet.place(
                                     anchor = 'c', 
-                                    relx = self.Placement['Characterization']['ButtonGetRed'][0], 
-                                    rely = self.Placement['Characterization']['ButtonGetRed'][1],
-                                    relwidth = self.Placement['Characterization']['ButtonGetRed'][2], 
-                                    relheight = self.Placement['Characterization']['ButtonGetRed'][3]
+                                    relx = self.Placement['Characterization']['SheetRed'][0], 
+                                    rely = self.Placement['Characterization']['SheetRed'][1],
+                                    relwidth = self.Placement['Characterization']['SheetRed'][2], 
+                                    relheight = self.Placement['Characterization']['SheetRed'][3], 
                                     )
 
-                def on_closing_root(self):
-                    #------------------------------------------------------
-                    #
-                    #   PURPOSE: Create exit protocol for the Segmentation
-                    #            Control Panel
-                    #
-                    #-------------------------------------------------------
+            # Format the sheet
+            self.stage_pts_sheet.change_theme("blue")
+            self.stage_pts_sheet.set_index_width(0)
 
-                    # Reset the window
-                    self.window = 0
-                    root.destroy()
+            # Set column widths
+            window.update_idletasks()
+            total_width = self.stage_pts_sheet.winfo_width()
+            self.stage_pts_sheet.column_width(column = 0, width = int(total_width*self.Placement['Characterization']['SheetRed'][4]), redraw = True)
+            self.stage_pts_sheet.column_width(column = 1, width = int(total_width*self.Placement['Characterization']['SheetRed'][5]), redraw = True)
+            self.stage_pts_sheet.table_align(align = 'c',redraw=True)
 
-                # Add the exit protocol to the root
-                root.protocol("WM_DELETE_WINDOW", lambda:on_closing_root(self))
+            # Enable Bindings
+            self.stage_pts_sheet.enable_bindings('single_select','cell_select', 'column_select',"arrowkeys")
+            self.stage_pts_sheet.extra_bindings([("cell_select", self.cell_select_stage)]) 
+            
+            # Fill existing values values
+            for i in range(len(rows)):
+                self.stage_pts_sheet.set_cell_data(i,0,self.Compare['Data'][self.test_name]['Stage Type'][i])
+                self.stage_pts_sheet.set_cell_data(i,1,self.Compare['Data'][self.test_name]['Stage Divisions'][i]) 
+            
+            # Update the sheet
+            self.stage_pts_sheet.redraw()
+
+            # Reduce Data Points
+            def GetReducedPts():
+                #------------------------------------------------------
+                #
+                #   PURPOSE: Get reduced data points from the button
+                #            press
+                #------------------------------------------------------
+
+                # Get the number of divisions for each stage
+                for i in range(len(self.stage_pts_sheet.data)):
+                    divp = int(self.stage_pts_sheet.data[i][1])
+                    if divp < 0:
+                        divp = 0
+                    self.Compare['Data'][self.test_name]['Stage Divisions'][i] = divp
+
+                # Reduce the data
+                self.reduce_data(self.test_name, self.load_dir)
+
+                # Destory the window
+                root.destroy()
+
+                # Update the data points
+                for i in range(len(self.Compare['Data'][self.test_name]['Stage Divisions'])):
+                    self.stage_table_char.set_cell_data(i, 6, self.Compare['Data'][self.test_name]['Stage Divisions'][i])
+                self.stage_table_char.redraw()
+
+                # Recall the plotting function
+                self.plotter_char()
+
+                # Reset the vizualization flag
+                self.viz_init = 0
+                    
+            # Create button to get the reduced data points
+            self.btn_get_red = ttk.Button(
+                                        root, 
+                                        text = "Get Data Points", 
+                                        command = GetReducedPts,
+                                        style = 'Modern2.TButton', 
+                                        )
+            self.btn_get_red.place(
+                                anchor = 'c', 
+                                relx = self.Placement['Characterization']['ButtonGetRed'][0], 
+                                rely = self.Placement['Characterization']['ButtonGetRed'][1],
+                                relwidth = self.Placement['Characterization']['ButtonGetRed'][2], 
+                                relheight = self.Placement['Characterization']['ButtonGetRed'][3]
+                                )
 
         # Create button to reduce data
         if hasattr(self, 'btn_red'):
@@ -1087,7 +1061,6 @@ class PY_COMPARE:
                             relheight = self.Placement['Characterization']['ButtonRed'][3]
                             )
         
-    
         if 'self.btn_red' not in self.atts['Characterization']['Local']:
             self.atts['Characterization']['Local'].append('self.btn_red')
 
@@ -1694,7 +1667,6 @@ class PY_COMPARE:
                 locked_cells.append([i, 2])
                 locked_cells.append([i, 4])
 
-
         # Enable/Disable user ability to edit cells
         if response.selected.column != None:
             if response.selected.column in locked_cols:
@@ -1711,7 +1683,7 @@ class PY_COMPARE:
                 eval(table_name).extra_bindings([("edit_cell", self.save_model),
                                                  ("end_edit_cell", lambda  event: self.format_cell(event, table_name))])
 
-
+                # Loop through rows
                 for i in range(len(eval(table_name).data)):
 
                     # -- Check lower bound
@@ -1731,6 +1703,8 @@ class PY_COMPARE:
                                 eval(table_name).highlight((i,4),fg = 'red', bg = 'white')
                         except:
                             pass
+
+            # Redraw the table
             eval(table_name).redraw()
 
     def save_model(self, response):
@@ -1772,7 +1746,7 @@ class PY_COMPARE:
                 binary_data = json_string.encode('utf-8')
                 self.Compare['Model Library'][user_input] = binary_data
 
-            # Reset Optimization
+            # Reset flags
             self.optimize = 0
             self.viz_init = 0
 
@@ -1826,6 +1800,7 @@ class PY_COMPARE:
         #
         #--------------------------------------------------------------------------
 
+        # Loop through rows
         for i in range(len(eval(table_name).data)):
             if eval(table_name).data[i][5] == 'Active':
                 eval(table_name).highlight_cells(i, 2, bg='white', fg = 'black', redraw=False)
@@ -1849,6 +1824,8 @@ class PY_COMPARE:
                         eval(table_name).set_cell_data(i, j, '{:0.4e}'.format(float(eval(table_name).data[i][j])))
                     except:
                         eval(table_name).set_cell_data(i, j, '')
+
+        # Redraw table
         eval(table_name).redraw()
    
     def cell_select_anly(self, response, tag):
@@ -1890,13 +1867,15 @@ class PY_COMPARE:
             except:
                 pass
 
-
+        # Set Bindings
         if response.selected.column != None:
             if response.selected.column in locked_cols:
                 eval(table_name).disable_bindings(("edit_cell"))
             else:
                 eval(table_name).enable_bindings(("edit_cell"))
                 eval(table_name).extra_bindings([("edit_cell", lambda event: format_analy(event, self, table_name))])
+
+            # Redrfaw table
             eval(table_name).redraw()
 
     def load_from_db(self, tag):
@@ -2216,7 +2195,7 @@ class PY_COMPARE:
                             root_v, 
                             text=f"Model Notes: {name}", 
                             font=('Segoe UI', max([self.min_font, int(12*self.scale)])),
-                            style= "Modern3.TLabel",
+                            style= "Modern1.TLabel",
                             ).place(
                                     anchor='n', 
                                     relx = self.Placement['Optimization']['ModLibNotesLabel'][0], 
@@ -2286,7 +2265,7 @@ class PY_COMPARE:
         #   COMPARE
         # -------------------------------------------------------------------------
         # Run Compare
-        def run_cmd_opt(callback, temp_dir):
+        def run_cmd_opt(callback, self):
 
             # Update the model
             UpdateModelData(None, self, 3, 'Model')
@@ -2427,12 +2406,11 @@ class PY_COMPARE:
                     pass
 
             # Begin save on background thread
-            threading.Thread(target=run_cmd_opt, args=(on_task_done,self), daemon=True).start()
+            threading.Thread(target=run_cmd_opt, args=(on_task_done, self), daemon=True).start()
 
             # Wait until loading window is closed
             self.loading = loading
             window.wait_window(loading)
-
 
         # Choose Model
         if self.Compare['Model']['Model Info']['Core'] == 'COMPARE':
@@ -2476,7 +2454,6 @@ class PY_COMPARE:
             return
 
         try:
-            
             # Set the model number
             mod =  mod = self.model_info_all[self.Compare['Model']['Model Name']]['Model Info']['Model']
 
@@ -2509,7 +2486,7 @@ class PY_COMPARE:
                 if self.Compare['Model']['Model Name'] == 'GVIPS TISO':
                     WriteSIM_TISO(self, self.Compare['Characterization'][sim_test], temp_dir, ct, mod, Param, P_Elas)
 
-
+                # Update counter
                 ct = ct + 1
 
         except:
@@ -2529,6 +2506,7 @@ class PY_COMPARE:
         try:
             command = 'cmd /k "cd ' + temp_dir + ' & compnasardamage & exit"'
             os.system(command)
+
         except:
             self.msg = 'Error running COMPARE.'
             self.flag = 1
@@ -2694,9 +2672,7 @@ class PY_COMPARE:
                 # Update ct
                 ct = ct + 1
 
-            # Write all data to log
-            self.update_log()
-            self.msg = 'Optimization Complete!'
+            
 
             # Write Global Error
             if hasattr(self,'globalerr_opt'):
@@ -2722,9 +2698,18 @@ class PY_COMPARE:
                 for i in range(len(self.Compare['Analysis']["VP_Param" ])):
                     self.Compare['Analysis']["VP_Param" ][i] = [self.Compare['Analysis']["VP_Param" ][i][0], self.Compare['Analysis']["VP_Param" ][i][1], self.Compare['Analysis']["VP_Param" ][i][6]]
 
-
         except:
             self.msg = 'Error reading output data from COMPARE.'
+            self.flag = 1
+            return
+        
+        try:
+            # Write all data to log
+            self.update_log()
+            self.msg = 'Optimization Complete!'
+
+        except:
+            self.msg = 'Error writing log file.'
             self.flag = 1
             return
 
@@ -2734,7 +2719,6 @@ class PY_COMPARE:
             self.viz_init = 2
         else:
             self.flag = 1
-
         return 
     
     def analyze(self):
@@ -2745,7 +2729,7 @@ class PY_COMPARE:
         #--------------------------------------------------------------------------
 
         # Run Compare
-        def run_cmd_anly(callback, temp_dir):
+        def run_cmd_anly(callback, self):
 
             # Update the model
             UpdateModelData(None, self, 3, 'Analysis')
@@ -2780,8 +2764,6 @@ class PY_COMPARE:
                 else:
                     messagebox.showeror(message='No tests have been added to the Database.')
 
-
-                
             # Notify when done
             callback()
         
@@ -2851,7 +2833,7 @@ class PY_COMPARE:
         #--------------------------------------------------------------------------
 
         try:
-            # Check for analyze
+            # Check for analysis
             if 'Analysis' in self.Compare.keys():
                 data = copy.deepcopy(self.Compare['Analysis'])
                 if 'Analysis' not in self.Compare.keys():                    
@@ -2889,6 +2871,7 @@ class PY_COMPARE:
             self.msg='Unable to set Analysis model parameters. Ensure a model has been loaded.'
             self.flag = 1
             return
+        
         try:
             # Create and clear the Temp Directory
             temp_dir = os.path.join(os.getcwd(),'Temp')
@@ -2944,7 +2927,6 @@ class PY_COMPARE:
 
                 if self.Compare['Analysis']['Model Name'] == 'GVIPS TISO':
                     WriteSIM_TISO(self, self.Compare['Data'][sim_test], temp_dir, ct, mod, Param, P_Elas)
-
 
                 ct = ct + 1
 
@@ -3037,6 +3019,7 @@ class PY_COMPARE:
                 ct = ct+1
 
             self.msg = 'Analysis Complete!'
+
         except:
             self.msg = 'Error reading output data from COMPARE.'
             self.flag = 1
@@ -3117,7 +3100,6 @@ class PY_COMPARE:
         formatter_header = "{:<10} {:<10} {:<10} {:<10} {:<10}"
         formatter_data   = "{:<10} {:<10} {:<10.4e} {:<10.4e} {:<10.4e}"
         
-
         # Write to file
         for row in param:
             if row[0] == 'PARAM':  # Header row
@@ -3202,8 +3184,8 @@ class PY_COMPARE:
             for line in self.log:
                 f.write(line + "\n")
 
+        # Close the file and reset lof
         f.close()
-
         self.log = []
     
     #------------------------------------------------------------------------------
@@ -3235,8 +3217,7 @@ class PY_COMPARE:
         except:
             pass
 
-        # -- LEFT PLOT
-
+        # -- LEFT PLOT --
         # Create the plot
         self.fig_viz1 = Figure(figsize=(
                                         self.Placement['Visualization']['Figure1'][4],self.Placement['Visualization']['Figure1'][5]), 
@@ -3342,8 +3323,7 @@ class PY_COMPARE:
             self.atts['Visualization']['Local'].append("self.toolbar_viz1")
             self.atts['Visualization']['Local'].append("self.canvas_viz1")
 
-        # -- RIGHT PLOT
-
+        # -- RIGHT PLOT --
         # Create the plot
         self.fig_viz2 = Figure(figsize=(self.Placement['Visualization']['Figure2'][4],self.Placement['Visualization']['Figure2'][5]), 
                                dpi = self.Placement['Visualization']['Figure2'][6], 
@@ -3480,8 +3460,7 @@ class PY_COMPARE:
         while len(colors) < len(self.tests_all):
             colors = colors + colors
 
-        # -- LEFT PLOT
-
+        # -- LEFT PLOT --
         # Create the plot
         self.fig_viz1 = Figure(
                         figsize=(self.Placement['Visualization']['Figure1'][4],self.Placement['Visualization']['Figure1'][5]), 
@@ -3578,8 +3557,7 @@ class PY_COMPARE:
             self.atts['Visualization']['Local'].append("self.toolbar_viz1")
             self.atts['Visualization']['Local'].append("self.canvas_viz1")
 
-        # -- RIGHT PLOT
-
+        # -- RIGHT PLOT --
         # Create the plot
         self.fig_viz2 = Figure(
                             figsize=(self.Placement['Visualization']['Figure2'][4],self.Placement['Visualization']['Figure2'][5]), 

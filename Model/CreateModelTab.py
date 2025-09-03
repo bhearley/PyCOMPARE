@@ -33,6 +33,7 @@ def CreateModelTab(self,window):
         with open(self.Compare['Paths']['Model Library'], 'r', encoding='utf8') as f:
             self.model_info_all = json.load(f)
 
+    # Set optimize and clicked
     self.optimize = 0
     self.clicked = 0
 
@@ -1003,7 +1004,7 @@ def CreateModelTab(self,window):
                                     self.nb_tab_tab3, 
                                     text = "Load from Excel", 
                                     command = lambda:self.load_from_db('Optimize'), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_load_opt.place(
                             anchor = 'w', 
@@ -1020,7 +1021,7 @@ def CreateModelTab(self,window):
                                     self.nb_tab_tab3, 
                                     text = "Model Library", 
                                     command = lambda : self.Model_Library('Optimize'), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_modlib_opt.place(
                             anchor = 'w', 
@@ -1037,7 +1038,7 @@ def CreateModelTab(self,window):
                                 self.nb_tab_tab3, 
                                 text = "Optimize", 
                                 command = self.optimizer, 
-                                style = "Modern3.TButton",
+                                style = "Modern1.TButton",
                                 )
         self.btn_opt.place(
                             anchor = 'w', 
@@ -1137,7 +1138,7 @@ def CreateModelTab(self,window):
                                 self.nb_tab_tab3, 
                                 text = "Reset Guess", 
                                 command = lambda: reset_guess(self), 
-                                style = "Modern3.TButton",
+                                style = "Modern1.TButton",
                                 )
         self.btn_reset_opt.place(
                             anchor = 'w', 
@@ -1197,7 +1198,7 @@ def CreateModelTab(self,window):
                                     self.nb_tab_tab3, 
                                     text = "Save Model", 
                                     command = save_model_local, 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_savemod_opt.place(
                             anchor = 'w', 
@@ -1287,7 +1288,7 @@ def CreateModelTab(self,window):
                                     self.nb_tab_tab3, 
                                     text = "Model Notes", 
                                     command = add_note, 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_addnote_opt.place(
                             anchor = 'w', 
@@ -1634,7 +1635,7 @@ def CreateModelTab(self,window):
                                     self.nb_tab_tab3, 
                                     text = "Run History", 
                                     command = lambda : view_history(self), 
-                                    style = "Modern3.TButton",
+                                    style = "Modern1.TButton",
                                     )
         self.btn_view_hist_opt.place(
                             anchor = 'w', 
