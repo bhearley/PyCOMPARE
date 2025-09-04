@@ -8,7 +8,7 @@
 def Search(self):
     # Import Modules
     from tkinter import messagebox
-    from GRCMI import UnitConversion
+    from Model.UnitConversion import UnitConversion
 
     # Get search criteria
     srch_crit = []
@@ -191,7 +191,7 @@ def Search(self):
     # -- Only name criteria
     else:
         attribute = self.table.attributes['Test Temperature']
-        any_search = attribute.search_criterion(greater_than=-1)
+        any_search = attribute.search_criterion(greater_than=-1000.0)
         records_out_temp = self.table.search_for_records_where([any_search])
 
     # Get the records that meet all requirements

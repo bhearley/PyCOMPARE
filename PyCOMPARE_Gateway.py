@@ -1,126 +1,156 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
-# PyCOMPARE.py
+#   PyCOMPARE_Gateway.py
 #   Brandon Hearley - LMS
 #   brandon.l.hearley@nasa.gov
-#   4/15/2025
-#
-# PURPOSE: Run the PyCOMPARE GUI
+#   8/25/2025
 #
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Import Modules
-from GRCMI import Connect
-import copy
-import json
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.ticker import ScalarFormatter
-import numpy as np
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Border, Side
-import os
-import pandas as pd
-from pathlib import Path
-import pickle
-from PIL import ImageTk, Image
-from scipy.interpolate import CubicSpline
-import shutil
-import tkinter as tk
-from tkinter import filedialog 
-from tkinter import messagebox
-from tkinter import simpledialog
-from tkinter import scrolledtext
-from tkinter import ttk 
-import tksheet
+def PyCOMPARE_Gateway():
+    # Import Modules
+    import os
+    from PIL import ImageTk, Image
+    from powermi import Connect
+    import tkinter as tk
+    from tkinter import messagebox
 
-# Import Functions
-from Gateway.BuildStartPage import *
-from Gateway.TestSelection import *
-from Deprecated.DeleteWidgets import *
-from GUI.GetStyles import *
+    # Import Functions
+    from Gateway.BuildStartPage import BuildStartPage
+    from Gateway.TestSelection import TestSelection
+    from Gateway.WriteToGranta import WriteToGranta
+    from GUI.GetStyles import GetStyles
+    from GUI.Placements import Placements
 
+    #Create the GUI
+    class PY_COMPARE_Gateway:
 
-
-# Set Directories
-home = os.getcwd()
-
-# Define Images
-title_img = os.path.join(home,'GUI','TitleHeader.png') # Set the title image path
-logo_img = os.path.join(home,'GUI','NasaLogo.png')     # Set the logo image path
-
-#Create the GUI
-class PY_COMPARE:
-    #Initialize
-    def __init__(self):
-        #--------------------------------------------------------------------------
+        #------------------------------------------------------------------------------
         #
-        #   PURPOSE: Initialize the GUI.
+        #   GENERAL FUNCTIONS
+        #   Initialize the GUI, enable saving and loading of projects
         #
-        #--------------------------------------------------------------------------
+        #------------------------------------------------------------------------------
 
-        # Set global variales
-        global window, frmt
+        def __init__(self):
+            #--------------------------------------------------------------------------
+            #
+            #   PURPOSE: Initialize the GUI.
+            #
+            #--------------------------------------------------------------------------
 
-        #Create Background Window
-        window = tk.Tk()
-        window.title("PyCOMPARE")
-        window.geometry("1500x875")
-        window.resizable(False, False)
-        window.configure(bg='white')
+            # Set global variales
+            global window
 
-        # Get Styles
-        GetStyles(self)
+            # Create Background Window
+            window = tk.Tk()
+            window.title("PCOMPARE Gateway")
+            window.configure(bg='white')
 
-        #Add the Title
-        img = Image.open(title_img)
-        scale = 0.9
-        img = img.resize((int(img.width*scale), int(img.height*scale)))
-        self.img_hdr = ImageTk.PhotoImage(img)
-        self.panel_hdr = tk.Label(window, image = self.img_hdr, bg = 'white')
-        self.panel_hdr.place(
-                            anchor = 'n', 
-                            relx = 0.5, 
-                            rely = 0.005
-                            )
+            # Get Placement Information
+            screen_width = window.winfo_screenwidth()
+            screen_height = window.winfo_screenheight()
+            Placements(self, screen_width, screen_height)
 
-        #Add the NASA Logo
-        img = Image.open(logo_img)
-        scale = 0.8
-        img = img.resize((int(img.width*scale), int(img.height*scale)))
-        self.img_nasa = ImageTk.PhotoImage(img)
-        self.panel_nasa = tk.Label(window, image = self.img_nasa, bg = 'white')
-        self.panel_nasa.place(
-                            anchor = 'e', 
-                            relx = 0.999, 
-                            rely = 0.045
-                            )
+            # Set Window Size
+            window.geometry(f'{self.screen_w}x{self.screen_h}')
 
-        # Connect to the database
-        try:
-            server_name = "https://granta.ndc.nasa.gov"
-            db_key = "NasaGRC_MD_45_09-2-05"
-            table_name = "Test Data: Thermomechanical"
-            self.mi, self.db, self.table = Connect(server_name, db_key, table_name)
+            # Load the style
+            GetStyles(self)
+
+            # Set home directory
+            self.home = os.getcwd()
+
+            # Create the Title
+            img = Image.open(os.path.join(self.home,'GUI','TitleHeader.png'))
+            scale = self.Placement['HomePage']['Title'][4]*self.scale
+            img = img.resize((int(img.width*scale), int(img.height*scale)))
+            self.img_hdr = ImageTk.PhotoImage(img)
+            self.panel_hdr = tk.Label(window, image = self.img_hdr, bg = 'white')
+            self.panel_hdr.place(
+                                anchor = 'n', 
+                                relx = self.Placement['HomePage']['Title'][0], 
+                                rely = self.Placement['HomePage']['Title'][1],
+                                relwidth = self.Placement['HomePage']['Title'][2],
+                                relheight = self.Placement['HomePage']['Title'][3],
+                                )
+
+            # Create the NASA Logo
+            img = Image.open(os.path.join(self.home,'GUI','NasaLogo.png'))
+            scale = self.Placement['HomePage']['Logo'][4]*self.scale
+            img = img.resize((int(img.width*scale), int(img.height*scale)))
+            self.img_nasa = ImageTk.PhotoImage(img)
+            self.panel_nasa = tk.Label(window, image = self.img_nasa, bg = 'white')
+            self.panel_nasa.place(
+                                anchor = 'e', 
+                                relx = self.Placement['HomePage']['Logo'][0], 
+                                rely = self.Placement['HomePage']['Logo'][1],
+                                relwidth = self.Placement['HomePage']['Logo'][2],
+                                relheight = self.Placement['HomePage']['Logo'][3],
+                                )
+            
+            try:
+                window.iconbitmap(os.path.join(self.home,'GUI','NasaLogo.ico'))
+            except:
+                img = Image.open(os.path.join(self.home,'GUI','Nasa-Logo-Large.jpg'))
+                img.save(os.path.join(self.home,'GUI','NasaLogo.ico'), sizes=[(16,16), (32,32), (48,48), (64,64), (128, 128), (256, 256)])
+                window.iconbitmap(os.path.join(self.home,'GUI','NasaLogo.ico'))
+
+            # Connect to the database
+            try:
+                server_name = "https://granta.ndc.nasa.gov"
+                db_key = "NasaGRC_MD_45_09-2-05"
+                table_name = "Test Data: Thermomechanical"
+                self.mi, self.db, self.table = Connect(server_name, db_key, table_name)
+                BuildStartPage(self, window)
+            except:
+                messagebox.showerror(message = "Unable to connect to the Granta MI Database!")
+            
+            window.mainloop()
+
+        # Function to import data
+        def import_data(self):
+            # Delete the home page
+            for att in self.att_list:
+                try:
+                    eval(att).destroy()
+                except:
+                    pass
+            self.att_list = []
+            window.update()
+
+            # Load the test selection page
+            TestSelection(self, window)
+
+        # Function to export data
+        def export_data(self):
+            # Delete the home page
+            for att in self.att_list:
+                try:
+                    eval(att).destroy()
+                except:
+                    pass
+            self.att_list = []
+            window.update()
+
+            WriteToGranta(self, window)
+
+        # Function to go back to home page
+        def back(self):
+            # Delete the home page
+            for att in self.att_list:
+                try:
+                    eval(att).destroy()
+                except:
+                    pass
+            self.att_list = []
+            window.update()
+
+            # Load the home page
             BuildStartPage(self, window)
-        except:
-            messagebox.showerror(message = "Unable to connect to the Granta MI Database!")
-        
-        window.mainloop()
 
-    # Function to import data
-    def import_data(self):
-        # Delete the home page
-        DeletePages(self)
+    # Run the GUI   
+    PY_COMPARE_Gateway()
 
-        # Load the tes selection page
-        TestSelection(self, window)
-
-    # Function to export data
-    def export_data(self):
-        # Delete the home page
-        DeletePages(self)
-
-
-# Run the GUI
-PY_COMPARE()
+# Run the Function
+PyCOMPARE_Gateway()

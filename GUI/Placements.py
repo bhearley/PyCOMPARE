@@ -18,7 +18,8 @@ def Placements(self, screen_width, screen_height):
                 'Analysis':{},
                 'Visualization':{},
                 'Export':{},
-                'Settings':{}
+                'Settings':{},
+                'Gateway':{},
                 }
     
     # Set Window Sizes
@@ -179,6 +180,22 @@ def Placements(self, screen_width, screen_height):
     Placement['Settings']['LabelExp'] = [0.025, 0.4]
     Placement['Settings']['ButtonExp'] = [0.025, 0.425, 0.06, 0.0325]
     Placement['Settings']['ButtonExpD'] = [0.1, 0.425, 0.06, 0.0325]
+
+    # -- Gateway
+    Placement['Gateway']['MainFrame'] = [0.5, 0.5, 0.25, 0.35]
+    Placement['Gateway']['ButtonImp'] = [0.5, 0.35, 0.65, 0.15]
+    Placement['Gateway']['ButtonExp'] = [0.5, 0.65, 0.65, 0.15]
+    Placement['Gateway']['SearchFrame'] = [0.005, 0.125, 0.45, 0.7]
+    Placement['Gateway']['SearchCanvas'] = [0.5, 0.001, 0.99, 0.99]
+    Placement['Gateway']['SearchCanvasScroll'] = [1, 0.001, 1]
+    Placement['Gateway']['ButtonSearch'] = [0.25, 0.9, 0.08, 0.05]
+    Placement['Gateway']['ResFrame'] = [0.505, 0.125, 0.45, 0.7]
+    Placement['Gateway']['ResSheet'] = [0.5, 0.005, 0.9, 0.9, 0.24, 0.24, 0.18, 0.24, 0.04]
+    Placement['Gateway']['ButtonResExp'] = [0.75, 0.9, 0.08, 0.05]
+    Placement['Gateway']['ButtonBack'] = [0.005, 0.005, 0.04, 0.04]
+    Placement['Gateway']['ExpSheet'] = [0.005, 0.125, 0.475, 0.7, 0.3, 0.65]
+    Placement['Gateway']['ButtonImpMod'] = [0.5, 0.9, 0.08, 0.05]
+    Placement['Gateway']['TestSheet'] = [0.505, 0.125, 0.475, 0.7, 0.19, 0.19, 0.19, 0.19, 0.19]
     
     # Set to self
     self.Placement = Placement

@@ -7,7 +7,6 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def TestSelection(self,window):
     # Import Modules
-    from GRCMI import UnitConversion
     import os
     import shutil
     import threading
@@ -22,6 +21,7 @@ def TestSelection(self,window):
     # Import Functions
     from Gateway.ExportData import ExportData
     from Gateway.Search import Search
+    from Model.UnitConversion import UnitConversion
 
     # Function for selection options
     def sel_opts(event, self):
@@ -127,7 +127,7 @@ def TestSelection(self,window):
         try:
             self.res_frame.destroy()
             self.res_sheet.destroy()
-            self.btn_exp.destroy()
+            self.btn_res_exp.destroy()
         except:
             pass
 
@@ -158,8 +158,11 @@ def TestSelection(self,window):
                         record = self.records[i]
 
                         # Create the temporary record
-                        file = ExportData(record, temp_path)
-                        self.fnames.append(file)
+                        file, msg = ExportData(record, temp_path)
+                        if file is not None:    
+                            self.fnames.append(file)
+                        else:
+                            messagebox.showerror(message=msg)
             
                 # Notify when done
                 callback()
@@ -169,8 +172,8 @@ def TestSelection(self,window):
 
                 # Create the window
                 loading = tk.Toplevel(window)
-                loading.title("Exportin Data")
-                loading.geometry("250x100")
+                loading.title("Exporting Data")
+                loading.geometry("350x100")
                 loading.resizable(False, False)
                 loading.configure(bg='white')
                 loading.grab_set()  
@@ -219,13 +222,14 @@ def TestSelection(self,window):
             show_export_window()
 
             try:
-                # Ask user where to save
-                save_dir = filedialog.askdirectory()
-                for file in self.fnames:
-                    shutil.move(file, os.path.join(save_dir,os.path.basename(file)))
+                if len(self.fnames) > 0:
+                    # Ask user where to save
+                    save_dir = filedialog.askdirectory()
+                    for file in self.fnames:
+                        shutil.move(file, os.path.join(save_dir,os.path.basename(file)))
 
-                # Show message the file is saved
-                messagebox.showinfo(message = 'Files saved!')
+                    # Show message the file is saved
+                    messagebox.showinfo(message = 'Files saved!')
 
             except:
                 messagebox.showerror(message = 'Save Failed - Check that all files are closed and try again.')
@@ -236,7 +240,7 @@ def TestSelection(self,window):
             # Create the window
             loading = tk.Toplevel(window)
             loading.title("Searching Database")
-            loading.geometry("250x100")
+            loading.geometry("350x100")
             loading.resizable(False, False)
             loading.configure(bg='white')
             loading.grab_set()  
@@ -289,14 +293,14 @@ def TestSelection(self,window):
             self.res_frame = tk.Frame(
                             window, 
                             bd=1, 
-                            width = 725,
-                            height = 600,
                             bg="white"
                             )
             self.res_frame.place(
-                            anchor = 'ne', 
-                            relx = 0.995, 
-                            rely = 0.175
+                            anchor = 'nw', 
+                            relx = self.Placement['Gateway']['ResFrame'][0], 
+                            rely = self.Placement['Gateway']['ResFrame'][1],
+                            relwidth = self.Placement['Gateway']['ResFrame'][2],
+                            relheight = self.Placement['Gateway']['ResFrame'][3],
                             )
             self.att_list.append('self.res_frame')
 
@@ -307,29 +311,31 @@ def TestSelection(self,window):
                                             total_rows = len(self.records), 
                                             total_columns = len(Cols), 
                                             headers = Cols,
-                                            width = 720, 
-                                            height = 595, 
                                             show_x_scrollbar = False, 
                                             show_y_scrollbar = True,
-                                            font = ("Segoe UI",10,"normal"),
-                                            header_font = ("Segoe UI",10,"bold"),
+                                            font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"normal"),
+                                            header_font = ("Segoe UI",max([self.min_font, int(12*self.scale)]),"bold"),
                                             #table_bg = 'red' # For checking formatting only
                                             )
             self.res_sheet.place(
                                 anchor = 'n', 
-                                relx = 0.5, 
-                                rely = 0.005
+                                relx = self.Placement['Gateway']['ResSheet'][0], 
+                                rely = self.Placement['Gateway']['ResSheet'][1],
+                                relwidth = self.Placement['Gateway']['ResSheet'][2],
+                                relheight = self.Placement['Gateway']['ResSheet'][3],
                                 )
             self.att_list.append('self.res_sheet')
 
             # -- Format the table
             self.res_sheet.change_theme("blue")
             self.res_sheet.table_align(align = 'c',redraw=True)
-            self.res_sheet.column_width(column = 0, width = 150, redraw = True)
-            self.res_sheet.column_width(column = 1, width = 150, redraw = True)
-            self.res_sheet.column_width(column = 2, width = 120, redraw = True)
-            self.res_sheet.column_width(column = 3, width = 150, redraw = True)
-            self.res_sheet.column_width(column = 4, width = 25, redraw = True)
+            self.res_frame.update_idletasks()
+            total_width = self.res_sheet.winfo_width()
+            self.res_sheet.column_width(column = 0, width = int(total_width*self.Placement['Gateway']['ResSheet'][4]), redraw = True)
+            self.res_sheet.column_width(column = 1, width = int(total_width*self.Placement['Gateway']['ResSheet'][5]), redraw = True)
+            self.res_sheet.column_width(column = 2, width = int(total_width*self.Placement['Gateway']['ResSheet'][6]), redraw = True)
+            self.res_sheet.column_width(column = 3, width = int(total_width*self.Placement['Gateway']['ResSheet'][7]), redraw = True)
+            self.res_sheet.column_width(column = 4, width = int(total_width*self.Placement['Gateway']['ResSheet'][8]), redraw = True)
             self.res_sheet.checkbox("E",checked=False)
 
             # -- Populate the data
@@ -356,70 +362,51 @@ def TestSelection(self,window):
             self.res_sheet.popup_menu_add_command('View Datasheet', view_datasheet, table_menu = True, index_menu = True, header_menu = True)
 
             # Create search button
-            self.btn_exp = ttk.Button(
+            self.btn_res_exp = ttk.Button(
                                     window, 
                                     text = "Export", 
                                     command = export_records,
                                     style = 'Modern1.TButton',
                                     )
-            self.btn_exp.place(
+            self.btn_res_exp.place(
                             anchor = 'n', 
-                            relx = 0.75, 
-                            rely = 0.9
+                            relx = self.Placement['Gateway']['ButtonResExp'][0], 
+                            rely = self.Placement['Gateway']['ButtonResExp'][1],
+                            relwidth = self.Placement['Gateway']['ButtonResExp'][2],
+                            relheight = self.Placement['Gateway']['ButtonResExp'][3],
                             )
-            self.att_list.append('self.btn_exp')
+            self.att_list.append('self.btn_res_exp')
     
     # Create the search criteria frame
     self.srch_frame = tk.Frame(
                             window, 
                             bd=1, 
-                            width = 725,
-                            height = 600,
                             bg="white"
                             )
     self.srch_frame.place(
                     anchor = 'nw', 
-                    relx = 0.005, 
-                    rely = 0.175
+                    relx = self.Placement['Gateway']['SearchFrame'][0], 
+                    rely = self.Placement['Gateway']['SearchFrame'][1],
+                    relwidth = self.Placement['Gateway']['SearchFrame'][2],
+                    relheight = self.Placement['Gateway']['SearchFrame'][3],
                     )
+    self.srch_frame.update_idletasks()
+    frame_width = self.srch_frame.winfo_width()
+    
     self.att_list.append('self.srch_frame')
 
     # Scrollable Frame in the left half
     self.srch_canvas = tk.Canvas(
-                            self.srch_frame, 
-                            width=720, 
-                            height=590, 
+                            self.srch_frame,
                             bg="white", 
                             highlightthickness=0
                             )
     self.att_list.append('self.srch_canvas')
-    self.srch_scroll = ttk.Scrollbar(
-                                self.srch_frame, 
-                                orient="vertical", 
-                                command=self.srch_canvas.yview,
-                                style = "Vertical.TScrollbar"
-                                )
-    self.att_list.append('self.srch_scroll')
-    self.srch_frame_scroll = ttk.Frame(self.srch_canvas, style="White.TFrame")
-    self.att_list.append('self.srch_frame_scroll')
-
-    self.srch_frame_scroll.bind(
-        "<Configure>",
-        lambda e: self.srch_canvas.configure(
-            scrollregion=self.srch_canvas.bbox("all")
-        )
-    )
-
-    self.srch_canvas.create_window((0, 0), window=self.srch_frame_scroll, anchor="nw")
-    self.srch_canvas.configure(yscrollcommand=self.srch_scroll.set)
-
-    self.srch_canvas.place(anchor = 'n', relx = 0.5, rely = 0.001)
-    self.srch_scroll.place(anchor = 'ne', relx = 1, rely = 0.001, height = 595)
 
     # Create search for material name
     # -- Create label
     self.label_mat = ttk.Label(
-                            self.srch_frame_scroll,
+                            self.srch_frame,
                             text = 'Material Name:',
                             style='Modern3.TLabel'
                             )
@@ -428,23 +415,23 @@ def TestSelection(self,window):
 
     # -- create the entry pox
     self.text_mat = tk.Text(
-                self.srch_frame_scroll,
-                width=75,
+                self.srch_frame,
+                width = int(85*frame_width/990),
                 height=4,
-                font=("Segoe UI", 10), 
+                font=("Segoe UI", max([self.min_font, int(12*self.scale)])), 
                 bg="white",
                 fg="black",
                 bd=1,                    
                 relief="solid",
                 wrap="word"
                 )
-    self.text_mat.grid(row = 0, column = 1, sticky="ew", padx=10, pady=5)
+    self.text_mat.grid(row = 0, column = 1, sticky="ew", padx=20, pady=5)
     self.att_list.append('self.text_mat')
 
     # Create search for Test Type
     # -- Create label
     self.label_type = ttk.Label(
-                            self.srch_frame_scroll,
+                            self.srch_frame,
                             text = 'Test Type:',
                             style='Modern3.TLabel'
                             )
@@ -454,19 +441,19 @@ def TestSelection(self,window):
     # -- Create the combobox
     opts = [''] + self.table.attributes['Test Type'].discrete_values
     self.combo_type = ttk.Combobox(
-                                self.srch_frame_scroll,
+                                self.srch_frame,
                                 values=opts,
                                 style="Modern.TCombobox",
                                 state="readonly",
                                 )
-    self.combo_type.grid(row = 1, column = 1, sticky="ew", padx=10, pady=5)
+    self.combo_type.grid(row = 1, column = 1, sticky="ew", padx=20, pady=5)
     self.att_list.append('self.combo_type')
     
 
     # Create search for Generic Test Type
     # -- Create label
     self.label_gtype = ttk.Label(
-                            self.srch_frame_scroll,
+                            self.srch_frame,
                             text = 'Generic Test Type:',
                             style='Modern3.TLabel'
                             )
@@ -476,12 +463,12 @@ def TestSelection(self,window):
     # -- Create the combobox
     opts = [''] + self.table.attributes['Variable Load Test Type'].discrete_values
     self.combo_gtype = ttk.Combobox(
-                                self.srch_frame_scroll,
+                                self.srch_frame,
                                 values=opts,
                                 style="Modern.TCombobox",
                                 state="readonly",
                                 )
-    self.combo_gtype.grid(row = 2, column = 1, sticky="ew", padx=10, pady=5)
+    self.combo_gtype.grid(row = 2, column = 1, sticky="ew", padx=20, pady=5)
     self.att_list.append('self.combo_gtype')
 
     # Preallocate self for changing widgets
@@ -506,7 +493,7 @@ def TestSelection(self,window):
 
         # -- Create label
         self.srch_vals[i][0] = ttk.Label(
-                                self.srch_frame_scroll,
+                                self.srch_frame,
                                 text = key,
                                 style='Modern3.TLabel'
                                 )
@@ -514,7 +501,7 @@ def TestSelection(self,window):
         self.att_list.append('self.srch_vals[i][0]')
 
         # -- Create the mini frame
-        self.srch_vals[i][1] = ttk.Frame(self.srch_frame_scroll, style = 'White.TFrame')
+        self.srch_vals[i][1] = ttk.Frame(self.srch_frame, style = 'White.TFrame')
         self.srch_vals[i][1].grid(row = i+3, column = 1, sticky="ew", padx=10, pady=5)
         self.att_list.append('self.srch_vals[i][1]')
 
@@ -551,8 +538,26 @@ def TestSelection(self,window):
                             style = 'Modern1.TButton',
                             )
     self.btn_srch.place(
-                    anchor = 'n', 
-                    relx = 0.25, 
-                    rely = 0.9
+                    anchor = 'n',  
+                    relx = self.Placement['Gateway']['ButtonSearch'][0], 
+                    rely = self.Placement['Gateway']['ButtonSearch'][1],
+                    relwidth = self.Placement['Gateway']['ButtonSearch'][2],
+                    relheight = self.Placement['Gateway']['ButtonSearch'][3],
                     )
     self.att_list.append('self.btn_srch')
+
+    # Create Back Button
+    self.btn_back = ttk.Button(
+                            window, 
+                            text = "Back", 
+                            command = self.back,
+                            style = 'Modern2.TButton',
+                            )
+    self.btn_back.place(
+                    anchor = 'nw',  
+                    relx = self.Placement['Gateway']['ButtonBack'][0], 
+                    rely = self.Placement['Gateway']['ButtonBack'][1],
+                    relwidth = self.Placement['Gateway']['ButtonBack'][2],
+                    relheight = self.Placement['Gateway']['ButtonBack'][3],
+                    )
+    self.att_list.append('self.btn_back')
